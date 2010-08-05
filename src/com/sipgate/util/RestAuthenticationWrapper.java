@@ -4,14 +4,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import net.oauth.OAuthMessage;
 import android.content.Context;
 
-import com.sipgate.api.types.MobileExtension;
 import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.MissingContextException;
 import com.sipgate.interfaces.RestAuthenticationInterface;
@@ -50,10 +48,12 @@ public class RestAuthenticationWrapper implements RestAuthenticationInterface {
 		return accessProtectedResource("GET", url, null);
 	}
 
+	@SuppressWarnings("unused")
 	private InputStream accessProtectedResource(String httpMethod, String url) throws AccessProtectedResourceException {
 		return accessProtectedResource(httpMethod, url, null);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private InputStream accessProtectedResource(String httpMethod, String url, Collection<? extends Entry> params) throws AccessProtectedResourceException {
 		OAuthMessage message = null;
 		if (params == null) {

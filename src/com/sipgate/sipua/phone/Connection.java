@@ -36,6 +36,7 @@ import android.text.TextUtils;
 /**
  * {@hide}
  */
+@SuppressWarnings("deprecation")
 public class Connection
 {
     public enum DisconnectCause {

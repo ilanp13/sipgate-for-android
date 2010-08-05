@@ -26,7 +26,12 @@ package com.sipgate.sipua.phone;
  */
 public class CallStateException extends Exception
 {
-    public
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7623579894888193712L;
+
+	public
     CallStateException()
     {
     }

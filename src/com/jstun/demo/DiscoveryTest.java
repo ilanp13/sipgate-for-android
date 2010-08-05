@@ -132,6 +132,7 @@ public class DiscoveryTest {
 		}
 	}
 		
+	@SuppressWarnings("unused")
 	private boolean test2() throws UtilityException, SocketException, UnknownHostException, IOException, MessageAttributeParsingException, MessageAttributeException, MessageHeaderParsingException {
 		int timeSinceFirstTransmission = 0;
 		int timeout = timeoutInitValue;
@@ -208,6 +209,7 @@ public class DiscoveryTest {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean test1Redo() throws UtilityException, SocketException, UnknownHostException, IOException, MessageAttributeParsingException, MessageHeaderParsingException{
 		int timeSinceFirstTransmission = 0;
 		int timeout = timeoutInitValue;
@@ -270,6 +272,7 @@ public class DiscoveryTest {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void test3() throws UtilityException, SocketException, UnknownHostException, IOException, MessageAttributeParsingException, MessageAttributeException, MessageHeaderParsingException {
 		int timeSinceFirstTransmission = 0;
 		int timeout = timeoutInitValue;

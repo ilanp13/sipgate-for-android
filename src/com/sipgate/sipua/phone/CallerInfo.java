@@ -36,6 +36,7 @@ import android.util.Log;
  *
  * {@hide}
  */
+@SuppressWarnings("deprecation")
 public class CallerInfo {
     private static final String TAG = "CallerInfo";
 

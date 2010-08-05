@@ -48,7 +48,12 @@ import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class Codecs {
-    	private static final Vector<Codec> codecs = new Vector<Codec>() {{
+    	private static final Vector<Codec> codecs = new Vector<Codec>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 5423816327968842601L;
+
+		{
 			add(new G722());			
 			add(new SILK24());		
 			add(new SILK16());

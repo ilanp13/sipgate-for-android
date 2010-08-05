@@ -286,7 +286,6 @@ public class RestClient implements ApiClientInterface {
 				Log.d(TAG, "setup mobile device node: " + n.getNodeName());
 				
 				if (n.getNodeName().equals("credentials")) {
-					NodeList credNodes = n.getChildNodes();
 					for (int j = 0; j < nodeList.getLength(); j++) {
 						Node p = nodeList.item(j);
 						if (p.getNodeName().equals("sipId")) {

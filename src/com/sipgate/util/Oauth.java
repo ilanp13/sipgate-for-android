@@ -146,11 +146,13 @@ public class Oauth {
 		return false;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public OAuthMessage accessProtectedResource(String url, Collection<? extends Entry> parameters) throws IOException,
 			OAuthException, URISyntaxException, OAuthAccessProtectedResourceException {
 		return this.accessProtectedResource("GET", url, parameters);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public OAuthMessage accessProtectedResource(String httpMethod, String url, Collection<? extends Entry> parameters)
 			throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException {
 		if (parameters == null) {

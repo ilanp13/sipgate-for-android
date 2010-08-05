@@ -25,15 +25,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import org.sipdroid.codecs.Codecs;
-import com.sipgate.R;
 import org.zoolu.sip.provider.SipStack;
 
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -42,11 +41,12 @@ import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.sipgate.R;
 
 public class Settings extends PreferenceActivity implements OnSharedPreferenceChangeListener, OnClickListener {
 	// Current settings handler

@@ -38,6 +38,7 @@ import android.util.Log;
  * ASYNCHRONOUS QUERY API
  */
 
+@SuppressWarnings("deprecation")
 public class CallerInfoAsyncQuery {
     
     private static final boolean DBG = false;
@@ -78,7 +79,12 @@ public class CallerInfoAsyncQuery {
      * Simple exception used to communicate problems with the query pool.
      */
     public static class QueryPoolException extends SQLException {
-        public QueryPoolException(String error) {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -1378967235215383907L;
+
+		public QueryPoolException(String error) {
             super(error);
         }
     }

@@ -22,9 +22,6 @@
 package com.sipgate.sipua.ui;
 
 
-import com.sipgate.R;
-import com.sipgate.sipua.UserAgent;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -32,11 +29,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.CallLog.Calls;
@@ -47,22 +42,26 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.Filterable;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
+
+import com.sipgate.R;
+import com.sipgate.sipua.UserAgent;
 
 /////////////////////////////////////////////////////////////////////
 // this the main activity of Sipdroid
 // for modifying it additional terms according to section 7, GPL apply
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
+@SuppressWarnings("deprecation")
 public class Sipdroid extends Activity {
 	private static final String TAG = "Sipdroid";
 
@@ -246,7 +245,7 @@ public class Sipdroid extends Activity {
 	}
 
 	protected void setAccountString() {
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+//		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 //		TextView accountTextView = (TextView) findViewById(R.id.account_string);
 //		if (! settings.getString(Settings.PREF_USERNAME, Settings.DEFAULT_USERNAME).equals("") && ! settings.getString(Settings.PREF_SERVER, "").equals("")) {
 //			accountTextView.setText(Settings.getProfileNameString(settings));

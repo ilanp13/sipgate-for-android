@@ -5,16 +5,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.PendingIntent.CanceledException;
+import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,7 +26,6 @@ import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.ui.SipgateFramesMessage;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.Oauth;
 
 public class EventServiceImpl extends Service implements EventService {
 	
@@ -84,7 +83,6 @@ public class EventServiceImpl extends Service implements EventService {
         notificationManager.cancelAll();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void refresh() {
 		if(!serviceEnabled) {
 			Log.d(TAG,"serviceEnabled == false");
@@ -94,6 +92,7 @@ public class EventServiceImpl extends Service implements EventService {
 
 			HashMap<String, String> params = new HashMap<String, String>();
 
+			@SuppressWarnings({ "unused", "rawtypes" })
 			Collection<? extends Entry> paramCollection;
 			paramCollection = params.entrySet();
 			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());

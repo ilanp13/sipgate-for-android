@@ -1368,6 +1368,7 @@ public class SipProvider implements Configurable, TransportListener,
 	}
 
 	/** Adds a new string to the default Log */
+	@SuppressWarnings("unused")
 	private final void printLog(String str, int level) {
 		if (Sipdroid.release) return;
 		if (event_log != null) {

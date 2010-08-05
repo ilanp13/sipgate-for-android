@@ -23,14 +23,9 @@ package com.sipgate.sipua.ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URL;
-import java.util.Enumeration;
-import com.sipgate.R;
-import com.sipgate.sipua.*;
-import com.sipgate.sipua.phone.Call;
-import com.sipgate.sipua.phone.Connection;
+
+import org.sipdroid.media.RtpStreamReceiver;
 
 import android.app.AlarmManager;
 import android.app.KeyguardManager;
@@ -51,8 +46,8 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.net.NetworkInfo.DetailedState;
+import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -69,7 +64,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import org.sipdroid.media.RtpStreamReceiver;
+import com.sipgate.R;
+import com.sipgate.sipua.SipdroidEngine;
+import com.sipgate.sipua.UserAgent;
+import com.sipgate.sipua.phone.Call;
+import com.sipgate.sipua.phone.Connection;
 
 	public class Receiver extends BroadcastReceiver {
 

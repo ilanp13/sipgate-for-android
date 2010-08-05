@@ -196,6 +196,7 @@ public class XMLRPCClient {
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
+	@SuppressWarnings("unchecked")
 	public Object callEx(final String method, final Object[] params)
 			throws XMLRPCException {
 		try {

@@ -33,7 +33,6 @@ import java.net.SocketException;
 import java.net.SocketOptions;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.security.AccessController;
 
 /**
  * The default, concrete instance of datagram sockets. This class does not
@@ -203,7 +202,7 @@ public class PlainDatagramSocketImpl extends DatagramSocketImpl {
     @Override
     public void joinGroup(SocketAddress addr, NetworkInterface netInterface) throws IOException {
         if (addr instanceof InetSocketAddress) {
-            InetAddress groupAddr = ((InetSocketAddress) addr).getAddress();
+//            InetAddress groupAddr = ((InetSocketAddress) addr).getAddress();
 //            setOption(IP_MULTICAST_ADD, new GenericIPMreq(groupAddr, netInterface));
         }
     }
@@ -217,7 +216,7 @@ public class PlainDatagramSocketImpl extends DatagramSocketImpl {
     public void leaveGroup(SocketAddress addr, NetworkInterface netInterface)
             throws IOException {
         if (addr instanceof InetSocketAddress) {
-            InetAddress groupAddr = ((InetSocketAddress) addr).getAddress();
+            //InetAddress groupAddr = ((InetSocketAddress) addr).getAddress();
 //            setOption(IP_MULTICAST_DROP, new GenericIPMreq(groupAddr, netInterface));
         }
     }

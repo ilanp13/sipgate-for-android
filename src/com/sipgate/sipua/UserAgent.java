@@ -978,6 +978,7 @@ public class UserAgent extends CallListenerAdapter {
 	}
 
 	/** Adds a new string to the default Log */
+	@SuppressWarnings("unused")
 	void printLog(String str, int level) {
 		if (Sipdroid.release) return;
 		if (log != null)
@@ -988,6 +989,7 @@ public class UserAgent extends CallListenerAdapter {
 	}
 
 	/** Adds the Exception message to the default Log */
+	@SuppressWarnings("unused")
 	void printException(Exception e, int level) {
 		if (Sipdroid.release) return;
 		if (log != null)
