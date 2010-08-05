@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sipgateCallList" android:layout_height="fill_parent"
+	android:layout_width="fill_parent" android:orientation="vertical">
+	<TextView android:id="@+id/sipgateCallListTitle" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="@string/call_list_title" android:typeface="normal" android:textSize="30px">
+	</TextView>
+	
+	<ListView android:id="@+id/InboxListView"
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:divider="#808080" android:dividerHeight="1px">
+	</ListView>
+</LinearLayout>

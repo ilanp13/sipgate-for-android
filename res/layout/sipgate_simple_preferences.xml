@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#000000">
+	<ScrollView android:id="@+id/sipgateSimpleSettingsScroller" android:layout_width="fill_parent"
+			android:layout_height="fill_parent">
+		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:id="@+id/sipgateSimpleSettings" android:layout_width="fill_parent"
+			android:layout_height="fill_parent" android:stretchColumns="1">
+
+			<View android:layout_height="1px" android:background="#888888" />
+
+			<TableRow android:id="@+id/sipgateSettingsAccountRow"
+				android:layout_marginTop="10dp">
+				<TextView android:layout_column="1"
+					android:text="@string/simple_settings_account" android:padding="3dip"
+					android:textSize="20dip" android:textColor="#FFFFFF" />
+			</TableRow>
+			<TableRow android:id="@+id/sipgateSettingsAccountRowValue">
+				<TextView android:text="x" android:layout_column="1"
+					android:padding="3dip" android:id="@+id/sipgateSettingsAccount"
+					android:textSize="15dip" />
+			</TableRow>
+
+			<View android:layout_height="1px" android:background="#888888" />
+
+			<TableRow android:id="@+id/sipgateSettingsExtensionRow"
+				android:layout_marginTop="10dip">
+				<TextView android:layout_column="1"
+					android:text="@string/simple_settings_extension" android:padding="3dip"
+					android:textSize="20dip" android:textColor="#FFFFFF" />
+			</TableRow>
+			<TableRow android:id="@+id/sipgateSettingsExtensionRowValue">
+				<TextView android:text="x" android:layout_column="1"
+					android:padding="3dip" android:id="@+id/sipgateSettingsExtension"
+					android:textSize="15dip" />
+			</TableRow>
+
+			<View android:layout_height="2px" android:background="#888888" />
+
+			<TableLayout android:id="@+id/sipgateSettingsBalanceTable"
+				android:layout_width="fill_parent" android:stretchColumns="1"
+				android:layout_height="wrap_content">
+				<TableRow android:id="@+id/sipgateSettingsBalanceRow">
+					<TextView android:layout_column="1"
+						android:text="@string/simple_settings_balance" android:padding="3dip"
+						android:textSize="20dip" android:textColor="#FFFFFF"
+						android:layout_marginTop="10dp" />
+				</TableRow>
+				<TableRow android:id="@+id/sipgateSettingsBalanceRowValue">
+					<TextView android:text="x" android:layout_column="1"
+						android:padding="3dip" android:id="@+id/sipgateSettingsBalance"
+						android:textSize="15dip" />
+				</TableRow>
+
+				<View android:layout_height="2px" android:background="#888888" />
+			</TableLayout>
+
+			<TableRow android:id="@+id/sipgateSettingsWirelessRow"
+				android:layout_marginTop="10dip" android:layout_marginBottom="10dp">
+				<TextView android:layout_column="1"
+					android:text="@string/simple_settings_wlan" android:padding="3dip"
+					android:textSize="20dip" android:textColor="#FFFFFF" />
+				<CheckBox android:id="@+id/sipgateSettingsWireless"
+					android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			</TableRow>
+
+			<View android:layout_height="1px" android:background="#888888" />
+
+			<TableRow android:id="@+id/sipgateSettings3GRow"
+				android:layout_marginTop="10dip" android:layout_marginBottom="10dp">
+				<TextView android:layout_column="1"
+					android:text="@string/simple_settings_3g" android:padding="3dip"
+					android:textSize="20dip" android:textColor="#FFFFFF" />
+				<CheckBox android:id="@+id/sipgateSettings3G"
+					android:layout_width="wrap_content" android:layout_height="wrap_content" />
+			</TableRow>
+
+			<View android:layout_height="2px" android:background="#888888" />
+
+			<TableRow android:id="@+id/sipgateSettingsAdvancedRow"
+				android:layout_marginTop="10dip" android:layout_marginBottom="10dp">
+				<TextView android:layout_column="1"
+					android:text="@string/simple_settings_advanced" android:padding="3dip"
+					android:textSize="20dip" android:textColor="#FFFFFF" />
+				<TextView android:layout_column="1" android:text=""
+					android:padding="3dip" android:textSize="20dip" android:textColor="#FFFFFF" />
+			</TableRow>
+
+		</TableLayout>
+	</ScrollView>
+</LinearLayout>

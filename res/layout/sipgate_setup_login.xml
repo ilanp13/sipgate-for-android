@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingRight="20px" android:paddingLeft="20px" android:layout_gravity="top" android:layout_marginTop="17px">
+		<ImageView android:id="@+id/ImageView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:src="@drawable/sipgate_logo" android:layout_marginBottom="17px"></ImageView>
+		<TextView android:text="@string/username" android:id="@+id/TextView01"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"></TextView>
+		<EditText android:id="@+id/inputUsername"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:inputType="textEmailAddress"></EditText>
+		<TextView android:text="@string/password" android:id="@+id/TextView02"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"></TextView>
+		<EditText android:id="@+id/inputPassword"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" android:password="true" android:singleLine="true" android:inputType="textPassword"></EditText>
+		<Button android:text="@string/ok" android:id="@+id/okButton"
+			android:layout_height="wrap_content" android:layout_width="200px" android:layout_gravity="center" android:layout_marginTop="17px"></Button>
+
+</LinearLayout>

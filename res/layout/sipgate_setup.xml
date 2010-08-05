@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent" android:paddingRight="20px" android:paddingLeft="20px" android:layout_gravity="center">
+		<ImageView android:id="@+id/ImageView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginBottom="17px" android:src="@drawable/sipgate_logo"></ImageView>
+		<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical" android:layout_marginTop="2px" android:id="@+id/setupTeamLayout"><TextView android:text="@string/select_extension" android:id="@+id/TextView01" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="17px"></TextView><Spinner android:id="@+id/extensionList" android:layout_width="fill_parent" android:layout_height="wrap_content"></Spinner>
+</LinearLayout><LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginTop="2px" android:orientation="vertical" android:id="@+id/setupVoiceLayout">
+
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chooseExtensionHelp" android:layout_marginBottom="17px" android:id="@+id/TextView02"></TextView>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/mobilePhoneNumberText"></EditText>
+</LinearLayout>
+		
+		<Button android:text="@string/ok" android:id="@+id/okButton"
+			android:layout_width="200px" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginTop="17px"></Button>
+
+</LinearLayout>

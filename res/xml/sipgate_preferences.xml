@@ -1,0 +1,128 @@
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+			<ListPreference
+				android:key="pref"
+				android:title="@string/settings_pref"
+				android:entries="@array/pref_display_values"
+				android:entryValues="@array/pref_values"
+				android:summary="@string/settings_pref2"
+				android:dialogTitle="@string/settings_pref" />
+	<PreferenceScreen android:title="@string/settings_account">
+			<ListPreference
+				android:key="port"
+				android:title="@string/settings_port"
+				android:entries="@array/port_display_values"
+				android:entryValues="@array/port_values"
+				android:dialogTitle="@string/settings_port" />
+			<ListPreference
+				android:key="protocol"
+				android:title="@string/settings_protocol"
+				android:entries="@array/protocol_display_values"
+				android:entryValues="@array/protocol_values"
+				android:dialogTitle="@string/settings_protocol" />
+	</PreferenceScreen>
+	<PreferenceScreen android:title="@string/settings_options">
+			<CheckBoxPreference
+				android:key="wlan"
+				android:title="@string/settings_wlan"
+				android:summary="@string/settings_check" />
+			<CheckBoxPreference
+				android:key="3g"
+				android:title="@string/settings_3g"
+				android:summary="@string/settings_check" />
+			<CheckBoxPreference
+				android:key="auto_on"
+				android:title="@string/settings_auto_on"
+				android:summary="@string/settings_auto_on2" />
+			<CheckBoxPreference
+				android:key="auto_ondemand"
+				android:title="@string/settings_auto_ondemand"
+				android:summary="@string/settings_auto_ondemand2" />
+			<CheckBoxPreference
+				android:key="auto_headset"
+				android:title="@string/settings_auto_headset"
+				android:summary="@string/settings_auto_headset2" />
+	</PreferenceScreen>
+	<PreferenceScreen android:title="@string/settings_notifications">
+			<CheckBoxPreference
+				android:key="MWI_enabled"
+				android:title="@string/settings_MWI"
+				android:summary="@string/settings_MWI2" />
+			<CheckBoxPreference
+				android:key="notify"
+				android:title="@string/settings_notify"
+				android:summary="@string/settings_notify2" />
+			<CheckBoxPreference
+				android:key="nodata"
+				android:title="@string/settings_nodata"
+				android:summary="@string/settings_nodata2" />
+			<org.sipdroid.sipua.ui.SipRingtonePreference
+				android:key="sipringtone"
+				android:title="@string/settings_sipringtone"
+				android:summary="@string/settings_sipringtone2"
+				android:dialogTitle="@string/settings_sipringtone_dialog"
+				android:persistent="false"
+				android:ringtoneType="ringtone" /> 
+	</PreferenceScreen>
+	<PreferenceScreen android:title="@string/settings_av_options">
+			<ListPreference
+				android:key="eargain"
+				android:title="@string/settings_eargain"
+				android:entries="@array/eargain_display_values"
+				android:entryValues="@array/eargain_values"
+				android:defaultValue="0.25"
+				android:dialogTitle="@string/settings_eargain" />
+			<ListPreference
+				android:key="micgain"
+				android:title="@string/settings_micgain"
+				android:entries="@array/eargain_display_values"
+				android:entryValues="@array/eargain_values"
+				android:defaultValue="0.25"
+				android:dialogTitle="@string/settings_micgain" />
+			<ListPreference
+				android:key="heargain"
+				android:title="@string/settings_heargain"
+				android:entries="@array/eargain_display_values"
+				android:entryValues="@array/eargain_values"
+				android:defaultValue="0.25"
+				android:dialogTitle="@string/settings_heargain" />
+			<ListPreference
+				android:key="hmicgain"
+				android:title="@string/settings_hmicgain"
+				android:entries="@array/eargain_display_values"
+				android:entryValues="@array/eargain_values"
+				android:defaultValue="1.0"
+				android:dialogTitle="@string/settings_hmicgain" />
+			<ListPreference
+				android:key="vquality"
+				android:title="@string/settings_vquality"
+				android:entries="@array/vquality_display_values"
+				android:entryValues="@array/vquality_values"
+				android:defaultValue="low"
+				android:dialogTitle="@string/settings_vquality" />
+	</PreferenceScreen>
+	<PreferenceScreen android:key="codecs" android:title="@string/codecs" >
+        	<intent
+                	android:action="android.intent.action.MAIN"
+	                android:targetPackage="com.sipgate"
+	                android:targetClass="org.sipdroid.codecs.Codecs$CodecSettings" />
+
+	</PreferenceScreen>
+	<PreferenceScreen android:title="@string/settings_advanced_options">
+			<EditTextPreference
+				android:key="search"
+				android:title="@string/settings_search"
+				android:singleLine="true" />
+			<EditTextPreference
+				android:key="excludepat"
+				android:title="@string/settings_excludepat"
+				android:singleLine="true" />
+			<CheckBoxPreference
+				android:key="ownwifi"
+				android:title="@string/settings_ownwifi"
+				android:summary="@string/settings_ownwifi2" />
+			<CheckBoxPreference
+				android:key="stun"
+				android:title="@string/settings_stun"/>
+	</PreferenceScreen>
+</PreferenceScreen>

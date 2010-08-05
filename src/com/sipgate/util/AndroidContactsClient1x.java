@@ -1,0 +1,173 @@
+package com.sipgate.util;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.content.ContentUris;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.provider.Contacts;
+import android.provider.Contacts.People;
+import android.util.Log;
+
+import com.sipgate.R;
+import com.sipgate.interfaces.ContactsInterface;
+import com.sipgate.models.SipgateContact;
+import com.sipgate.models.SipgateContactNumber;
+
+@SuppressWarnings("deprecation")
+public class AndroidContactsClient1x implements ContactsInterface {
+	private final String TAG = "AndroidContactsClient1x";
+
+	private Activity activity = null;
+	
+	public AndroidContactsClient1x(Activity activity){
+		this.activity = activity;
+	}
+	
+	@Override
+	public ArrayList<SipgateContact> getContacts() {
+		ArrayList<SipgateContact> contactsList = null;
+		
+		// Form an array specifying which columns to return. 
+		String[] projection = new String[] {
+		                             People._ID,
+		                             People.NAME,
+		                             People.PRIMARY_PHONE_ID,
+		                          };
+
+		// Make the query. 
+		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI,
+		                         projection, // Which columns to return 
+		                         null,       // Which rows to return (all rows)
+		                         null,       // Selection arguments (none)
+		                         // Put the results in ascending order by name
+		                         People.NAME + " ASC");
+		
+		if (managedCursor.moveToFirst()) {
+			contactsList = new ArrayList<SipgateContact>();
+			do {
+	            // Get the field values
+				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
+	            String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
+	            if (lastName == null){
+	            	Log.d(TAG, "no name");
+	            	continue;
+	            }
+
+	            String firstName = null;
+	            String title = null;
+	            
+	            ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
+            	
+            	Bitmap photo = getPhoto(id);
+            	
+	            contactsList.add(new SipgateContact(id, firstName, lastName, title, numbers, photo));
+
+			} while (managedCursor.moveToNext());
+		}
+		
+		return contactsList;
+	}
+	
+	@Override
+	public SipgateContact getContact(Integer id) {
+		SipgateContact contact = null;
+		
+		// Form an array specifying which columns to return. 
+		String[] projection = new String[] {
+									People._ID,
+		                            People.NAME,
+		                            People.PRIMARY_PHONE_ID,
+								};
+
+		// Make the query. 
+		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI,
+		                         projection, // Which columns to return 
+		                         null,       // Which rows to return (all rows)
+		                         null,       // Selection arguments (none)
+		                         // Put the results in ascending order by name
+		                         People.NAME + " ASC");
+		
+		if (managedCursor.moveToFirst()) {
+			do {
+				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
+				
+				if (tempID == id){
+		            String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
+		            if (lastName != null){
+		                String firstName = null;
+		                String title = null;
+		                
+		                ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
+		            	
+		            	Bitmap photo = getPhoto(id);
+		            	
+		                contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
+		            }
+		            break;
+				}
+			} while (managedCursor.moveToNext());
+		}
+		
+		return contact;
+	}
+
+	private ArrayList<SipgateContactNumber> getPhoneNumbers(Integer id) {
+		ArrayList<SipgateContactNumber> numbers = null;
+        Cursor personCursor = this.activity.managedQuery(Contacts.Phones.CONTENT_URI,
+        		null, 
+    			Contacts.Phones.PERSON_ID +" = ?", 
+    			new String[]{id.toString()}, null);
+
+    	if (personCursor.moveToFirst()){
+    		numbers = new ArrayList<SipgateContactNumber>();
+        	do{
+        		String number = personCursor.getString(personCursor.getColumnIndex(Contacts.Phones.NUMBER));
+        		String unformattedNumber = personCursor.getString(personCursor.getColumnIndex(Contacts.Phones.NUMBER)).replace("-", "").replace(" ", "");
+        		SipgateContactNumber.PhoneType type = null;
+        		
+        		switch (personCursor.getInt(personCursor.getColumnIndex(Contacts.Phones.TYPE))){
+        			case Contacts.Phones.TYPE_CUSTOM:
+        				type = SipgateContactNumber.PhoneType.CUSTOM;
+        				break;
+        			case Contacts.Phones.TYPE_FAX_HOME:
+        				type = SipgateContactNumber.PhoneType.HOME_FAX;
+        				break;
+        			case Contacts.Phones.TYPE_FAX_WORK:
+        				type = SipgateContactNumber.PhoneType.WORK_FAX;
+        				break;
+        			case Contacts.Phones.TYPE_HOME:
+        				type = SipgateContactNumber.PhoneType.HOME;
+        				break;
+        			case Contacts.Phones.TYPE_MOBILE:
+        				type = SipgateContactNumber.PhoneType.MOBILE;
+        				break;
+        			case Contacts.Phones.TYPE_OTHER:
+        				type = SipgateContactNumber.PhoneType.OTHER;
+        				break;
+        			case Contacts.Phones.TYPE_PAGER:
+        				type = SipgateContactNumber.PhoneType.PAGER;
+        				break;
+        			case Contacts.Phones.TYPE_WORK:
+        				type = SipgateContactNumber.PhoneType.WORK;
+        				break;
+        			default:
+        				break;
+        		}
+        		
+        		Log.d(TAG, number);
+        		
+        		numbers.add(new SipgateContactNumber(type, number, unformattedNumber));
+        	} while (personCursor.moveToNext());
+    	}
+    	
+    	return numbers;
+	}
+	
+	private Bitmap getPhoto(Integer id) {
+		Bitmap photo = People.loadContactPhoto(this.activity.getApplicationContext(), ContentUris.withAppendedId(People.CONTENT_URI, id), R.drawable.ic_contact_picture, null);
+		return photo;
+	}
+	
+}

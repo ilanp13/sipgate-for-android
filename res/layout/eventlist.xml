@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#eeeeee">
+	<!--
+		<Button android:text="login" android:id="@+id/loginButton"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"></Button> <Button
+		android:text="get voicemails" android:id="@+id/getVoicemailsButton"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"></Button>
+	-->
+	<ListView android:id="@+id/EventListView"
+		android:layout_height="fill_parent" android:layout_width="fill_parent"
+		android:background="#eeeeee" android:choiceMode="singleChoice">
+</ListView>
+	<TextView android:text="@string/sipgate_empty_eventlist"
+		android:id="@+id/EmptyEventListTextView" android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:gravity="center"></TextView>
+</LinearLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#000000">
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical" android:layout_width="fill_parent"
+		android:paddingLeft="5px" android:paddingTop="5px"
+		android:paddingBottom="5px" android:layout_height="wrap_content"
+		android:background="#888888">
+
+
+		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:stretchColumns="2">
+			<TableRow android:layout_height="wrap_content"
+				android:layout_width="fill_parent">
+				<ImageView android:id="@+id/ContactPhoto"
+					android:layout_height="82dp" android:layout_width="82dp"
+					android:src="@drawable/ic_contact_picture" android:scaleType="fitXY" />
+				<TextView android:id="@+id/ContactName"
+					android:layout_height="wrap_content" android:layout_width="wrap_content"
+					android:layout_gravity="center_vertical" android:text="Full Name"
+					android:paddingLeft="5px" android:textColor="#FFFFFF"
+					android:textStyle="bold" android:textSize="16dp"
+					/>
+			</TableRow>
+		</TableLayout>
+	</LinearLayout>
+
+	<ListView android:id="@+id/ContactPhonenumbers"
+		android:layout_height="fill_parent" android:layout_width="fill_parent"
+		android:background="#000000" android:choiceMode="singleChoice">
+	</ListView>
+
+
+</LinearLayout>

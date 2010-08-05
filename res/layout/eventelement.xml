@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="#ffffff">
+
+	<TextView android:layout_height="wrap_content"
+		android:background="#a2a2ff" android:textColor="#ffffff" android:text="category"
+		android:layout_width="fill_parent" android:id="@+id/CategoryTextView"></TextView>
+
+	<LinearLayout android:id="@+id/LinearLayout01"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:paddingLeft="6px" android:paddingRight="6px">
+
+		<LinearLayout android:id="@+id/LinearLayout03"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:orientation="vertical">
+			<TextView android:text="element" android:id="@+id/EventTitle"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:textColor="#000000"></TextView>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/TranscriptionTextView"
+				android:text="transcription"></TextView>
+		</LinearLayout>
+		
+		<LinearLayout android:id="@+id/LinearLayout02"
+			android:layout_height="wrap_content" android:gravity="right"
+			android:layout_width="fill_parent">
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:id="@+id/DateTextView"
+				android:text="0:00"></TextView>
+		</LinearLayout>
+
+	</LinearLayout>
+
+</LinearLayout>
