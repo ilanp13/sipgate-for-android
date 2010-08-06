@@ -325,7 +325,6 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result = super.onOptionsItemSelected(item);
-
 		optionsMenu m = new optionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
@@ -465,12 +464,10 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 			this.numberToDial += digit;
 		}
 		PhoneNumberFormatter formatter = new PhoneNumberFormatter();
-		//formatter.init();
 		Locale locale = Locale.getDefault();
-		
 		String formattedNumber = formatter.formattedPhoneNumberFromStringWithCountry(this.numberToDial, locale.getCountry());
+		if(this.numberToDial.length()>0 && this.numberToDial.substring(0,1).equals("+")) formattedNumber = "+" + formattedNumber;
 		this.txtCallee.setText(formattedNumber);
-		Log.d(TAG, this.numberToDial);
 		
 		float size = 0;
 		float height = 0;

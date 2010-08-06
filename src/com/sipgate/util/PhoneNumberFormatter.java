@@ -401,16 +401,16 @@ public class PhoneNumberFormatter {
 				}
 			}
 			
-			if (!countryInfo.get("countryCode").equals(idd)) {
+			if (!this.countryInfo.get("countryCode").equals(idd)) {
 				if (aPrefixType == PrefixType.SGNationalPrefix || aPrefixType == PrefixType.SGNationalPrefixOmitted) {
 					aPrefixType = PrefixType.SGInternationalPrefix;
 				}
 			}
 			
 			if (aPrefixType == PrefixType.SGInternationalPrefix) {
-				return String.format("%s%s %s", countryInfo.get("IDD"), idd, realNumber);
-			} else if (aPrefixType == PrefixType.SGNationalPrefix || (aPrefixType == PrefixType.SGNationalPrefixOmitted && countryInfo.get("optionalNDD") == null)) {
-				return String.format("%s%s", countryInfo.get("NDD"), realNumber);
+				return String.format("%s%s %s", this.countryInfo.get("IDD"), idd, realNumber);
+			} else if (aPrefixType == PrefixType.SGNationalPrefix || (aPrefixType == PrefixType.SGNationalPrefixOmitted && this.countryInfo.get("optionalNDD") == null)) {
+				return String.format("%s%s", this.countryInfo.get("NDD"), realNumber);
 			} else if (aPrefixType == PrefixType.SGNationalPrefixOmitted) {
 				return String.format("%s", realNumber);
 			} else if (aPrefixType == PrefixType.SGE123Prefix) {
