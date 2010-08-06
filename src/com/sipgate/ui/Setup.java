@@ -8,10 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.oauth.OAuthException;
-
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -137,21 +134,12 @@ public class Setup extends Activity implements OnClickListener {
 		
 		} while (extensions == null);
 		
-		if (extensions != null) {
+		{
 			extensionSpinner = (Spinner) findViewById(com.sipgate.R.id.extensionList);
 			
 	        MyArrayAdapter adapter = new MyArrayAdapter(this,R.layout.sipgate_spinner_row,R.id.text, aliases);
 	        extensionSpinner.setAdapter( adapter );
 		}
-		else {
-			AlertDialog m_AlertDlg = new AlertDialog.Builder(this)
-				.setMessage(getApplicationContext().getString(R.string.sipgate_extension_try_later))
-				.setTitle(getApplicationContext().getString(R.string.sipgate_extension_try_later_title))
-				.setIcon(R.drawable.icon22)
-				.setCancelable(true)
-				.show();
-		}
-
 	}
 
 	private SipgateProvisioningData getProvisioningData() {
@@ -295,8 +283,6 @@ public class Setup extends Activity implements OnClickListener {
 		}
 
 		ArrayList<SipgateProvisioningExtension> extensions = provisioningData.getExtensions();
-		ArrayList<String> aliases = new ArrayList<String>();
-
 		this.registrar = provisioningData.getRegistrar();
 		this.outboundProxy = provisioningData.getOutboundProxy();
 

@@ -43,6 +43,7 @@ import java.io.InputStream;
 /**
  * Helper class for async access of images.
  */
+@SuppressWarnings("deprecation")
 public class ContactsAsyncHelper extends Handler {
     
     private static final boolean DBG = false;
@@ -67,7 +68,8 @@ public class ContactsAsyncHelper extends Handler {
     
     // static objects
     private static Handler sThreadHandler;
-    private static ContactsAsyncHelper sInstance;
+    @SuppressWarnings("unused")
+	private static ContactsAsyncHelper sInstance;
     
     static {
         sInstance = new ContactsAsyncHelper();

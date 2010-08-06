@@ -628,6 +628,7 @@ public class RegisterAgent implements TransactionClientListener, SubscriberDialo
 	// ****************************** Logs *****************************
 
 	/** Adds a new string to the default Log */
+	@SuppressWarnings("unused")
 	void printLog(String str, int level) {
 		if (Sipdroid.release) return;
 		if (log != null)
@@ -637,6 +638,7 @@ public class RegisterAgent implements TransactionClientListener, SubscriberDialo
 	}
 
 	/** Adds the Exception message to the default Log */
+	@SuppressWarnings("unused")
 	void printException(Exception e, int level) {
 		if (Sipdroid.release) return;
 		if (log != null)

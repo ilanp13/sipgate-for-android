@@ -27,17 +27,11 @@ package com.sipgate.sipua.phone;
 //import com.android.internal.telephony.Connection;
 //import com.android.internal.telephony.Phone;
 
-import com.sipgate.R;
-import com.sipgate.sipua.*;
-import com.sipgate.sipua.ui.Receiver;
-
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-//import android.pim.ContactsAsyncHelper;
-//import android.pim.DateUtils;
 import android.provider.Contacts.People;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -51,11 +45,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sipgate.R;
+import com.sipgate.sipua.ui.Receiver;
+
 /**
  * "Call card" UI element: the in-call screen contains a tiled layout of call
  * cards, each representing the state of a current "call" (ie. an active call,
  * a call on hold, or an incoming call.)
  */
+@SuppressWarnings("deprecation")
 public class CallCard extends FrameLayout
         implements CallerInfoAsyncQuery.OnQueryCompleteListener,
                 ContactsAsyncHelper.OnImageLoadCompleteListener{

@@ -37,6 +37,7 @@ import com.sipgate.interfaces.RestAuthenticationInterface;
 
 public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	
+	@SuppressWarnings("unused")
 	private DefaultRedirectHandler redirectHandler = new DefaultRedirectHandler();
 	
 	
@@ -79,6 +80,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	}
 	
 	
+	@SuppressWarnings("rawtypes")
 	private HttpPost createPostRequest(String url, Collection<? extends Entry> params) {
 		HttpPost ret = new HttpPost(url);
 		
@@ -100,7 +102,8 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	
 	
 	
-    private InputStream accessProtectedResource(String httpMethod, String urlString, Collection<? extends Entry> params) throws AccessProtectedResourceException, NetworkProblemException {
+    @SuppressWarnings("rawtypes")
+	private InputStream accessProtectedResource(String httpMethod, String urlString, Collection<? extends Entry> params) throws AccessProtectedResourceException, NetworkProblemException {
 
     	URL url;
 		try {
@@ -111,10 +114,10 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		String username = this.user;
 		String password = this.pass;
 
-		int serverPort = 443;
-		if (url.getPort() != -1) {
-			serverPort = url.getPort();
-		}
+		//int serverPort = 443;
+		//if (url.getPort() != -1) {
+		//	serverPort = url.getPort();
+		//}
 		
         DefaultHttpClient httpClient = new DefaultHttpClient();
 

@@ -75,7 +75,8 @@ public class SlidingCardManager implements ViewTreeObserver.OnGlobalLayoutListen
      */
     private InCallScreen mInCallScreen;
 
-    private Phone mPhone;
+    @SuppressWarnings("unused")
+	private Phone mPhone;
 
     // Touch mode states, and state of the sliding card
     private boolean mSlideInProgress = false;
@@ -425,7 +426,7 @@ public class SlidingCardManager implements ViewTreeObserver.OnGlobalLayoutListen
         // startSliding (to save a couple of method calls each time here.)
         // TODO: this block is duplicated above; use a single helper method instead.
         mMainFrame.getLocationInWindow(mTempLocation);
-        final int mainFrameX = mTempLocation[0];
+        //final int mainFrameX = mTempLocation[0];
         final int mainFrameY = 0; //mTempLocation[1];
 
         // In the "top" position the CallCard is aligned exactly with the

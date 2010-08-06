@@ -298,6 +298,7 @@ public class EventListActivity extends Activity {
 				}
 			}
 		};
+		Log.e(TAG, "marking vmail as read... ");
 		t.start();
 	}
 

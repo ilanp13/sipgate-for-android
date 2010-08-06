@@ -58,16 +58,19 @@ public class Mangle {
 	}
 
 	/** Rotates w left n bits. */
+	@SuppressWarnings("unused")
 	private static int rotateLeft(int w, int n) {
 		return (w << n) | (w >>> (32 - n));
 	}
 
 	/** Rotates w right n bits. */
+	@SuppressWarnings("unused")
 	private static int rotateRight(int w, int n) {
 		return (w >>> n) | (w << (32 - n));
 	}
 
 	/** Rotates an array of int (words), shifting 1 word left. */
+	@SuppressWarnings("unused")
 	private static int[] rotateLeft(int[] w) {
 		int len = w.length;
 		int w1 = w[len - 1];
@@ -78,6 +81,7 @@ public class Mangle {
 	}
 
 	/** Rotates an array of int (words), shifting 1 word right. */
+	@SuppressWarnings("unused")
 	private static int[] rotateRight(int[] w) {
 		int len = w.length;
 		int w0 = w[0];
@@ -88,6 +92,7 @@ public class Mangle {
 	}
 
 	/** Rotates an array of bytes, shifting 1 byte left. */
+	@SuppressWarnings("unused")
 	private static byte[] rotateLeft(byte[] b) {
 		int len = b.length;
 		byte b1 = b[len - 1];
@@ -98,6 +103,7 @@ public class Mangle {
 	}
 
 	/** Rotates an array of bytes, shifting 1 byte right. */
+	@SuppressWarnings("unused")
 	private static byte[] rotateRight(byte[] b) {
 		int len = b.length;
 		byte b0 = b[0];
@@ -241,7 +247,7 @@ public class Mangle {
 		int begin = 0, end;
 		byte[] b = new byte[4];
 		for (int i = 0; i < 4; i++) {
-			String num;
+			//String num;
 			if (i < 3) {
 				end = addr.indexOf('.', begin);
 				b[i] = (byte) Integer.parseInt(addr.substring(begin, end));

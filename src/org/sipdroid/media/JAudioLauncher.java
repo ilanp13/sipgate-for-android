@@ -21,11 +21,8 @@ package org.sipdroid.media;
 
 import org.sipdroid.codecs.Codecs;
 import org.sipdroid.net.SipdroidSocket;
-import org.zoolu.sip.provider.SipStack;
 import org.zoolu.tools.Log;
 import org.zoolu.tools.LogLevel;
-
-import com.sipgate.sipua.ui.Sipdroid;
 
 /** Audio launcher based on javax.sound  */
 public class JAudioLauncher implements MediaLauncher
@@ -156,6 +153,7 @@ public class JAudioLauncher implements MediaLauncher
    // ****************************** Logs *****************************
 
    /** Adds a new string to the default Log */
+   @SuppressWarnings("unused")
    private void printLog(String str)
    {  printLog(str,LogLevel.HIGH);
    }
@@ -163,17 +161,13 @@ public class JAudioLauncher implements MediaLauncher
    /** Adds a new string to the default Log */
    private void printLog(String str, int level)
    {
-	  if (Sipdroid.release) return;
-	  if (log!=null) log.println("AudioLauncher: "+str,level+SipStack.LOG_LEVEL_UA);  
-      if (level<=LogLevel.HIGH) System.out.println("AudioLauncher: "+str);
+	  return;
    }
 
    /** Adds the Exception message to the default Log */
    void printException(Exception e,int level)
    { 
-	  if (Sipdroid.release) return;
-	  if (log!=null) log.printException(e,level+SipStack.LOG_LEVEL_UA);
-      if (level<=LogLevel.HIGH) e.printStackTrace();
+	  return;
    }
 
 }

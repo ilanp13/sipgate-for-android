@@ -2,13 +2,12 @@ package com.sipgate.ui;
 
 import java.util.ArrayList;
 
-import com.sipgate.models.SipgateCallData;
-import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.RestClient;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.sipgate.models.SipgateCallData;
+import com.sipgate.util.ApiServiceProvider;
 
 public class CallListActivity extends Activity {
 	

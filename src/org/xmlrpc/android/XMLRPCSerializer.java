@@ -27,6 +27,7 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 	
 	static SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
 
+	@SuppressWarnings("unchecked")
 	public void serialize(final XmlSerializer serializer, final Object object)
 			throws IOException {
 		// check for scalar types:

@@ -21,6 +21,7 @@ import android.view.MenuItem;
 
 import com.sipgate.R;
 
+@SuppressWarnings("deprecation")
 public class optionsMenu {
 	
 	

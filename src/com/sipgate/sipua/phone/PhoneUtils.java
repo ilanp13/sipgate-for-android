@@ -22,8 +22,6 @@
 package com.sipgate.sipua.phone;
 
 import com.sipgate.R;
-import com.sipgate.sipua.*;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -31,6 +29,7 @@ import android.provider.Contacts;
 import android.text.TextUtils;
 import android.util.Log;
 
+@SuppressWarnings("deprecation")
 public class PhoneUtils {
     private static final String LOG_TAG = "PhoneUtils";
     private static final boolean DBG = false;

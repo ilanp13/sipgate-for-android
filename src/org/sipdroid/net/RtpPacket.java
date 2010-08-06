@@ -271,6 +271,7 @@ public class RtpPacket {
 	// *********************** Private and Static ***********************
 
 	/** Gets int value */
+	@SuppressWarnings("unused")
 	private static int getInt(byte b) {
 		return ((int) b + 256) % 256;
 	}

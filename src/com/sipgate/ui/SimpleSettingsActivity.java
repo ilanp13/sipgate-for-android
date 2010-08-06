@@ -4,14 +4,9 @@ package com.sipgate.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,12 +17,10 @@ import android.widget.TextView;
 
 import com.sipgate.R;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.service.EventService;
 import com.sipgate.service.EventServiceImpl;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.RestClient;
 import com.sipgate.util.SettingsClient;
 
 public class SimpleSettingsActivity extends Activity implements OnClickListener {

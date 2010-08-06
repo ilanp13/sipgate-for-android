@@ -145,6 +145,7 @@ public class TransactionClient extends Transaction {
 	 * Method derived from interface TimerListener. It's fired from an active
 	 * Timer.
 	 */
+	@SuppressWarnings("unused")
 	public void onTimeout(Timer to) {
 		try {
 			if (to.equals(retransmission_to)
