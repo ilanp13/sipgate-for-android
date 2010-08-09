@@ -10,4 +10,5 @@ public class EventViewHolder {
 	public TextView categoryView;
 	public ImageView imageView;
 	public TextView transcriptionView;
+	public ImageView iconVM;
 }

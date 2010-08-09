@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" android:background="#eeeeee">
+	android:layout_height="fill_parent" android:background="#000000">
 	<!--
 		<Button android:text="login" android:id="@+id/loginButton"
 		android:layout_width="wrap_content"
@@ -12,7 +12,7 @@
 	-->
 	<ListView android:id="@+id/EventListView"
 		android:layout_height="fill_parent" android:layout_width="fill_parent"
-		android:background="#eeeeee" android:choiceMode="singleChoice">
+		android:background="#000000" android:choiceMode="singleChoice">
 </ListView>
 	<TextView android:text="@string/sipgate_empty_eventlist"
 		android:id="@+id/EmptyEventListTextView" android:layout_width="fill_parent"
