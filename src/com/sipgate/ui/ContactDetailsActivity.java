@@ -197,7 +197,7 @@ public class ContactDetailsActivity extends Activity implements
 		super.onResume();
 	}
 
-	@Override
+	
 	public void onItemClick(AdapterView<?> parent, View arg1, int position,
 			long id) {
 		// TODO Auto-generated method stub
