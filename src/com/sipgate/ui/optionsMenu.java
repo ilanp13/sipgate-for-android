@@ -33,12 +33,13 @@ public class optionsMenu {
 	public static final int EXIT_MENU_ITEM = FIRST_MENU_ID + 4;
 	public static final int CONTACTS_MENU_ITEM = FIRST_MENU_ID + 5;
 	public static final int EVENTLIST_MENU_ITEM = FIRST_MENU_ID + 6;
+	public static final int REFRESH_VOICEMAIL_LIST = FIRST_MENU_ID + 7;
 	
 	private static AlertDialog m_AlertDlg;
 
 	private static final String TAG = "optionsMenu";
 	
-	public void createMenu (Menu menu){ 
+	public void createMenu (Menu menu, String caller){ 
 
 
 		// About
@@ -50,8 +51,15 @@ public class optionsMenu {
 		m.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 		
 		// settings
-		m = menu.add(0, CONFIGURE_MENU_ITEM, 0, R.string.menu_settings);
-		m.setIcon(R.drawable.menu_icon_settings_48);
+		if(caller != "Login"){
+			m = menu.add(0, CONFIGURE_MENU_ITEM, 0, R.string.menu_settings);
+			m.setIcon(R.drawable.menu_icon_settings_48);
+		}
+		// refresh for voicemail tab only
+		if(caller == "EventList") {
+			m = menu.add(0, REFRESH_VOICEMAIL_LIST, 0, R.string.menu_refresh);
+			m.setIcon(R.drawable.ic_menu_refresh);
+		}
 		
 		// Eventlist
 //		m = menu.add(0, EVENTLIST_MENU_ITEM, 0, R.string.menu_event_list);
@@ -65,6 +73,7 @@ public class optionsMenu {
 //		m = menu.add(0, CONTACTS_MENU_ITEM, 0, R.string.menu_contacts);
 //		m.setIcon(R.drawable.menu_icon_contacts_48);
 	}
+	
 	
 	public void selectItem (MenuItem item, Context context, Activity activity){
 		Intent intent = null;
@@ -105,6 +114,15 @@ public class optionsMenu {
 		case CONFIGURE_MENU_ITEM: {
 			try {
 				intent = new Intent(activity, SimpleSettingsActivity.class);
+				activity.startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(TAG, e.getLocalizedMessage());
+			}
+			break;
+		}
+		case REFRESH_VOICEMAIL_LIST: {
+			try {	
+				intent = new Intent(activity, EventListActivity.class);
 				activity.startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Log.e(TAG, e.getLocalizedMessage());

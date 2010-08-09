@@ -25,6 +25,7 @@
    	<string name="menu_event_list">Eventliste</string>
    	<string name="menu_exit">Beenden</string>
    	<string name="menu_settings">Einstellungen</string>
+   	<string name="menu_refresh">Aktualisieren</string>
    	<string name="menu_about">Über</string>
    	<string name="sipgate_a_new_voicemail">Neue Voicemailnachricht</string>
    	<string name="alert_3g_cost">Bitte beachten Sie, dass Datentransfer über das 3G-Netz mit Kosten verbunden sein kann.</string>
