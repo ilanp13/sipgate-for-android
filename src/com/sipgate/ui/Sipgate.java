@@ -466,7 +466,6 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 		Locale locale = Locale.getDefault();
 		String formattedNumber = formatter.formattedPhoneNumberFromStringWithCountry(this.numberToDial, locale.getCountry());
-		if(this.numberToDial.length()>0 && this.numberToDial.substring(0,1).equals("+")) formattedNumber = "+" + formattedNumber;
 		this.txtCallee.setText(formattedNumber);
 		
 		float size = 0;

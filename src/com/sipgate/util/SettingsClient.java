@@ -8,10 +8,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * Allows Access to the Sipdroid configurations
+ * Allows Access to the Sipgate configurations
  * 
  * @author Karsten Knuth
- * @version 1.0
+ * @version 1.1
  *
  */
 public class SettingsClient {
@@ -91,8 +91,10 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Returns the registration server
 	 * 
-	 * @return
+	 * @since 1.0
+	 * @return the registration server
 	 */
 	public String getServer() {
 		return this.preferences.getString(Settings.PREF_SERVER, "");
@@ -110,6 +112,7 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Returns the domain of the registered user
 	 * 
 	 * @return
 	 */
@@ -129,13 +132,21 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Returns the sipID for the registered extension
 	 * 
-	 * @return
+	 * @since 1.0
+	 * @return the sipID
 	 */
 	public String getSipID() {
 		return this.preferences.getString(Settings.PREF_USERNAME, "");
 	}
 	
+	/**
+	 * Checks whether an sipID has ever been set or if we are in the very first login
+	 * 
+	 * @since 1.1
+	 * @return if the sipID is set
+	 */
 	public boolean isSipIdSet() {
 		String sipId = this.preferences.getString(Settings.PREF_USERNAME, randomDefaultValue);
 		if (sipId.equals(randomDefaultValue)){
@@ -156,15 +167,17 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Returns the password of the registered extension
 	 * 
-	 * @return
+	 * @since 1.1
+	 * @return the sip password
 	 */
 	public String getPassword() {
 		return this.preferences.getString(Settings.PREF_PASSWORD, "");
 	}
 
 	/**
-	 * Saves the protocol used for connection to the servetr
+	 * Saves the protocol used for connection to the server
 	 * 
 	 * @since 1.0
 	 * @param protocol the sip protocol ("udp"/"tcp")
@@ -188,6 +201,7 @@ public class SettingsClient {
 	/**
 	 * Returns whether a wireless network is used
 	 * 
+	 * @since 1.0
 	 * @return whether a wireless network is used
 	 */
 	public Boolean getUseWireless(){
@@ -208,6 +222,7 @@ public class SettingsClient {
 	/**
 	 * Returns whether the UMTS/HSDPA network is used
 	 * 
+	 * @since 1.0
 	 * @return whether the UMTS/HSDPA network is used
 	 */
 	public Boolean getUse3G(){
@@ -294,7 +309,9 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Unregister the extension and unset all settings that we no longer need
 	 * 
+	 * @since 1.0
 	 */
 	public void unRegisterExtension(){
 		setSipID("");
@@ -308,21 +325,44 @@ public class SettingsClient {
 		setStunPort("10000");
 	}
 	
+	/**
+	 * Checks whether the sip client is provisioned or not
+	 * 
+	 * @since 1.0
+	 * @return if the sip client is provisioned
+	 */
 	public Boolean isProvisioned(){
 		if(!getSipID().equals("") && !getPassword().equals("") && !getServer().equals("") && !getDomain().equals(""))
 			return true;
 		return false;
 	}
 
+	/**
+	 * Saves the username for further use with the sipgate api
+	 * 
+	 * @since 1.1
+	 * @param webuser the username for the webuser
+	 */
 	public void setWebusername(String webuser){
 		this.editor.putString("sipgate_webuser", webuser);
 		this.editor.commit();
 	}
 	
+	/**
+	 * Returns the username of the registered webuser for use with the api
+	 * 
+	 * @since 1.1
+	 * @return the username for the webuser
+	 */
 	public String getWebusername(){
 		return this.preferences.getString("sipgate_webuser", "");
 	}
 
+	/**
+	 * Removes all data about a webuser on account change
+	 * 
+	 * @since 1.1
+	 */
 	public void purgeWebuserCredentials() {
 		this.editor.remove("sipgate_webuser");
 		this.editor.remove("sipgate_webpass");
@@ -330,19 +370,43 @@ public class SettingsClient {
 		this.editor.commit();
 	}
 	
+	/**
+	 * Saves the password of the registered webuser for use with the api
+	 * 
+	 * @since 1.1
+	 * @param webpass the password for the webuser
+	 */
 	public void setWebuserpass(String webpass){
 		this.editor.putString("sipgate_webpass", webpass);
 		this.editor.commit();
 	}
 	
+	/**
+	 * Returns the password of the registered webuser for the use with the api
+	 * 
+	 * @since 1.1
+	 * @return the password for the webuser
+	 */
 	public String getWebpassword() {
 		return this.preferences.getString("sipgate_webpass", "");
 	}
 	
+	/**
+	 * Checks whether we are in the first registration ever
+	 * 
+	 * @since 1.1
+	 * @return if we are in the first registration
+	 */
 	public boolean isFirstRegistration() {
 		return !isSipIdSet();
 	}
 	
+	/**
+	 * Saves the api type for the webuser we are registering
+	 * 
+	 * @since 1.1
+	 * @param type the api type the user can access
+	 */
 	public void setApiType(API_TYPE type) {
 		if (type == null) {
 			this.editor.remove("sipgate_api-type");
@@ -352,6 +416,13 @@ public class SettingsClient {
 		this.editor.commit();
 	}
 	
+	/**
+	 * Returns the api type for the webuser we are registering
+	 * 
+	 * @since 1.1
+	 * @return the users api type
+	 * @throws SipgateSettingsProviderGeneralException if no setting are found
+	 */
 	public API_TYPE getApiType() throws SipgateSettingsProviderGeneralException {
 		String typeString = this.preferences.getString("sipgate_api-type","");
 		if (typeString.equals(API_TYPE.XMLRPC.toString())) {
@@ -360,6 +431,6 @@ public class SettingsClient {
 			return API_TYPE.REST;
 		}
 		
-		throw new SipgateSettingsProviderGeneralException("not setting found for 'sipgate_api-type'");
+		throw new SipgateSettingsProviderGeneralException("no setting found for 'sipgate_api-type'");
 	}
 }
