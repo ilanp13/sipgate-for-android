@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -215,6 +216,7 @@ public class EventListActivity extends Activity {
 					holder.dateView = (TextView) convertView.findViewById(R.id.DateTextView);
 					holder.categoryView = (TextView) convertView.findViewById(R.id.CategoryTextView);
 					holder.transcriptionView = (TextView) convertView.findViewById(R.id.TranscriptionTextView);
+					holder.iconVM = (ImageView) convertView.findViewById(R.id.IconView);
 					convertView.setTag(holder);
 				} else {
 					holder = (EventViewHolder) convertView.getTag();
