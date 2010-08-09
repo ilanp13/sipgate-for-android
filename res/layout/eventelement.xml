@@ -2,11 +2,11 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" android:background="#ffffff">
+	android:layout_height="fill_parent" android:background="#000000">
 
 	<TextView android:layout_height="wrap_content"
-		android:background="#a2a2ff" android:textColor="#ffffff" android:text="category"
-		android:layout_width="fill_parent" android:id="@+id/CategoryTextView"></TextView>
+		android:textColor="#ffffff" android:text="category"
+		android:layout_width="fill_parent" android:id="@+id/CategoryTextView" android:background="#808080"></TextView>
 
 	<LinearLayout android:id="@+id/LinearLayout01"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
@@ -17,7 +17,7 @@
 			android:orientation="vertical">
 			<TextView android:text="element" android:id="@+id/EventTitle"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:textColor="#000000"></TextView>
+				android:textColor="#ffffff"></TextView>
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:id="@+id/TranscriptionTextView"
 				android:text="transcription"></TextView>

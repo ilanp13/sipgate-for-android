@@ -233,6 +233,7 @@ public class EventListActivity extends Activity {
 
 				holder.dateView.setText(formatDateAsTime(createdOn));
 				holder.categoryView.setText(thisDay);
+				holder.categoryView.setVisibility(View.VISIBLE);
 
 				if (item.getClass().equals(Voicemail.class)) {
 					showVoicemailDetails(holder, (Voicemail) item);
