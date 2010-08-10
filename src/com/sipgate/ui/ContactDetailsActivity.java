@@ -18,6 +18,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -180,6 +182,25 @@ public class ContactDetailsActivity extends Activity implements
 		elementList.setAdapter(phonenumbersAdapter);
 
 		showContact(currentContact.getNumbers());
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+
+		optionsMenu m = new optionsMenu();
+		m.createMenu(menu,"ContactDetails");
+		
+		return result;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		boolean result = super.onOptionsItemSelected(item);
+		optionsMenu m = new optionsMenu();
+		m.selectItem(item, this.getApplicationContext(), this);
+
+		return result;
 	}
 
 	private void showContact(ArrayList<SipgateContactNumber> numbers) {
