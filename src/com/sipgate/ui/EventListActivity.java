@@ -229,8 +229,10 @@ public class EventListActivity extends Activity {
 
 				if (item.isRead()) {
 					holder.titleView.setTypeface(Typeface.DEFAULT);
+					holder.iconVM.setImageDrawable(getResources().getDrawable(R.drawable.voicemail_read));
 				} else {
 					holder.titleView.setTypeface(Typeface.DEFAULT_BOLD);
+					holder.iconVM.setImageDrawable(getResources().getDrawable(R.drawable.voicemail_unread));
 				}
 
 				holder.dateView.setText(formatDateAsTime(createdOn));

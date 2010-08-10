@@ -406,12 +406,13 @@ public class PhoneNumberFormatter {
 		/*
 		 * remove illegal characters
 		 */
+		if (this.freestyleNumber != null) this.freestyleNumber = null;
+		this.freestyleNumber = num;
+		
 		num = num.replaceAll(PhoneNumberFormatter.invalidChars, "");
 		
 		num = num.replaceAll("[\\(\\)\\-\\./ ]", "");
 		
-		if (this.freestyleNumber != null) this.freestyleNumber = null;
-		this.freestyleNumber = num;
 		if (this.freestyleNumber.equals("+")) {
 			//no nothing for now
 		}
@@ -537,7 +538,7 @@ public class PhoneNumberFormatter {
 		/* 
 		 * first see if the number is valid, otherwise just return what the user gave us
 		 */
-		if (!this.isValid) {
+		if (!this.isValid || this.freestyleNumber.contains("*") || this.freestyleNumber.contains("#")) {
 			return this.freestyleNumber;
 		}
 		
