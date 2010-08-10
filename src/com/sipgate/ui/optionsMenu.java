@@ -121,7 +121,8 @@ public class optionsMenu {
 			break;
 		}
 		case REFRESH_VOICEMAIL_LIST: {
-			try {	
+			try {
+				activity.getEvents();
 				intent = new Intent(activity, EventListActivity.class);
 				activity.startActivity(intent);
 			} catch (ActivityNotFoundException e) {
