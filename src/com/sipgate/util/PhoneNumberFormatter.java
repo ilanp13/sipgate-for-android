@@ -538,7 +538,7 @@ public class PhoneNumberFormatter {
 		/* 
 		 * first see if the number is valid, otherwise just return what the user gave us
 		 */
-		if (!this.isValid || this.freestyleNumber.contains("*") || this.freestyleNumber.contains("#")) {
+		if (!this.isValid || (this.freestyleNumber != null && (this.freestyleNumber.contains("*") || this.freestyleNumber.contains("#")))) {
 			return this.freestyleNumber;
 		}
 		
