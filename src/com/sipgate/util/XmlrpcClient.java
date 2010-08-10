@@ -171,7 +171,6 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public SipgateBalanceData getBillingBalance() throws ApiException, FeatureNotAvailableException, NetworkProblemException {
 		SipgateBalanceData balance = null;
 
@@ -202,17 +201,17 @@ public class XmlrpcClient implements ApiClientInterface {
 		return balance;
 	}
 
-	@Override
+	
 	public ArrayList<SipgateCallData> getCalls() throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+
 	public List<Event> getEvents() throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+
 	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException,
 			AuthenticationErrorException, NetworkProblemException {
 		SipgateServerData serverData = null;
@@ -284,17 +283,17 @@ public class XmlrpcClient implements ApiClientInterface {
 		return prov;
 	}
 
-	@Override
+	
 	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+	
 	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+	
 	public boolean connectivityOk() throws ApiException {
 		boolean ret = true;
 
@@ -307,24 +306,24 @@ public class XmlrpcClient implements ApiClientInterface {
 		return ret;
 	}
 
-	@Override
+	
 	public boolean featureAvailable(API_FEATURE feature) {
 		return false;
 	}
 
-	@Override
+	
 	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException,
 			OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+	
 	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException,
 			OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+	
 	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();

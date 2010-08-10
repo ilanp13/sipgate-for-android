@@ -485,7 +485,7 @@ public class RestClient implements ApiClientInterface {
 		return (Element) fstNmElmnt;
 	}
 
-	@Override
+
 	public boolean connectivityOk() throws ApiException, NetworkProblemException {
 		// TODO FIXME: We want some test that has less impact on the system!!!
 		try {
@@ -500,7 +500,7 @@ public class RestClient implements ApiClientInterface {
 		return true;
 	}
 
-	@Override
+
 	public boolean featureAvailable(API_FEATURE feature) {
 		boolean ret = false;
 		

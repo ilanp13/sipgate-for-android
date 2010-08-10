@@ -26,7 +26,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		this.activity = activity;
 	}
 	
-	@Override
+	
 	public ArrayList<SipgateContact> getContacts() {
 		ArrayList<SipgateContact> contactsList = null;
 		
@@ -61,7 +61,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		return contactsList;
 	}
 
-	@Override
+	
 	public SipgateContact getContact(Integer id) {
 		SipgateContact contact = null;
 		

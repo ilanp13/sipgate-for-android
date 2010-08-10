@@ -7,7 +7,7 @@
 	android:background="#000000">
 
 <!--
-			<org.sipdroid.sipua.ui.InstantAutoCompleteTextView
+			<com.sipgate.sipua.ui.InstantAutoCompleteTextView
  -->
 	<TextView
 		android:id="@+id/txt_callee"
