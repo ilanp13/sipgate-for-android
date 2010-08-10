@@ -317,7 +317,7 @@ public class EventListActivity extends Activity {
 		return dateformatterPretty.format(d);
 	}
 
-	protected void getEvents() {
+	public void getEvents() {
 		try {
 			if (serviceBinding != null) {
 				List<Event> events = serviceBinding.getEvents();
