@@ -112,23 +112,25 @@ public class EventServiceImpl extends Service implements EventService {
 	
 	private void notifyIfUnreads(List<Event> oldList, List<Event> newList) {
 		
-		if (!oldList.equals(newList)) {
-			for (PendingIntent pInt: onNewEventsTriggers){
-				try {
-					pInt.send();
-				} catch (CanceledException e) {
-					e.printStackTrace();
-				}			
-			}
-		}
-		
 		Boolean hasUnreadEvents = false;
 		
-		for (Event e: newList){
-			if (! e.isRead()){
-				hasUnreadEvents = true;
-				createNewMessagesNotification();
-				break;
+		if (newList != null && oldList != null) {
+			if (!oldList.equals(newList)) {
+				for (PendingIntent pInt: onNewEventsTriggers){
+					try {
+						pInt.send();
+					} catch (CanceledException e) {
+						e.printStackTrace();
+					}			
+				}
+			}
+			
+			for (Event e: newList){
+				if (! e.isRead()){
+					hasUnreadEvents = true;
+					createNewMessagesNotification();
+					break;
+				}
 			}
 		}
 		if (!hasUnreadEvents) {
