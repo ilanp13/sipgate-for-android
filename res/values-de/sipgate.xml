@@ -27,13 +27,13 @@
    	<string name="menu_settings">Einstellungen</string>
    	<string name="menu_refresh">Aktualisieren</string>
    	<string name="menu_about">Über</string>
-   	<string name="sipgate_a_new_voicemail">Neue Voicemailnachricht</string>
+   	<string name="sipgate_a_new_voicemail">Neue Nachricht</string>
    	<string name="alert_3g_cost">Bitte beachten Sie, dass Datentransfer über das 3G-Netz mit Kosten verbunden sein kann.</string>
    	<string name="alert_not_available">Wenn beide Netze deaktiviert sind, sind Sie nicht erreichbar und können keine Telefonate über sipgate führen.</string>
   	<string name="alert_unregister">Hiermit wechseln Sie Ihren Account. Wenn Sie dies tun, wird ihr derzeit eingetragener Account aus der App gelöscht und Sie müssen in jedem Fall Ihre Logindaten erneut eingeben! Wollen Sie wirklich fortfahren?</string>
    	<string name="emptycontact">Dieser Kontakt scheint keine Rufnummer zu besitzen.</string>
    	<string name="sipgate_empty_eventlist">Keine Einträge in Ihrer Ereignisliste.</string>
-   	<string name="sipgate_voicemail_from">Voicemailnachricht von</string>
+   	<string name="sipgate_voicemail_from">Nachricht von</string>
    	<string name="sipgate_seconds">Sekunden</string>
 	<string name="sipgate_tab_dialpad">Ziffernblock</string>   	
 	<string name="sipgate_tab_voicemail">Nachrichten</string>  	
