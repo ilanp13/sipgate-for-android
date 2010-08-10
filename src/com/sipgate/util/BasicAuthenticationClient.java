@@ -197,22 +197,22 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		return inputStream;
 	}
 
-	@Override
+
 	public InputStream getBillingBalance() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/billing/balance/?complexity=full");
 	}
 
-	@Override
+
 	public InputStream getCalls() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/calls/?complexity=full");
 	}
 
-	@Override
+
 	public InputStream getProvisioningData() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/extensions/?complexity=full");
 	}
 
-	@Override
+
 	public InputStream getEvents() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/?complexity=full");
 	}
@@ -227,17 +227,17 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		accessProtectedResource("PUT", voicemail+"/?value=true"/*, params*/);
 	}
 
-	@Override
+
 	public InputStream getMobileExtensions() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/mobile/extensions/");
 	}
 
-	@Override
+
 	public InputStream getBaseProductType() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/baseproducttype/");
 	}
 
-	@Override
+
 	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws AccessProtectedResourceException, NetworkProblemException {
 		HashMap<String, String> params = new HashMap<String, String>();

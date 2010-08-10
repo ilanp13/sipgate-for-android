@@ -73,22 +73,22 @@ public class RestAuthenticationWrapper implements RestAuthenticationInterface {
 		return stream;
 	}
 
-	@Override
+	
 	public InputStream getBillingBalance() throws AccessProtectedResourceException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "hun/my/billing/balance/?complexity=full");
 	}
 
-	@Override
+	
 	public InputStream getCalls() throws AccessProtectedResourceException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/calls/?complexity=full");
 	}
 
-	@Override
+	
 	public InputStream getProvisioningData() throws AccessProtectedResourceException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/extensions/?complexity=full");
 	}
 
-	@Override
+
 	public InputStream getEvents() throws AccessProtectedResourceException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/?complexity=full");
 	}
@@ -101,17 +101,17 @@ public class RestAuthenticationWrapper implements RestAuthenticationInterface {
 		accessProtectedResource(voicemail);
 	}
 
-	@Override
+
 	public InputStream getMobileExtensions() throws AccessProtectedResourceException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/mobile/extensions/");
 	}
 	
-	@Override
+	
 	public InputStream getBaseProductType() throws AccessProtectedResourceException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/baseproducttype/");
 	}
 
-	@Override
+	
 	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws AccessProtectedResourceException {
 		HashMap<String, String> params = new HashMap<String, String>();

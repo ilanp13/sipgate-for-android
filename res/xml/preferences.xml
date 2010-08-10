@@ -87,7 +87,7 @@
 				android:key="nodata"
 				android:title="@string/settings_nodata"
 				android:summary="@string/settings_nodata2" />
-			<org.sipdroid.sipua.ui.SipRingtonePreference
+			<com.sipgate.sipua.ui.SipRingtonePreference
 				android:key="sipringtone"
 				android:title="@string/settings_sipringtone"
 				android:summary="@string/settings_sipringtone2"
@@ -135,7 +135,7 @@
 	<PreferenceScreen android:key="codecs" android:title="@string/codecs" >
         	<intent
                 	android:action="android.intent.action.MAIN"
-	                android:targetPackage="org.sipdroid.sipua"
+	                android:targetPackage="com.sipgate.sipua"
 	                android:targetClass="org.sipdroid.codecs.Codecs$CodecSettings" />
 
 	</PreferenceScreen>

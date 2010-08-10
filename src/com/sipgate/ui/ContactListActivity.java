@@ -171,7 +171,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		getContacts();
 	}
 
-	@Override
+	
 	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
 		// TODO Auto-generated method stub
 		Log.d(TAG, "click()");

@@ -21,12 +21,12 @@ public class AndroidContactsClient implements ContactsInterface {
 		}	
 	}
 	
-	@Override
+	
 	public ArrayList<SipgateContact> getContacts() {
 		return this.contactsInterface.getContacts();
 	}
 
-	@Override
+	
 	public SipgateContact getContact(Integer id) {
 		return this.contactsInterface.getContact(id);
 	}
