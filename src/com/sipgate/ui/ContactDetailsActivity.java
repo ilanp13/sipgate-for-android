@@ -1,6 +1,7 @@
 package com.sipgate.ui;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 
 import com.sipgate.R;
@@ -9,6 +10,7 @@ import com.sipgate.models.SipgateContactNumber;
 import com.sipgate.models.holder.ContactDetailViewHolder;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.util.AndroidContactsClient;
+import com.sipgate.util.PhoneNumberFormatter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -163,7 +165,13 @@ public class ContactDetailsActivity extends Activity implements
 					break;
 				}
 				holder.contactNumberType.setText(type);
-				holder.contactNumberValue.setText(number);
+
+				PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+				Locale locale = Locale.getDefault();
+				String numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(number, locale.getCountry());
+				if(number.length()>0 && number.substring(0,1).equals("+")) numberPretty = "+" + numberPretty;
+				
+				holder.contactNumberValue.setText(numberPretty);
 
 				return convertView;
 			}
@@ -197,7 +205,7 @@ public class ContactDetailsActivity extends Activity implements
 		super.onResume();
 	}
 
-	
+	@Override
 	public void onItemClick(AdapterView<?> parent, View arg1, int position,
 			long id) {
 		// TODO Auto-generated method stub

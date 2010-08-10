@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -215,6 +216,7 @@ public class EventListActivity extends Activity {
 					holder.dateView = (TextView) convertView.findViewById(R.id.DateTextView);
 					holder.categoryView = (TextView) convertView.findViewById(R.id.CategoryTextView);
 					holder.transcriptionView = (TextView) convertView.findViewById(R.id.TranscriptionTextView);
+					holder.iconVM = (ImageView) convertView.findViewById(R.id.IconView);
 					convertView.setTag(holder);
 				} else {
 					holder = (EventViewHolder) convertView.getTag();
@@ -233,6 +235,7 @@ public class EventListActivity extends Activity {
 
 				holder.dateView.setText(formatDateAsTime(createdOn));
 				holder.categoryView.setText(thisDay);
+				holder.categoryView.setVisibility(View.VISIBLE);
 
 				if (item.getClass().equals(Voicemail.class)) {
 					showVoicemailDetails(holder, (Voicemail) item);
@@ -399,8 +402,18 @@ public class EventListActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 
-		@SuppressWarnings("unused")
-		MenuItem m = menu.add(0, REFRESH_MENU_ITEM, 0, R.string.refresh);
+		optionsMenu m = new optionsMenu();
+		m.createMenu(menu,"EventList");
+		
+		return result;
+	}
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		boolean result = super.onOptionsItemSelected(item);
+		optionsMenu m = new optionsMenu();
+		m.selectItem(item, this.getApplicationContext(), this);
 
 		return result;
 	}
@@ -411,18 +424,7 @@ public class EventListActivity extends Activity {
 		stopservice();
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean result = super.onOptionsItemSelected(item);
-
-		switch (item.getItemId()) {
-		case REFRESH_MENU_ITEM:
-			getEvents();
-			break;
-		}
-
-		return result;
-	}
+	
 
 	@Override
 	protected void onNewIntent(Intent intent) {

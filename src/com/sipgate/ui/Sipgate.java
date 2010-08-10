@@ -22,6 +22,8 @@
 package com.sipgate.ui;
 
 
+import java.util.Locale;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
@@ -36,6 +38,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.CallLog.Calls;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +57,7 @@ import com.sipgate.R;
 import com.sipgate.sipua.UserAgent;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.Settings;
+import com.sipgate.util.PhoneNumberFormatter;
 
 /////////////////////////////////////////////////////////////////////
 // this the main activity of Sipdroid
@@ -61,14 +65,16 @@ import com.sipgate.sipua.ui.Settings;
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
 public class Sipgate extends Activity implements OnClickListener, OnLongClickListener {
-//	private static final String TAG = "Dialpad";
+	private static final String TAG = "Dialpad";
 
 	public static final boolean release = true;
 	public static final boolean market = false;
 
 	private TextView txtCallee;
+	private float txtSize;
 	private Vibrator vib;
 	private AlertDialog m_AlertDlg;
+	private String numberToDial = "";
 	
 	@Override
 	public void onStart() {
@@ -199,6 +205,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		ImageButton dialBackspace = (ImageButton) findViewById(R.id.backspace);
 		
 		this.txtCallee = (TextView) findViewById(R.id.txt_callee);
+		this.txtSize = this.txtCallee.getTextSize();
 		
 		dialOne.setOnClickListener(this);
 		dialOne.setOnLongClickListener(this);
@@ -260,7 +267,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	
 	void call_menu()
 	{
-		String target = this.txtCallee.getText().toString();
+		String target = this.numberToDial;
 		if (m_AlertDlg != null) 
 		{
 			m_AlertDlg.cancel();
@@ -298,6 +305,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		if (Receiver.call_state != UserAgent.UA_STATE_IDLE) Receiver.moveTop();
 		this.txtCallee.setText("");
 		this.txtCallee.scrollTo(0, 0);
+		this.numberToDial = "";
 		uncrackButtons();
 	}
 
@@ -306,7 +314,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		boolean result = super.onCreateOptionsMenu(menu);
 
 		optionsMenu m = new optionsMenu();
-		m.createMenu(menu);
+		m.createMenu(menu,"sipgate");
 		
 		return result;
 	}
@@ -317,7 +325,6 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result = super.onOptionsItemSelected(item);
-
 		optionsMenu m = new optionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
@@ -448,19 +455,40 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	
 	private void addDigit(String digit) {
 		this.vib.vibrate(20);
-		String text = this.txtCallee.getText().toString();
-		if(digit == "--" && text.length()>0) {
-			text = text.substring(0,text.length()-1);
+		//String text = this.txtCallee.getText().toString();
+		if(digit == "--" && this.numberToDial.length()>0) {
+			this.numberToDial = this.numberToDial.substring(0,this.numberToDial.length()-1);
 		} else if(digit == "##") {
-			text = "";
+			this.numberToDial = "";
 		} else if(digit!="--" && digit!="##") {
-			text += digit;
+			this.numberToDial += digit;
 		}
-		this.txtCallee.setText(text);
-
-		float size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
-		if(size>(this.txtCallee.getWidth()-100)) this.txtCallee.scrollTo((int)size-this.txtCallee.getWidth()+100,0);
-		if(size<=(this.txtCallee.getWidth()-100)) this.txtCallee.scrollTo(0,0);
+		PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+		Locale locale = Locale.getDefault();
+		String formattedNumber = formatter.formattedPhoneNumberFromStringWithCountry(this.numberToDial, locale.getCountry());
+		this.txtCallee.setText(formattedNumber);
+		
+		float size = 0;
+		float height = 0;
+		do {
+			size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
+			if(size>(this.txtCallee.getWidth()-100)) {
+				this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) .99));
+				//this.txtCallee.scrollTo((int)size-this.txtCallee.getWidth()+100,0);
+			}
+		} while (size>(this.txtCallee.getWidth()-100));
+		if (!numberToDial.equals("")) {
+			do {
+				size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
+				height = this.txtCallee.getTextSize();
+				if(size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize) {
+					this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) 1.01));
+					//this.txtCallee.scrollTo(0,0);
+				}
+			} while (size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize); 
+		} else {
+			this.txtCallee.setTextSize(this.txtSize);
+		}
 	}
 	
 	private void crackButtons() {
