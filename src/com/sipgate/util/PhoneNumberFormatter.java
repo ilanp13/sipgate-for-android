@@ -618,7 +618,7 @@ public class PhoneNumberFormatter {
 				} else if (rest.length() == 0) {
 					realNumber = String.format("%s", onkz);
 				} else {
-					realNumber = String.format("%s-%s", onkz, rest);
+					realNumber = String.format("%s %s", onkz, rest);
 				}
 			}
 			
