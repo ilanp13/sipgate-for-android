@@ -314,7 +314,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		boolean result = super.onCreateOptionsMenu(menu);
 
 		optionsMenu m = new optionsMenu();
-		m.createMenu(menu);
+		m.createMenu(menu,"sipgate");
 		
 		return result;
 	}

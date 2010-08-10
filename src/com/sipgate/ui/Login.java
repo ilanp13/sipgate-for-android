@@ -7,6 +7,8 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -89,6 +91,25 @@ public class Login extends Activity implements OnClickListener {
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		boolean result = super.onCreateOptionsMenu(menu);
+
+		optionsMenu m = new optionsMenu();
+		m.createMenu(menu,"Login");
+		
+		return result;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		boolean result = super.onOptionsItemSelected(item);
+		optionsMenu m = new optionsMenu();
+		m.selectItem(item, this.getApplicationContext(), this);
+
+		return result;
 	}
 
 	public void onClick(View v) {
