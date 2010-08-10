@@ -338,8 +338,9 @@ public class PhoneNumberFormatter {
 			if (aNumber == null) {
 				this.e164Number = null;
 				this.freestyleNumber = "";
-				hasPrefix = false;
+				this.hasPrefix = false;
 				this.isValid = true;
+				this.isEmergencyNumber = false;
 				return this;
 			}
 			
@@ -380,6 +381,7 @@ public class PhoneNumberFormatter {
 			this.isValid = true;
 			return this;
 		}
+		this.isEmergencyNumber = false;
 		
 		/*
 		 * check if we have a tel or sip uri
