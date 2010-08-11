@@ -186,7 +186,9 @@ import com.sipgate.sipua.phone.Connection;
 									Settings.System.DEFAULT_RINGTONE_URI.toString());
 							if(!TextUtils.isEmpty(sUriSipRingtone)) {
 								oRingtone = RingtoneManager.getRingtone(mContext, Uri.parse(sUriSipRingtone));
-								oRingtone.play();	
+								if (oRingtone != null) {
+									oRingtone.play();
+								}
 							}
 						}
 					}
