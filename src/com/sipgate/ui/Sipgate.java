@@ -313,7 +313,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.createMenu(menu,"sipgate");
 		
 		return result;
@@ -325,7 +325,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result = super.onOptionsItemSelected(item);
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
 		return result;

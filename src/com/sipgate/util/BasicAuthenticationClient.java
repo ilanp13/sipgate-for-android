@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -174,7 +175,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 					HttpParams httpParams = response.getParams();
 					request = new HttpGet((String) httpParams.getParameter("Location"));
 					response = null;
-				} else if (statusLine.getStatusCode() == 200) {
+				} else if (statusLine.getStatusCode() == 200 || statusLine.getStatusCode() == 204) {
 					Log.v(TAG, "successful request to '"+urlString+"'");
 				} else if (statusLine.getStatusCode() == 401) {
 					Log.w(TAG, "cannot authenticate");
@@ -185,11 +186,15 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 				}
 			} while (response == null);
 
-			inputStream = response.getEntity().getContent();
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				inputStream = entity.getContent();
+			}
 		} catch (UnknownHostException e) {
 			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): "+e.getLocalizedMessage());
 			throw new NetworkProblemException();
 		} catch (Exception e) {
+			e.printStackTrace();
 			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): "+e.getLocalizedMessage());
 			throw new AccessProtectedResourceException();
 		}

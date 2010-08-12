@@ -97,7 +97,7 @@ public class Login extends Activity implements OnClickListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.createMenu(menu,"Login");
 		
 		return result;
@@ -106,7 +106,7 @@ public class Login extends Activity implements OnClickListener {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result = super.onOptionsItemSelected(item);
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
 		return result;

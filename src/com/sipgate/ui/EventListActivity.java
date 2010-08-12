@@ -52,14 +52,13 @@ public class EventListActivity extends Activity {
 	private ArrayAdapter<Event> eventListAdapter;
 	private ServiceConnection serviceConnection;
 	private EventService serviceBinding = null;
-	private boolean serviceStopped = false;
 	private PendingIntent onNewEventsPendingIntent;
 	private MediaConnector mediaConnector;
 	private MediaController mediaController;
 	private String voicemailFromText;
 	private String secondsText;
 	private ApiServiceProvider apiClient = null;
-	private boolean hastVmListFeature = false;
+	private boolean hasVmListFeature = false;
 
 	/**
 	 * optimization: gets Strings from resources. must be called from onCreate()
@@ -85,7 +84,7 @@ public class EventListActivity extends Activity {
 		Context ctx = getApplicationContext();
 
 		// ... and only start service when feature available:
-		if (!this.hastVmListFeature) {
+		if (!this.hasVmListFeature) {
 			Log.w(TAG, "used API is not capable of 'VM_LIST' feature; not starting service!");
 		} else {
 			Log.v(TAG, "enter startScanService");
@@ -93,6 +92,7 @@ public class EventListActivity extends Activity {
 			ctx.startService(startIntent);
 
 			if (serviceConnection == null) {
+				Log.d(TAG, "service connection is null");
 				serviceConnection = new ServiceConnection() {
 	
 					public void onServiceDisconnected(ComponentName arg0) {
@@ -103,20 +103,15 @@ public class EventListActivity extends Activity {
 					public void onServiceConnected(ComponentName name, IBinder binder) {
 						Log.v(TAG, "service " + name + " connected");
 						try {
-							if (!serviceStopped) {
-								Log.d(TAG, "serviceBinding set");
-								serviceBinding = (EventService) binder;
-								try {
-									Log.d(TAG, "serviceBinding registerOnEventsIntent");
-									serviceBinding.registerOnEventsIntent(getNewMessagesIntent());
-								} catch (RemoteException e) {
-									e.printStackTrace();
-								}
-								getEvents();
-	
-							} else {
-								Log.d(TAG, "service is stopped");
+							Log.d(TAG, "serviceBinding set");
+							serviceBinding = (EventService) binder;
+							try {
+								Log.d(TAG, "serviceBinding registerOnEventsIntent");
+								serviceBinding.registerOnEventsIntent(getNewMessagesIntent());
+							} catch (RemoteException e) {
+								e.printStackTrace();
 							}
+							getEvents();
 						} catch (ClassCastException e) {
 							e.printStackTrace();
 						}
@@ -124,9 +119,11 @@ public class EventListActivity extends Activity {
 				};
 				Intent intent = new Intent(this, EventServiceImpl.class);
 				Log.d(TAG, "bindService");
-				ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+				boolean bindret = ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 	
-				Log.v(TAG, "leave startScanService");
+				Log.v(TAG, "leave startScanService: " + bindret);
+			} else {
+				Log.d(TAG, "service connection is not null");
 			}
 		}
 	}
@@ -135,7 +132,6 @@ public class EventListActivity extends Activity {
 		if (serviceConnection != null) {
 			try {
 				if (serviceBinding != null) {
-					serviceStopped = true;
 					serviceBinding.unregisterOnEventsIntent(getNewMessagesIntent());
 				}
 			} catch (RemoteException e) {
@@ -169,9 +165,10 @@ public class EventListActivity extends Activity {
 			this.apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
 			try {
-				this.hastVmListFeature = this.apiClient.featureAvailable(API_FEATURE.VM_LIST);
+				this.hasVmListFeature = this.apiClient.featureAvailable(API_FEATURE.VM_LIST);
+				Log.d(TAG, "having vmlistfeature: " + hasVmListFeature);
 			} catch (Exception e) {
-				Log.w(TAG, "startScanService() exception in call to featureAvailable() -> "+e.getLocalizedMessage());
+				Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
 			}
 		}
 	}
@@ -339,7 +336,7 @@ public class EventListActivity extends Activity {
 
 	private void showEvents(List<Event> events) {
 		eventListAdapter.clear();
-		Log.i(TAG, "showEvents");
+		Log.i(TAG, "showEvents " + new Date().toString());
 		boolean itemsAdded = false;
 		for (Event item : events) {
 			// only add voicemail-events. that's about to change in future
@@ -375,6 +372,8 @@ public class EventListActivity extends Activity {
 			eventlist.setVisibility(View.GONE);
 			emptylist.setVisibility(View.VISIBLE);
 		}
+		
+		Log.i(TAG, "showEvents done " + new Date().toString());
 	}
 
 	@Override
@@ -396,15 +395,27 @@ public class EventListActivity extends Activity {
 		Log.v(TAG, "onResume");
 		//if (serviceBinding == null) {
 		startScanService();
+		serviceRefresh();
 		getEvents();
 		//}
+	}
+
+	private void serviceRefresh() {
+		if (serviceBinding != null) {
+			try {
+				serviceBinding.refreshEvents();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.createMenu(menu,"EventList");
 		
 		return result;
@@ -414,7 +425,7 @@ public class EventListActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result = super.onOptionsItemSelected(item);
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
 		return result;
@@ -449,22 +460,18 @@ public class EventListActivity extends Activity {
 		public MediaConnector() {
 			mediaPlayer = new MediaPlayer();
 		}
-
 		
 		public int getBufferPercentage() {
 			return 0;
 		}
-
 		
 		public int getCurrentPosition() {
 			return mediaPlayer.getCurrentPosition();
 		}
-
 		
 		public int getDuration() {
 			return mediaPlayer.getDuration();
 		}
-
 		
 		public boolean isPlaying() {
 			return mediaPlayer.isPlaying();

@@ -113,7 +113,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.createMenu(menu,"ContactList");
 		
 		return result;
@@ -122,7 +122,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		boolean result = super.onOptionsItemSelected(item);
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
 		return result;

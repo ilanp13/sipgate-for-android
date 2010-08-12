@@ -22,7 +22,7 @@ import android.view.MenuItem;
 import com.sipgate.R;
 
 // @SuppressWarnings("deprecation")
-public class optionsMenu {
+public class OptionsMenu {
 	
 	
 	/* Following the menu item constants which will be used for menu creation */
@@ -121,9 +121,12 @@ public class optionsMenu {
 			break;
 		}
 		case REFRESH_VOICEMAIL_LIST: {
-			if(activity.getClass() == EventListActivity.class){
-				EventListActivity tmp = (EventListActivity) activity;
-				tmp.getEvents();
+			try {
+				intent = new Intent(activity, SipgateFrames.class);
+				intent.putExtra("view", SipgateFrames.SipgateTab.VM);
+				activity.startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(TAG, e.getLocalizedMessage());
 			}
 			break;
 		}
