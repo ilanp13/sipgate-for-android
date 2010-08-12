@@ -8,4 +8,5 @@ interface EventService {
 	
 	void registerOnEventsIntent(in PendingIntent i);
 	void unregisterOnEventsIntent(in PendingIntent i);
+	void refreshEvents();
 }

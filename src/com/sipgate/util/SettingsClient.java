@@ -20,7 +20,7 @@ public class SettingsClient {
 	private static SettingsClient instance = null;
 
 	private static final String randomDefaultValue= "DEFAULTTHATWILLNEVEROCCUR";
-	private static final String sharedPrefsFile = "com.sipgate_preferences";
+	public static final String sharedPrefsFile = "com.sipgate_preferences";
 	private static final String extensionAlias = "extension_alias";
 	private SharedPreferences preferences = null;
 	private SharedPreferences.Editor editor = null;
@@ -54,7 +54,7 @@ public class SettingsClient {
 	 */
 	private void init(Context context) {
 		this.context = context;
-		this.preferences = this.context.getSharedPreferences(sharedPrefsFile, 0);
+		this.preferences = this.context.getSharedPreferences(sharedPrefsFile, Context.MODE_PRIVATE);
 		this.editor = this.preferences.edit();
 	}
 	

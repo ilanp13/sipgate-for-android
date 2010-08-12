@@ -463,6 +463,7 @@ public class RestClient implements ApiClientInterface {
 		try {
 			RestClient.authenticationInterface.setVoicemailRead(voicemail);
 		} catch (AccessProtectedResourceException e) {
+			e.printStackTrace();
 			throw new ApiException();
 		}
 	}
