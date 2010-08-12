@@ -148,6 +148,7 @@ public class SipgateFrames extends TabActivity {
 			this.tabs.clearAllTabs();
 			tabs.addTab(tabSpecDial);
 			tabs.addTab(tabSpecContacts);
+			tabs.addTab(tabSpecCallList);
 		} catch (NullPointerException e) {
 			Log.i(TAG, "removeVmTab() -> "+e.getLocalizedMessage());
 		}
