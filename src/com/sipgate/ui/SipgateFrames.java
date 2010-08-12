@@ -41,12 +41,13 @@ import android.widget.TabHost.TabSpec;
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
 public class SipgateFrames extends TabActivity {
-	public enum SipgateTab { DIALPAD, CONTACTS, VM};
+	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};
 	
 	private static final String TAG = "TabActivity";
 	private static final int TAB_DIAL = 0;
 	private static final int TAB_CONTACTS = 1;
-	private static final int TAB_VMLIST = 2;
+	private static final int TAB_CALLLIST = 2;
+	private static final int TAB_VMLIST = 3;
 	
 	private SipgateTab currentTab = SipgateTab.DIALPAD;
 	private ApiServiceProvider apiClient = null;
@@ -113,6 +114,10 @@ public class SipgateFrames extends TabActivity {
 		}
 
 		switch (this.currentTab) {
+		case CALLS:
+			tabs.setCurrentTab(TAB_CALLLIST);
+			break;
+		
 		case VM:
 			tabs.setCurrentTab(TAB_VMLIST);
 			break;

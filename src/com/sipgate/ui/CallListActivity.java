@@ -45,7 +45,7 @@ public class CallListActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
 
-		optionsMenu m = new optionsMenu();
+		OptionsMenu m = new OptionsMenu();
 		m.createMenu(menu,"CallList");
 		
 		return result;
