@@ -171,7 +171,6 @@ public class ContactDetailsActivity extends Activity implements
 				PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 				Locale locale = Locale.getDefault();
 				String numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(number, locale.getCountry());
-				if(number.length()>0 && number.substring(0,1).equals("+")) numberPretty = "+" + numberPretty;
 				
 				holder.contactNumberValue.setText(numberPretty);
 
