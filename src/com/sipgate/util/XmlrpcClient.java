@@ -226,7 +226,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			throw new ApiException();
 		}
 		
-		if (inputStream == null) {
+		if (apiResponse == null) {
 			Log.e(TAG, "wtf, inputstream is null");
 			return null;
 		}
@@ -282,7 +282,7 @@ public class XmlrpcClient implements ApiClientInterface {
 				String src_name = ""; // TODO: Match Phonebook Contacts - Here or somewhere else?
 				String src_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(src_number, locale.getCountry());
 				String src_numberE164 = formatter.e164NumberWithPrefix("");
-				call.setCallTarget(src_numberE164, src_numberPretty, src_name);
+				call.setCallSource(src_numberE164, src_numberPretty, src_name);
 
 				String tgt_name = ""; // TODO: Match Phonebook Contacts - Here or somewhere else?
 				String tgt_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(tgt_number, locale.getCountry());

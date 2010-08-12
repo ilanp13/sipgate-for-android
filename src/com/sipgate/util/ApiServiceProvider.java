@@ -209,7 +209,9 @@ public class ApiServiceProvider {
 	}
 
 	public ArrayList<SipgateCallData> getCalls() throws ApiException, FeatureNotAvailableException {
-		throw new FeatureNotAvailableException();
+		synchronized (this.apiClient) {
+			return apiClient.getCalls();
+		}
 	}
 
 	public boolean featureAvailable(API_FEATURE feature) throws ApiException {

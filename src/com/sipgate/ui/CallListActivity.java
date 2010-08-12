@@ -68,6 +68,7 @@ public class CallListActivity extends Activity {
 					holder.callTimeView = (TextView) convertView.findViewById(R.id.DateTimeTextView);
 					holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.CallTypeImage);
 					holder.callButtonView = (ImageView) convertView.findViewById(R.id.CallImageButton);
+					holder.categoryTextView = (TextView) convertView.findViewById(R.id.CategoryTextView);
 					convertView.setTag(holder);
 				} else {
 					holder = (CallViewHolder) convertView.getTag();
@@ -122,26 +123,32 @@ public class CallListActivity extends Activity {
 
 		};
 		elementList.setAdapter(callListAdapter);
-		getCalls();
 		showCalls(new ArrayList<SipgateCallData>(0)); // begin with empty list
-
+		getCalls();
 	}
 	
 	public void getCalls() {
-		// TODO: CallGetter
+		ApiServiceProvider api = ApiServiceProvider.getInstance(getApplicationContext());
+		try {
+			ArrayList<SipgateCallData> calls = api.getCalls();
+			showCalls(calls);
+		} catch (Exception e) {
+			Log.e(TAG,"foo");
+		}
 	}
 
 	private void showCalls(List<SipgateCallData> calls) {
 		callListAdapter.clear();
 		Log.i(TAG, "showCalls " + new Date().toString());
 		boolean itemsAdded = false;
+		if(calls == null) return;
 		for (SipgateCallData item : calls) {
 			callListAdapter.add(item);
 			itemsAdded = true;
 		}
 
 		ListView eventlist = (ListView) findViewById(R.id.CalllistListView);
-		TextView emptylist = (TextView) findViewById(R.id.CalllistListView);
+		TextView emptylist = (TextView) findViewById(R.id.EmptyCallListTextView);
 		
 		if (itemsAdded) {
 			eventlist.setVisibility(View.VISIBLE);
