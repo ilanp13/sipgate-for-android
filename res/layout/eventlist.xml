@@ -16,5 +16,6 @@
 </ListView>
 	<TextView android:text="@string/sipgate_empty_eventlist"
 		android:id="@+id/EmptyEventListTextView" android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:gravity="center"></TextView>
+		android:layout_height="fill_parent" android:gravity="center"
+		android:textColor="#FFFFFF"></TextView>
 </LinearLayout>
