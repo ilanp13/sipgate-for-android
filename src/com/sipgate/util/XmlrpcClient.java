@@ -245,7 +245,8 @@ public class XmlrpcClient implements ApiClientInterface {
 				String status = (String) HistorySet.get("Status");
 				String direction = "";
 				Boolean missed = false;
-
+				
+				Log.d("call Status: ", status);
 				if(status.equals("accepted")) {
 					direction = "incoming";
 				}
