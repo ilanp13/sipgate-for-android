@@ -88,7 +88,7 @@ public class CallListAdapter implements ListAdapter {
 		// need to reinflate it. We only inflate a new View when the convertView
 		// supplied by ListView is null.
 		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.sipgate_call_list_item, null);
+			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 
 			// Creates a ViewHolder and store references to the two children
 			// views

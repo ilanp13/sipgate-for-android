@@ -34,6 +34,7 @@ public class optionsMenu {
 	public static final int CONTACTS_MENU_ITEM = FIRST_MENU_ID + 5;
 	public static final int EVENTLIST_MENU_ITEM = FIRST_MENU_ID + 6;
 	public static final int REFRESH_VOICEMAIL_LIST = FIRST_MENU_ID + 7;
+	public static final int REFRESH_CALL_LIST = FIRST_MENU_ID + 8;
 	
 	private static AlertDialog m_AlertDlg;
 
@@ -61,6 +62,12 @@ public class optionsMenu {
 			m.setIcon(R.drawable.ic_menu_refresh);
 		}
 		
+		// refresh for calllist tab only
+		if(caller == "CallList") {
+			m = menu.add(0, REFRESH_CALL_LIST, 0, R.string.menu_refresh);
+			m.setIcon(R.drawable.ic_menu_refresh);
+		}
+
 		// Eventlist
 //		m = menu.add(0, EVENTLIST_MENU_ITEM, 0, R.string.menu_event_list);
 //		m.setIcon(R.drawable.menu_icon_voicemail_48);
@@ -124,6 +131,13 @@ public class optionsMenu {
 			if(activity.getClass() == EventListActivity.class){
 				EventListActivity tmp = (EventListActivity) activity;
 				tmp.getEvents();
+			}
+			break;
+		}
+		case REFRESH_CALL_LIST: {
+			if(activity.getClass() == CallListActivity.class){
+				CallListActivity tmp = (CallListActivity) activity;
+				//tmp.getEvents();
 			}
 			break;
 		}

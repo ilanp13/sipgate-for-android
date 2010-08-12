@@ -55,6 +55,7 @@ public class SipgateFrames extends TabActivity {
 		
 	private TabSpec tabSpecDial = null;
 	private TabSpec tabSpecContacts = null;
+	private TabSpec tabSpecCallList = null;
 	private TabSpec tabSpecVmList = null;
 
 	@Override
@@ -79,6 +80,11 @@ public class SipgateFrames extends TabActivity {
 		this.tabSpecContacts.setIndicator(res.getText(R.string.sipgate_tab_contacts), res.getDrawable(R.drawable.tab_contacts));
 		this.tabSpecContacts.setContent(new Intent(this, ContactListActivity.class));
 		tabs.addTab(this.tabSpecContacts);
+
+		this.tabSpecCallList = tabs.newTabSpec("Calllist");
+		this.tabSpecCallList.setIndicator(res.getText(R.string.sipgate_tab_calllist), res.getDrawable(R.drawable.ic_menu_end_call));
+		this.tabSpecCallList.setContent(new Intent(this, CallListActivity.class));
+		tabs.addTab(this.tabSpecCallList);
 
 		// check if used API is capable of VM-list and only start service when feature available:
 		if (!this.hasVmListFeature()) {
