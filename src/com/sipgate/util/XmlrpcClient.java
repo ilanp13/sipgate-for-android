@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -78,6 +81,20 @@ public class XmlrpcClient implements ApiClientInterface {
 		this.client.setBasicAuthentication(ApiUser, ApiPassword);
 	}
 
+	private Date getDate(String createOn) {
+		try {
+			if (createOn == null) {
+				return new Date(0);
+			}
+			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ");
+			return dateformatterIso.parse(createOn, new ParsePosition(0));
+		} catch (IllegalArgumentException e) {
+			Log.e(TAG,"badly formated date");
+			
+		}
+		return new Date(0);
+	}
+	
 	@SuppressWarnings("unchecked")
 	private HashMap<String, Object> doXmlrpcCall(String method, Object param) throws XMLRPCException, NetworkProblemException {
 		HashMap<String, Object> res = null;
@@ -240,7 +257,7 @@ public class XmlrpcClient implements ApiClientInterface {
 				HashMap<String, Object> HistorySet = (HashMap<String, Object>) HistoryObject;
 
 				call.setCallId((String) HistorySet.get("EntryID"));
-				call.setCallTime((String) HistorySet.get("Timestamp"));
+				call.setCallTime((Date) getDate((String) HistorySet.get("Timestamp")));
 
 				String status = (String) HistorySet.get("Status");
 				String direction = "";

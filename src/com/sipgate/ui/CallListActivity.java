@@ -1,5 +1,6 @@
 package com.sipgate.ui;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -76,22 +77,17 @@ public class CallListActivity extends Activity {
 				
 				SipgateCallData item = (SipgateCallData) getItem(position);
 
-				String createdOn = item.getCallTime();
-				
 				String callDirection = item.getCallDirection();
 				Boolean callMissed = item.getCallMissed();
 				
 				if(callDirection.equals("incoming") && callMissed == false) {
-					// TODO: Change icon!
-					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.ic_incall_ongoing));
+					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.icon_incoming));
 				}
 				if(callDirection.equals("incoming") && callMissed == true) {
-					// TODO: Change icon!
-					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.ic_incall_ongoing));
+					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.icon_missed));
 				}
 				if(callDirection.equals("outgoing")) {
-					// TODO: Change icon!
-					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.ic_incall_ongoing));
+					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.icon_outgoing));
 				}
 
 				if(callDirection.equals("outgoing")) {
@@ -104,13 +100,16 @@ public class CallListActivity extends Activity {
 					holder.callerNumberView.setText(item.getCallSourceNumberPretty());
 				}
 				
-				String thisDay = item.getCallTime();
+				Date callTime = item.getCallTime();
+				String thisDay = formatDateAsDay(callTime);
+				holder.callTimeView.setText(formatDateAsTime(callTime));
 				holder.categoryTextView.setText(thisDay);
 				holder.categoryTextView.setVisibility(View.VISIBLE);
 
 				if (position > 0) {
 					SipgateCallData lastItem = getItem(position - 1);
-					String lastDay = lastItem.getCallTime();
+					Date lastTime = lastItem.getCallTime();
+					String lastDay = formatDateAsDay(lastTime);
 					if (lastDay.equals(thisDay)) {
 						holder.categoryTextView.setVisibility(View.GONE);
 					} else {
@@ -126,6 +125,18 @@ public class CallListActivity extends Activity {
 		showCalls(new ArrayList<SipgateCallData>(0)); // begin with empty list
 		getCalls();
 	}
+	
+	protected String formatDateAsDay(Date d) {
+		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(
+				getResources().getString(R.string.dateTimeFormatForDay));
+		return dateformatterPretty.format(d);
+	}
+
+	protected String formatDateAsTime(Date d) {
+		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(
+				getResources().getString(R.string.dateTimeFormatForTime));
+		return dateformatterPretty.format(d);
+	}	
 	
 	public void getCalls() {
 		ApiServiceProvider api = ApiServiceProvider.getInstance(getApplicationContext());

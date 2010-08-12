@@ -123,7 +123,7 @@ public class CallListAdapter implements ListAdapter {
 		holder.callerNumberPretty.setText(inboxItem.getCallSourceNumberPretty());
 		holder.callerNumberE164 = inboxItem.getCallSourceNumberE164();
 
-		holder.dateTime.setText(this.dateIsoToPretty(inboxItem.getCallTime()));
+		//holder.dateTime.setText(this.dateIsoToPretty(inboxItem.getCallTime()));
 
 		String name = inboxItem.getCallSourceName();
 		if (name != null && name.length() > 0) {

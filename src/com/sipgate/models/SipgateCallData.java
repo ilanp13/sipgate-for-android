@@ -1,6 +1,7 @@
 package com.sipgate.models;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class SipgateCallData implements Serializable {
 
@@ -41,7 +42,7 @@ public class SipgateCallData implements Serializable {
 	private String id = null;
 	private String direction = null;
 	private Boolean missed = null;
-	private String time = null;
+	private Date time = null;
 	private SipgateEndpointData target = null;
 	private SipgateEndpointData source = null;
 	
@@ -107,11 +108,11 @@ public class SipgateCallData implements Serializable {
 		return source.getName();
 	}
 	
-	public void setCallTime(String time) {
+	public void setCallTime(Date time) {
 		this.time = time;
 	}
 	
-	public String getCallTime() {
+	public Date getCallTime() {
 		return time;
 	}
 

@@ -3,7 +3,10 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -151,6 +154,20 @@ public class RestClient implements ApiClientInterface {
 		return provisioningData;
 	}
 	
+	private Date getDate(String createOn) {
+		try {
+			if (createOn == null) {
+				return new Date(0);
+			}
+			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+			return dateformatterIso.parse(createOn, new ParsePosition(0));
+		} catch (IllegalArgumentException e) {
+			Log.e(TAG,"badly formated date");
+			
+		}
+		return new Date(0);
+	}
+	
 	public ArrayList<SipgateCallData> getCalls() throws ApiException {
 		
 		InputStream inputStream = null;
@@ -205,7 +222,7 @@ public class RestClient implements ApiClientInterface {
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
-					call.setCallTime(getElementById(fstElmnt, "created"));
+					call.setCallTime(getDate(getElementById(fstElmnt, "created")));
 					calls.add(call);
 				}
 			}
