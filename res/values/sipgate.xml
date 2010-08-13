@@ -72,5 +72,6 @@
    	<string name="sipgate_error_unable_to_create_mobile_extension">unable to create mobile extension</string>
    	<string name="sipgate_network_problem">There is a problem with your network connection. Please make sure your device is connected to the internet and try again.</string>
    	<string name="sipgate_me">Me</string>
+   	<string name="sipgate_unknown_caller">Unknown</string>
    	<string name="sipgate_empty_calllist">Your calltlist is empty.</string>
 </resources>

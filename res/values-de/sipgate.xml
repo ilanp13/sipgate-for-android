@@ -67,5 +67,6 @@
    	<string name="sipgate_extension_try_later_title">Fehler</string>
 	<string name="sipgate_network_problem">Es ist ein Netzwerkproblem aufgetreten. Bitte prüfen Sie, ob Ihr Gerät mit dem Internet verbunden ist und versuchen Sie es noch einmal.</string>
    	<string name="sipgate_me">Ich</string>
+   	<string name="sipgate_unknown_caller">Unbekannt</string>
    	<string name="sipgate_empty_calllist">Keine Einträge in Ihrer Anrufliste.</string>
 </resources>
