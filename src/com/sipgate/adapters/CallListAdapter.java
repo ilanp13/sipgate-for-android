@@ -153,6 +153,7 @@ public class CallListAdapter implements ListAdapter {
 		return convertView;
 	}
 
+	@SuppressWarnings("unused")
 	private CharSequence dateIsoToPretty(String dateTimeIso) {
 		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(context.getResources().getString(R.string.dateTimeFormat));
 		SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss"); // TODO fixme!

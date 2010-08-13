@@ -1,18 +1,13 @@
 package com.sipgate.service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.Service;
@@ -26,11 +21,7 @@ import android.util.Log;
 
 import com.sipgate.R;
 import com.sipgate.api.types.Event;
-import com.sipgate.exceptions.ApiException;
-import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.models.SipgateCallData;
-import com.sipgate.sipua.ui.Settings;
-import com.sipgate.ui.SipgateFramesMessage;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.NotificationClient;
 import com.sipgate.util.SettingsClient;
@@ -216,7 +207,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 		if (newList != null) {
 			for (SipgateCallData call: newList){
 				if (! call.getCallRead()) {
-					if (call.getCallTime().after(youngestCall)){
+					if (call.getCallTime().after(youngestCall) && call.getCallMissed() == true){
 						updateYoungestCalldate(call.getCallTime());
 						hasUnreadEvents = true;
 						unreadCounter++;

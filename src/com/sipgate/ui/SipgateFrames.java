@@ -109,6 +109,7 @@ public class SipgateFrames extends TabActivity {
 			Log.d("bundle", this.currentTab.toString());
 		} else {
 			Log.e("bundle", "Not provided");
+			this.currentTab = SipgateTab.DIALPAD;
 		}
 
 		switch (this.currentTab) {

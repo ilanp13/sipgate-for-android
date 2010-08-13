@@ -13,15 +13,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import net.oauth.OAuthException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
 import org.xmlrpc.android.XMLRPCFault;
@@ -29,15 +20,12 @@ import org.zoolu.sip.address.SipURL;
 
 import android.util.Log;
 
-import com.sipgate.R;
 import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateCallData;
@@ -432,14 +420,12 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	
-	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException,
-			OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
 	
-	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException,
-			OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 

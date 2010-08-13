@@ -39,6 +39,7 @@ public class SipgateCallData implements Parcelable {
 		public SipgateEndpointData() {
 		}
 		
+		@SuppressWarnings("unused")
 		public SipgateEndpointData(Parcel in) {
 			readFromParcel(in);
 		}

@@ -5,15 +5,13 @@ import java.util.ArrayList;
 
 import com.sipgate.R;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.provider.Contacts;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
 import com.sipgate.interfaces.ContactsInterface;
@@ -101,23 +99,14 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	}
 	
 	public String getContactName(String phoneNumber) {
-		// define the columns I want the query to return
-		String[] projection = new String[] { Contacts.Phones.DISPLAY_NAME,
-				Contacts.Phones.NUMBER };
-		// encode the phone number and build the filter URI
-		Uri contactUri = Uri.withAppendedPath(
-				Contacts.Phones.CONTENT_FILTER_URL, Uri.encode(phoneNumber));
-		// query time
-		Cursor c = this.activity.managedQuery(contactUri, projection, null,
-				null, null);
-		// if the query returns 1 or more results
-		// return the first result
-		if (c.moveToFirst()) {
-			String name = c.getString(c
-					.getColumnIndex(Contacts.Phones.DISPLAY_NAME));
+		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+		Cursor nameCursor = this.activity.managedQuery(uri, new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
+		
+		if(nameCursor != null && nameCursor.moveToFirst()) {
+			String name = nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 			return name;
 		}
-		// return the original number if no match was found
+		
 		return phoneNumber;
 	}
 	

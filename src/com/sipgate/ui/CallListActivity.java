@@ -13,7 +13,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -28,25 +27,17 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.sipgate.R;
-import com.sipgate.api.types.Call;
-import com.sipgate.api.types.Event;
-import com.sipgate.api.types.Voicemail;
 import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.holder.CallViewHolder;
-import com.sipgate.models.holder.EventViewHolder;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
-import com.sipgate.ui.EventListActivity.MediaConnector;
 import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.Constants;
-import com.sipgate.util.XmlrpcClient;
 
 public class CallListActivity extends Activity {
 	
@@ -177,6 +168,7 @@ public class CallListActivity extends Activity {
 		contactsClient = new AndroidContactsClient(this);
 
 		callListAdapter = new ArrayAdapter<SipgateCallData>(this, R.layout.sipgate_call_list_bit, R.id.CallerNameTextView) {
+
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				CallViewHolder holder = null;
@@ -214,8 +206,8 @@ public class CallListActivity extends Activity {
 				String targetNumber = item.getCallTargetNumberPretty();
 				String sourceNumber = item.getCallSourceNumberPretty();
 				
-				if(targetName.equals(targetNumber)) targetName = getApplicationContext().getString(R.string.sipgate_unknown_caller);
-				if(sourceName.equals(sourceNumber)) sourceName = getApplicationContext().getString(R.string.sipgate_unknown_caller);
+				if(targetName.equals(targetNumber)) targetName = unknownCaller;
+				if(sourceName.equals(sourceNumber)) sourceName = unknownCaller;
 				
 				if(callDirection.equals("outgoing")) {
 					holder.callerNameView.setText(targetName);
@@ -244,6 +236,8 @@ public class CallListActivity extends Activity {
 					}
 				}
 
+				setRead(item);
+				
 				return convertView;
 			}
 

@@ -44,7 +44,7 @@ import com.sipgate.util.Constants; //import com.sipgate.util.Oauth;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
 public class EventListActivity extends Activity {
-	private static final int REFRESH_MENU_ITEM = 0;
+	//private static final int REFRESH_MENU_ITEM = 0;
 	private static final String TAG = "EventListActivity";
 
 	// private Oauth oauth;

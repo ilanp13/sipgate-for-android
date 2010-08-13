@@ -3,14 +3,12 @@ package com.sipgate.util;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.Contacts;
 import android.provider.Contacts.People;
-import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
 import com.sipgate.R;

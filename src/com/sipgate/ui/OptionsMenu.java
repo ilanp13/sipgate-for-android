@@ -21,7 +21,7 @@ import android.view.MenuItem;
 
 import com.sipgate.R;
 
-// @SuppressWarnings("deprecation")
+@SuppressWarnings("deprecation")
 public class OptionsMenu {
 	
 	
@@ -138,9 +138,12 @@ public class OptionsMenu {
 			break;
 		}
 		case REFRESH_CALL_LIST: {
-			if(activity.getClass() == CallListActivity.class){
-				CallListActivity tmp = (CallListActivity) activity;
-				//tmp.getEvents();
+			try {
+				intent = new Intent(activity, SipgateFrames.class);
+				intent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
+				activity.startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(TAG, e.getLocalizedMessage());
 			}
 			break;
 		}
