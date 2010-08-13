@@ -168,6 +168,14 @@ public class RestClient implements ApiClientInterface {
 		return new Date(0);
 	}
 	
+	private Boolean getBoolean(String value) {
+		if (value.toLowerCase().equals("true")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public ArrayList<SipgateCallData> getCalls() throws ApiException {
 		
 		InputStream inputStream = null;
@@ -223,6 +231,11 @@ public class RestClient implements ApiClientInterface {
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
 					call.setCallTime(getDate(getElementById(fstElmnt, "created")));
+					
+					Element readStatus = getNodeById(fstElmnt, "read");
+					call.setCallRead(getBoolean(getElementById(readStatus, "value")));
+					call.setCallReadModifyUrl(getElementById(readStatus, "modify"));
+					
 					calls.add(call);
 				}
 			}

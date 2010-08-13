@@ -27,7 +27,7 @@
    	<string name="menu_settings">Einstellungen</string>
    	<string name="menu_refresh">Aktualisieren</string>
    	<string name="menu_about">Über</string>
-   	<string name="sipgate_a_new_voicemail">%d neue Voicemailnachricht</string>
+   	<string name="sipgate_a_new_voicemail">%d neue Voicemailnachrichten</string>
    	<string name="alert_3g_cost">Bitte beachten Sie, dass Datentransfer über das 3G-Netz mit Kosten verbunden sein kann.</string>
    	<string name="alert_not_available">Wenn beide Netze deaktiviert sind, sind Sie nicht erreichbar und können keine Telefonate über sipgate führen.</string>
   	<string name="alert_unregister">Hiermit wechseln Sie Ihren Account. Wenn Sie dies tun, wird ihr derzeit eingetragener Account aus der App gelöscht und Sie müssen in jedem Fall Ihre Logindaten erneut eingeben! Wollen Sie wirklich fortfahren?</string>
@@ -68,4 +68,5 @@
 	<string name="sipgate_network_problem">Es ist ein Netzwerkproblem aufgetreten. Bitte prüfen Sie, ob Ihr Gerät mit dem Internet verbunden ist und versuchen Sie es noch einmal.</string>
    	<string name="sipgate_me">Ich</string>
    	<string name="sipgate_empty_calllist">Keine Einträge in Ihrer Anrufliste.</string>
+   	<string name="sipgate_a_new_call">%d neue Anrufe</string>
 </resources>

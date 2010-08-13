@@ -38,7 +38,7 @@ import com.sipgate.api.types.Voicemail;
 import com.sipgate.exceptions.DownloadException;
 import com.sipgate.models.holder.EventViewHolder;
 import com.sipgate.service.EventService;
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.Constants; //import com.sipgate.util.Oauth;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
@@ -90,7 +90,7 @@ public class EventListActivity extends Activity {
 							"used API is not capable of 'VM_LIST' feature; not starting service!");
 		} else {
 			Log.v(TAG, "enter startScanService");
-			Intent startIntent = new Intent(this, EventServiceImpl.class);
+			Intent startIntent = new Intent(this, SipgateBackgroundService.class);
 			ctx.startService(startIntent);
 
 			if (serviceConnection == null) {
@@ -123,7 +123,7 @@ public class EventListActivity extends Activity {
 						}
 					}
 				};
-				Intent intent = new Intent(this, EventServiceImpl.class);
+				Intent intent = new Intent(this, SipgateBackgroundService.class);
 				Log.d(TAG, "bindService");
 				boolean bindret = ctx.bindService(intent, serviceConnection,
 						Context.BIND_AUTO_CREATE);
@@ -161,9 +161,9 @@ public class EventListActivity extends Activity {
 		if (onNewEventsPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
-			onChangedIntent.setAction(EventServiceImpl.ACTION_NEWEVENTS);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
 			onNewEventsPendingIntent = PendingIntent.getActivity(this,
-					EventServiceImpl.REQUEST_NEWEVENTS, onChangedIntent, 0);
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
 		return onNewEventsPendingIntent;
 	}
@@ -476,7 +476,7 @@ public class EventListActivity extends Activity {
 		Log.v(TAG, "action: " + intent.getAction());
 
 		String action = intent.getAction();
-		if (action != null && action.equals(EventServiceImpl.ACTION_NEWEVENTS)) {
+		if (action != null && action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
 			getEvents();
 		} else {
 			super.onNewIntent(intent);

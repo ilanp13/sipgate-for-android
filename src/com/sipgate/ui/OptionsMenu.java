@@ -1,6 +1,6 @@
 package com.sipgate.ui;
 
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.sipua.ui.Settings;
@@ -114,7 +114,7 @@ public class OptionsMenu {
 			Log.d(TAG, "stopping voicemail service");
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	        notificationManager.cancelAll();
-			context.stopService(new Intent(context,EventServiceImpl.class));
+			context.stopService(new Intent(context,SipgateBackgroundService.class));
 			activity.finish();
 			break;
 

@@ -28,31 +28,40 @@ import com.sipgate.R;
 import com.sipgate.api.types.Event;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
+import com.sipgate.models.SipgateCallData;
 import com.sipgate.sipua.ui.Settings;
 import com.sipgate.ui.SipgateFramesMessage;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.NotificationClient;
 import com.sipgate.util.SettingsClient;
+import com.sipgate.util.NotificationClient.NotificationType;
 
-public class EventServiceImpl extends Service implements EventService {
+public class SipgateBackgroundService extends Service implements EventService {
 
 	private static final String TAG = "background service";
 	private static final long EVENTREFRESH_INTERVAL = 30000;
 	public static final String ACTION_NEWEVENTS = "action_newEvents";
-	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.EventServiceImpl";
+	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 	private static final String PREF_YOUNGESTVOICEMAILDATE = "youngestVoicemailDate";
+	private static final String PREF_YOUNGESTCALLDATE = "youngestCallDate";
 	private static final String PREF_FIRSTLAUNCHDATE = "firstLaunchDate";
 	private boolean serviceEnabled = false;
 	private Timer timer;
 	private List<Event> events = new ArrayList<Event>();
-	private Set<PendingIntent> onNewEventsTriggers = new HashSet<PendingIntent>();
+	private List<SipgateCallData> calls = new ArrayList<SipgateCallData>();
+	private Set<PendingIntent> onNewVoicemailsTriggers = new HashSet<PendingIntent>();
+	private Set<PendingIntent> onNewCallsTriggers = new HashSet<PendingIntent>();
 
+	private Date youngestCall = new Date(0); 
+	
 	private Date youngestVoicemail = new Date(0); 
 	private Date firstLaunch = null; // never access directly. use getFirstLaunchDate()
 
 	public void onCreate() {
 		super.onCreate();
 		fetchYoungestVoicemaildate();
+		fetchYoungestCalldate();
 		startservice();
 	}
 
@@ -68,7 +77,7 @@ public class EventServiceImpl extends Service implements EventService {
 			public void run() {
 				Log.v(TAG, "timer tick tack");
 				if(serviceEnabled) {
-					refresh();
+					refreshVoicemails();
 				}
 			}
 
@@ -98,47 +107,53 @@ public class EventServiceImpl extends Service implements EventService {
 		notificationManager.cancelAll();
 	}
 
-	private void refresh() {
+	private void refreshVoicemails() {
 		
 		try {
 
-			HashMap<String, String> params = new HashMap<String, String>();
-
-			@SuppressWarnings({ "unused", "rawtypes" })
-			Collection<? extends Entry> paramCollection;
-			paramCollection = params.entrySet();
 			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
 			List<Event> currentEvents = apiClient.getEvents();
 			List<Event> oldEvents = events;
 			events = currentEvents;
-			notifyIfUnreads(oldEvents, currentEvents);
-		} catch (ApiException e) {
-			// TODO Auto-generated catch block
+			notifyIfUnreadsVoicemails(oldEvents, currentEvents);
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (FeatureNotAvailableException e) {
-			// TODO Auto-generated catch block
+		}
+	}
+	
+	private void refreshCalls() {
+		
+		try {
+
+			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
+
+			List<SipgateCallData> currentCalls = apiClient.getCalls();
+			List<SipgateCallData> oldCalls = calls;
+			calls = currentCalls;
+			notifyIfUnreadsCalls(oldCalls, currentCalls);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void notifyIfUnreads(List<Event> oldList, List<Event> newList) {
+	private void notifyIfUnreadsVoicemails(List<Event> oldList, List<Event> newList) {
 
-		Log.d(TAG, "notifyIfUnreads");
+		Log.d(TAG, "notifyIfUnreadVoicemails");
 		
 		if (oldList == null || !oldList.equals(newList)) {
-			Log.d(TAG, "notifyIfUnreads, oldlist equals newlist not: " + onNewEventsTriggers.size());
-			for (PendingIntent pInt: onNewEventsTriggers){
+			Log.d(TAG, "notifyIfUnreadVoicemails, oldlist equals newlist not: " + onNewCallsTriggers.size());
+			for (PendingIntent pInt: onNewCallsTriggers){
 				
 				try {
-					Log.d(TAG, "notifying unreads to activity");
+					Log.d(TAG, "notifying unread voicemails to activity");
 					pInt.send();
 				} catch (CanceledException e) {
 					e.printStackTrace();
 				}			
 			}
 		} else {
-			Log.d(TAG, "notifyIfUnreads, oldlist equals newlist");
+			Log.d(TAG, "notifyIfUnreadVoicemails, oldlist equals newlist");
 		}
 
 		Boolean hasUnreadEvents = false;
@@ -159,11 +174,57 @@ public class EventServiceImpl extends Service implements EventService {
 			}
 		}
 		if (unreadCounter <= 0) {
-			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-			notificationManager.cancelAll();
+			NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+			notifyClient.deleteNotification(NotificationClient.NotificationType.VOICEMAIL);
 		} else {
 			if (hasUnreadEvents) {
-				createNewMessagesNotification(unreadCounter);
+				createNewVoicemailNotification(unreadCounter);
+			}
+		}
+	}
+	
+	private void notifyIfUnreadsCalls(List<SipgateCallData> oldList, List<SipgateCallData> newList) {
+
+		Log.d(TAG, "notifyIfUnreadCalls");
+		
+		if (oldList == null || !oldList.equals(newList)) {
+			Log.d(TAG, "notifyIfUnreadCalls, oldlist equals newlist not: " + onNewVoicemailsTriggers.size());
+			for (PendingIntent pInt: onNewVoicemailsTriggers){
+				
+				try {
+					Log.d(TAG, "notifying unread calls to activity");
+					pInt.send();
+				} catch (CanceledException e) {
+					e.printStackTrace();
+				}			
+			}
+		} else {
+			Log.d(TAG, "notifyIfUnreadCalls, oldlist equals newlist");
+		}
+
+		Boolean hasUnreadEvents = false;
+
+		int unreadCounter = 0;
+		if (newList != null) {
+			for (SipgateCallData call: newList){
+				if (! call.getCallRead()) {
+					if (call.getCallTime().after(youngestCall)){
+						updateYoungestCalldate(call.getCallTime());
+						hasUnreadEvents = true;
+					}
+					if (call.getCallTime().after(getFirstLaunchDate())) {
+						unreadCounter++;
+					}
+
+				}
+			}
+		}
+		if (unreadCounter <= 0) {
+			NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+			notifyClient.deleteNotification(NotificationClient.NotificationType.CALL);
+		} else {
+			if (hasUnreadEvents) {
+				createNewCallNotification(unreadCounter);
 			}
 		}
 	}
@@ -174,6 +235,15 @@ public class EventServiceImpl extends Service implements EventService {
 		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
 		Editor editor = pref.edit();
 		editor.putLong(PREF_YOUNGESTVOICEMAILDATE, youngestVoicemail.getTime());
+		editor.commit();
+	}
+	
+	private void updateYoungestCalldate(Date d) {
+		youngestCall = d;
+		
+		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
+		Editor editor = pref.edit();
+		editor.putLong(PREF_YOUNGESTCALLDATE, youngestCall.getTime());
 		editor.commit();
 	}
 	
@@ -200,32 +270,30 @@ public class EventServiceImpl extends Service implements EventService {
 		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
 		youngestVoicemail = new Date(pref.getLong(PREF_YOUNGESTVOICEMAILDATE, 0));
 	}
+	
+	private void fetchYoungestCalldate() {
+		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
+		youngestCall = new Date(pref.getLong(PREF_YOUNGESTCALLDATE, 0));
+	}
 
-	private void createNewMessagesNotification(int unreadCounter) {
-
-		NotificationManager notificationManager =
-			(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		Notification notification = new Notification(R.drawable.statusbar_voicemai_48, buildNotificationString(unreadCounter), 0 );
-		notification.flags = Notification.FLAG_ONLY_ALERT_ONCE | Notification.FLAG_AUTO_CANCEL;
-		//          notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		Intent notificationIntent = new Intent(this, SipgateFramesMessage.class);
-
-		Log.d("createNewMessagesNotification","Executed");
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-		notification.setLatestEventInfo(this, getResources().getText(R.string.sipgate), buildNotificationString(unreadCounter), contentIntent);
-		notificationManager.notify(0, notification);
-		Log.d(TAG,"send notification");
-		
-		
+	private void createNewVoicemailNotification(int unreadCounter) {
+		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+		notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.statusbar_voicemai_48, buildVoicemailNotificationString(unreadCounter));
 	}
 	
-	private String buildNotificationString(int unreadCounter) {
+	private void createNewCallNotification(int unreadCounter) {
+		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_voicemai_48, buildCallNotificationString(unreadCounter));
+	}
+	
+	private String buildVoicemailNotificationString(int unreadCounter) {
 		return String.format((String) getResources().getText(R.string.sipgate_a_new_voicemail), Integer.valueOf(unreadCounter));
 	}
 	
-
+	private String buildCallNotificationString(int unreadCounter) {
+		return String.format((String) getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(unreadCounter));
+	}
+	
 	public IBinder asBinder() {
 		// TODO Auto-generated method stub
 		return null;
@@ -238,12 +306,12 @@ public class EventServiceImpl extends Service implements EventService {
 	public void registerOnEventsIntent(PendingIntent i)
 	throws RemoteException {
 		Log.d(TAG, "registering on events intent");
-		onNewEventsTriggers.add(i);
+		onNewVoicemailsTriggers.add(i);
 	}
 
 	public void unregisterOnEventsIntent(PendingIntent i)
 	throws RemoteException {
-		onNewEventsTriggers.remove(i);
+		onNewVoicemailsTriggers.remove(i);
 	}
 
 	@Override
@@ -276,7 +344,7 @@ public class EventServiceImpl extends Service implements EventService {
 
 	@Override
 	public void refreshEvents() throws RemoteException {
-		refresh();
+		refreshVoicemails();
 	}
 
 }

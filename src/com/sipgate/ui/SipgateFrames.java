@@ -22,7 +22,7 @@
 package com.sipgate.ui;
 
 import com.sipgate.R;
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
@@ -89,7 +89,7 @@ public class SipgateFrames extends TabActivity {
 
 		// check if used API is capable of VM-list and only start service when feature available:
 		if (!this.hasVmListFeature()) {
-			this.stopService(new Intent(this, EventServiceImpl.class));
+			this.stopService(new Intent(this, SipgateBackgroundService.class));
 
 			this.vmTabVisible = false;
 			
@@ -99,7 +99,7 @@ public class SipgateFrames extends TabActivity {
 
 			this.addVmTab();
 			
-			this.startService(new Intent(this, EventServiceImpl.class));
+			this.startService(new Intent(this, SipgateBackgroundService.class));
 		}
 		
 		this.setCurrentTab(bundle);

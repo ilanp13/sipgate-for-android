@@ -228,6 +228,7 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	public ArrayList<SipgateCallData> getCalls() throws ApiException {
 		
 		Hashtable<String, String> params = new Hashtable<String, String>();
@@ -307,6 +308,9 @@ public class XmlrpcClient implements ApiClientInterface {
 				String tgt_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(tgt_number, locale.getCountry());
 				String tgt_numberE164 = formatter.e164NumberWithPrefix("");
 				call.setCallTarget(tgt_numberE164, tgt_numberPretty, tgt_name);
+				
+				//XMLRPC doesn't provide a read/unread attribute .. so we assume it's a new call
+				call.setCallRead(false);
 
 				calls.add(call);
 			}

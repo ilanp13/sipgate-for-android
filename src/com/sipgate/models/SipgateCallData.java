@@ -42,9 +42,11 @@ public class SipgateCallData implements Serializable {
 	private String id = null;
 	private String direction = null;
 	private Boolean missed = null;
+	private Boolean isRead = null;
 	private Date time = null;
 	private SipgateEndpointData target = null;
 	private SipgateEndpointData source = null;
+	private String readModifyUrl = null;
 	
 	public void setCallId(String id) {
 		this.id = id;
@@ -114,6 +116,22 @@ public class SipgateCallData implements Serializable {
 	
 	public Date getCallTime() {
 		return time;
+	}
+
+	public void setCallRead(Boolean isRead) {
+		this.isRead = isRead;
+	}
+
+	public Boolean getCallRead() {
+		return isRead;
+	}
+	
+	public void setCallReadModifyUrl(String readModifyUrl) {
+		this.readModifyUrl = readModifyUrl;
+	}
+
+	public String getCallReadModifyUrl() {
+		return readModifyUrl;
 	}
 
 }
