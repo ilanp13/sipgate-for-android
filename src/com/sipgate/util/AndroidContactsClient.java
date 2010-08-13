@@ -31,4 +31,8 @@ public class AndroidContactsClient implements ContactsInterface {
 		return this.contactsInterface.getContact(id);
 	}
 	
+	public String getContactName(String phoneNumber) {
+		return this.contactsInterface.getContactName(phoneNumber);
+	}
+	
 }
