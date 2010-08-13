@@ -10,4 +10,6 @@ public interface ContactsInterface {
 	
 	public SipgateContact getContact(Integer id);
 	
+	public String getContactName(String phoneNumber);
+	
 }

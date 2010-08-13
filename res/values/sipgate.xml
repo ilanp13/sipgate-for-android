@@ -74,4 +74,5 @@
    	<string name="sipgate_me">Me</string>
    	<string name="sipgate_empty_calllist">Your calllist is empty.</string>
    	<string name="sipgate_a_new_call">You have %d new calls.</string>
+   	<string name="sipgate_unknown_caller">Unknown</string>
 </resources>

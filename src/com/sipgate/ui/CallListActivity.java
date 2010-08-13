@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -31,7 +32,9 @@ import com.sipgate.api.types.Voicemail;
 import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.models.holder.EventViewHolder;
+import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.ui.EventListActivity.MediaConnector;
+import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.XmlrpcClient;
 
@@ -39,6 +42,8 @@ public class CallListActivity extends Activity {
 	
 	private ArrayAdapter<SipgateCallData> callListAdapter;
 	private static final String TAG = "CallListActivity";
+	private AlertDialog m_AlertDlg;
+	private AndroidContactsClient contactsClient;
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -53,9 +58,13 @@ public class CallListActivity extends Activity {
 		elementList.setOnItemClickListener(new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
-				// TODO: Add Click Handler
+				SipgateCallData call = (SipgateCallData) parent.getItemAtPosition(position);
+				String direction = call.getCallDirection();
+				if(direction.equals("incoming")) call_menu(call.getCallSourceNumberE164());
+				if(direction.equals("outgoing")) call_menu(call.getCallTargetNumberE164());
 			}
 		});
+		contactsClient = new AndroidContactsClient(this);
 
 		callListAdapter = new ArrayAdapter<SipgateCallData>(this, R.layout.sipgate_call_list_bit, R.id.CallerNameTextView) {
 			@Override
@@ -90,14 +99,22 @@ public class CallListActivity extends Activity {
 					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.icon_outgoing));
 				}
 
+				String targetName = contactsClient.getContactName(item.getCallTargetNumberPretty());
+				String sourceName = contactsClient.getContactName(item.getCallSourceNumberPretty());
+				String targetNumber = item.getCallTargetNumberPretty();
+				String sourceNumber = item.getCallSourceNumberPretty();
+				
+				if(targetName.equals(targetNumber)) targetName = getApplicationContext().getString(R.string.sipgate_unknown_caller);
+				if(sourceName.equals(sourceNumber)) sourceName = getApplicationContext().getString(R.string.sipgate_unknown_caller);
+				
 				if(callDirection.equals("outgoing")) {
-					holder.callerNameView.setText(item.getCallTargetName());
-					holder.callerNumberView.setText(item.getCallTargetNumberPretty());
+					holder.callerNameView.setText(targetName);
+					holder.callerNumberView.setText(targetNumber);
 				}
 				
 				if(callDirection.equals("incoming")) {
-					holder.callerNameView.setText(item.getCallSourceName());
-					holder.callerNumberView.setText(item.getCallSourceNumberPretty());
+					holder.callerNameView.setText(sourceName);
+					holder.callerNumberView.setText(sourceNumber);
 				}
 				
 				Date callTime = item.getCallTime();
@@ -193,6 +210,27 @@ public class CallListActivity extends Activity {
 		
 		return result;
 	}
-	
+
+	void call_menu(String target)
+	{
+		if (m_AlertDlg != null) 
+		{
+			m_AlertDlg.cancel();
+		}
+		if (target.length() == 0)
+			m_AlertDlg = new AlertDialog.Builder(this)
+				.setMessage(R.string.empty)
+				.setTitle(R.string.app_name)
+				.setIcon(R.drawable.icon22)
+				.setCancelable(true)
+				.show();
+		else if (!Receiver.engine(this).call(target))
+			m_AlertDlg = new AlertDialog.Builder(this)
+				.setMessage(R.string.notfast)
+				.setTitle(R.string.app_name)
+				.setIcon(R.drawable.icon22)
+				.setCancelable(true)
+				.show();
+	}	
 }
 
