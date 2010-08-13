@@ -219,11 +219,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 					if (call.getCallTime().after(youngestCall)){
 						updateYoungestCalldate(call.getCallTime());
 						hasUnreadEvents = true;
-					}
-					if (call.getCallTime().after(getFirstLaunchDate())) {
 						unreadCounter++;
 					}
-
 				}
 			}
 		}

@@ -309,6 +309,22 @@ public class CallListActivity extends Activity {
 			callListAdapter.add(item);
 			itemsAdded = true;
 		}
+		
+		callListAdapter.sort(new Comparator<SipgateCallData>() {
+
+			public int compare(SipgateCallData a, SipgateCallData b) {
+				if (a == null && b != null) {
+					return 1;
+				}
+				if (b == null && a != null) {
+					return -1;
+				}
+				if (b == a) {
+					return 0;
+				}
+				return -1 * a.getCallTime().compareTo(b.getCallTime());
+			}
+		});
 
 		ListView eventlist = (ListView) findViewById(R.id.CalllistListView);
 		TextView emptylist = (TextView) findViewById(R.id.EmptyCallListTextView);
