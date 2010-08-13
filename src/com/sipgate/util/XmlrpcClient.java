@@ -255,7 +255,9 @@ public class XmlrpcClient implements ApiClientInterface {
 			for (Object HistoryObject : HistoryList) {
 				SipgateCallData call = new SipgateCallData();
 				HashMap<String, Object> HistorySet = (HashMap<String, Object>) HistoryObject;
-
+				
+				if(!HistorySet.get("TOS").equals("voice")) continue;
+				
 				call.setCallId((String) HistorySet.get("EntryID"));
 				call.setCallTime((Date) getDate((String) HistorySet.get("Timestamp")));
 
