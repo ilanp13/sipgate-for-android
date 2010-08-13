@@ -89,8 +89,6 @@ public class SipgateFrames extends TabActivity {
 
 		// check if used API is capable of VM-list and only start service when feature available:
 		if (!this.hasVmListFeature()) {
-			this.stopService(new Intent(this, SipgateBackgroundService.class));
-
 			this.vmTabVisible = false;
 			
 			Log.i(TAG, "used API is NOT capable of 'VM_LIST' feature; background-service disabled ...");
@@ -98,9 +96,9 @@ public class SipgateFrames extends TabActivity {
 			Log.i(TAG, "used API is capable of 'VM_LIST' feature ...");
 
 			this.addVmTab();
-			
-			this.startService(new Intent(this, SipgateBackgroundService.class));
 		}
+		
+		this.startService(new Intent(this, SipgateBackgroundService.class));
 		
 		this.setCurrentTab(bundle);
 	}
@@ -157,14 +155,14 @@ public class SipgateFrames extends TabActivity {
 	}
 	
 	private boolean hasVmListFeature() {
-		boolean hastVmListFeature = false;
+		boolean hasVmListFeature = false;
 		try {
-			hastVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
+			hasVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
 		} catch (Exception e) {
 			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
 		}
 		
-		return hastVmListFeature;
+		return hasVmListFeature;
 	}
 	
 	public void onResume() {

@@ -51,7 +51,7 @@ public class EventListActivity extends Activity {
 	private ArrayAdapter<Event> eventListAdapter;
 	private ServiceConnection serviceConnection;
 	private EventService serviceBinding = null;
-	private PendingIntent onNewEventsPendingIntent;
+	private PendingIntent onNewVoicemailsPendingIntent;
 	private MediaConnector mediaConnector;
 	private MediaController mediaController;
 	private String voicemailFromText;
@@ -85,9 +85,7 @@ public class EventListActivity extends Activity {
 
 		// ... and only start service when feature available:
 		if (!this.hasVmListFeature) {
-			Log
-					.w(TAG,
-							"used API is not capable of 'VM_LIST' feature; not starting service!");
+			Log.w(TAG, "used API is not capable of 'VM_LIST' feature; not starting service!");
 		} else {
 			Log.v(TAG, "enter startScanService");
 			Intent startIntent = new Intent(this, SipgateBackgroundService.class);
@@ -109,15 +107,12 @@ public class EventListActivity extends Activity {
 							Log.d(TAG, "serviceBinding set");
 							serviceBinding = (EventService) binder;
 							try {
-								Log
-										.d(TAG,
-												"serviceBinding registerOnEventsIntent");
-								serviceBinding
-										.registerOnEventsIntent(getNewMessagesIntent());
+								Log.d(TAG, "serviceBinding registerOnEventsIntent");
+								serviceBinding.registerOnEventsIntent(getNewMessagesIntent());
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}
-							getEvents();
+							getVoicemails();
 						} catch (ClassCastException e) {
 							e.printStackTrace();
 						}
@@ -158,14 +153,14 @@ public class EventListActivity extends Activity {
 	}
 
 	private PendingIntent getNewMessagesIntent() {
-		if (onNewEventsPendingIntent == null) {
+		if (onNewVoicemailsPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
-			onNewEventsPendingIntent = PendingIntent.getActivity(this,
+			onNewVoicemailsPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
-		return onNewEventsPendingIntent;
+		return onNewVoicemailsPendingIntent;
 	}
 
 	private void initApi() {
@@ -294,8 +289,8 @@ public class EventListActivity extends Activity {
 			}
 		};
 		elementList.setAdapter(eventListAdapter);
-		getEvents();
-		showEvents(new ArrayList<Event>(0)); // begin with empty list
+		getVoicemails();
+		showVoicemails(new ArrayList<Event>(0)); // begin with empty list
 	}
 
 	protected void showPlayerDialog(Voicemail voicemail) {
@@ -347,12 +342,12 @@ public class EventListActivity extends Activity {
 		return dateformatterPretty.format(d);
 	}
 
-	public void getEvents() {
+	public void getVoicemails() {
 		try {
 			if (serviceBinding != null) {
-				List<Event> events = serviceBinding.getEvents();
+				List<Event> events = serviceBinding.getVoicemails();
 				if (events != null) {
-					showEvents(events);
+					showVoicemails(events);
 				} else {
 					Log.d(TAG, "got 'null' events result");
 				}
@@ -365,7 +360,7 @@ public class EventListActivity extends Activity {
 		}
 	}
 
-	private void showEvents(List<Event> events) {
+	private void showVoicemails(List<Event> events) {
 		eventListAdapter.clear();
 		Log.i(TAG, "showEvents " + new Date().toString());
 		boolean itemsAdded = false;
@@ -430,14 +425,14 @@ public class EventListActivity extends Activity {
 		// if (serviceBinding == null) {
 		startScanService();
 		serviceRefresh();
-		getEvents();
+		getVoicemails();
 		// }
 	}
 
 	private void serviceRefresh() {
 		if (serviceBinding != null) {
 			try {
-				serviceBinding.refreshEvents();
+				serviceBinding.refreshVoicemails();
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -477,11 +472,11 @@ public class EventListActivity extends Activity {
 
 		String action = intent.getAction();
 		if (action != null && action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
-			getEvents();
+			getVoicemails();
 		} else {
 			super.onNewIntent(intent);
 		}
-		getEvents();
+		getVoicemails();
 	}
 
 	public class MediaConnector implements MediaController.MediaPlayerControl {

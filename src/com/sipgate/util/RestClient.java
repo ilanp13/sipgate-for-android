@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 
 import android.util.Log;
 
+import com.sipgate.R;
 import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.api.types.SMS;
@@ -168,14 +169,6 @@ public class RestClient implements ApiClientInterface {
 		return new Date(0);
 	}
 	
-	private Boolean getBoolean(String value) {
-		if (value.toLowerCase().equals("true")) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
 	public ArrayList<SipgateCallData> getCalls() throws ApiException {
 		
 		InputStream inputStream = null;
@@ -219,21 +212,29 @@ public class RestClient implements ApiClientInterface {
 					call.setCallId(getElementById(fstElmnt, "id"));
 					String direction = getElementById(fstElmnt, "direction");
 					if(direction.equals("incoming")){
-						call.setCallMissed(false);
+						call.setCallMissed("false");
 						call.setCallDirection("incoming");
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
 					else if(direction.equals("missed_incoming")){
-						call.setCallMissed(true);
+						call.setCallMissed("true");
 						call.setCallDirection("incoming");
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
-					call.setCallTime(getDate(getElementById(fstElmnt, "created")));
+					if(direction.equals("outgoing")){
+						call.setCallMissed("false");
+						call.setCallDirection("outgoing");
+						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
+						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
+					}
+					Date created = getDate(getElementById(fstElmnt, "created"));
+					SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+					call.setCallTime(dateformatterPretty.format(created));
 					
 					Element readStatus = getNodeById(fstElmnt, "read");
-					call.setCallRead(getBoolean(getElementById(readStatus, "value")));
+					call.setCallRead(getElementById(readStatus, "value"));
 					call.setCallReadModifyUrl(getElementById(readStatus, "modify"));
 					
 					calls.add(call);
@@ -270,14 +271,7 @@ public class RestClient implements ApiClientInterface {
 				String ret = parseBaseProductType(doc);
 			
 				return ret;	
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -329,14 +323,7 @@ public class RestClient implements ApiClientInterface {
 			
 			return new MobileExtension(sipid, null, null, null, sippassword);
 				
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;	
@@ -375,14 +362,7 @@ public class RestClient implements ApiClientInterface {
 			
 			return extensions;
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -492,6 +472,15 @@ public class RestClient implements ApiClientInterface {
 	public void setVoicemailRead(String voicemail) throws ApiException, NetworkProblemException {
 		try {
 			RestClient.authenticationInterface.setVoicemailRead(voicemail);
+		} catch (AccessProtectedResourceException e) {
+			e.printStackTrace();
+			throw new ApiException();
+		}
+	}
+	
+	public void setCallRead(String call) throws ApiException, NetworkProblemException {
+		try {
+			RestClient.authenticationInterface.setCallRead(call);
 		} catch (AccessProtectedResourceException e) {
 			e.printStackTrace();
 			throw new ApiException();

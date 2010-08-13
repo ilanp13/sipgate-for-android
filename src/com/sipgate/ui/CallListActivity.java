@@ -8,12 +8,19 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -32,10 +39,13 @@ import com.sipgate.api.types.Voicemail;
 import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.models.holder.EventViewHolder;
+import com.sipgate.service.EventService;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.ui.EventListActivity.MediaConnector;
 import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.Constants;
 import com.sipgate.util.XmlrpcClient;
 
 public class CallListActivity extends Activity {
@@ -44,10 +54,110 @@ public class CallListActivity extends Activity {
 	private static final String TAG = "CallListActivity";
 	private AlertDialog m_AlertDlg;
 	private AndroidContactsClient contactsClient;
+	private String unknownCaller = null;
+	private ServiceConnection serviceConnection;
+	private EventService serviceBinding = null;
+	private PendingIntent onNewCallsPendingIntent;
 
+	private void initStrings() {
+		unknownCaller = getResources().getString( R.string.sipgate_unknown_caller);
+	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+		startScanService();
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		stopservice();
+	}
+	
+	private void startScanService() {
+		Context ctx = getApplicationContext();
+
+		Log.v(TAG, "enter startScanService");
+		Intent startIntent = new Intent(this, SipgateBackgroundService.class);
+		ctx.startService(startIntent);
+
+		if (serviceConnection == null) {
+			Log.d(TAG, "service connection is null");
+			serviceConnection = new ServiceConnection() {
+
+				public void onServiceDisconnected(ComponentName arg0) {
+					Log.d(TAG, "service disconnected");
+					serviceBinding = null;
+				}
+
+				public void onServiceConnected(ComponentName name,
+						IBinder binder) {
+					Log.v(TAG, "service " + name + " connected");
+					try {
+						Log.d(TAG, "serviceBinding set");
+						serviceBinding = (EventService) binder;
+						try {
+							Log.d(TAG, "serviceBinding registerOnEventsIntent");
+							serviceBinding.registerOnEventsIntent(getNewMessagesIntent());
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+						getCalls();
+					} catch (ClassCastException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			Intent intent = new Intent(this, SipgateBackgroundService.class);
+			Log.d(TAG, "bindService");
+			boolean bindret = ctx.bindService(intent, serviceConnection,
+					Context.BIND_AUTO_CREATE);
+
+			Log.v(TAG, "leave startScanService: " + bindret);
+		} else {
+			Log.d(TAG, "service connection is not null");
+		}
+
+	}
+	
+	private void stopservice() {
+		if (serviceConnection != null) {
+			try {
+				if (serviceBinding != null) {
+					serviceBinding
+							.unregisterOnEventsIntent(getNewMessagesIntent());
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			Log.d(TAG, "calling unbind");
+			getApplicationContext().unbindService(serviceConnection);
+			serviceConnection = null;
+		}
+	}
+	
+	public void onDestroy() {
+		super.onDestroy();
+		stopservice();
+	}
+	
+	private PendingIntent getNewMessagesIntent() {
+		if (onNewCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onNewCallsPendingIntent = PendingIntent.getActivity(this,
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNewCallsPendingIntent;
+	}
+	
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		initStrings();
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.sipgate_call_list);
 		
@@ -143,6 +253,23 @@ public class CallListActivity extends Activity {
 		getCalls();
 	}
 	
+	private void setRead(final SipgateCallData callData) {
+		Thread t = new Thread() {
+			public void start() {
+				try {
+					String url = callData.getCallReadModifyUrl();
+					ApiServiceProvider apiClient = ApiServiceProvider
+							.getInstance(getApplicationContext());
+					apiClient.setCallRead(url);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		Log.e(TAG, "marking call as read... ");
+		t.start();
+	}
+	
 	protected String formatDateAsDay(Date d) {
 		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(
 				getResources().getString(R.string.dateTimeFormatForDay));
@@ -156,12 +283,20 @@ public class CallListActivity extends Activity {
 	}	
 	
 	public void getCalls() {
-		ApiServiceProvider api = ApiServiceProvider.getInstance(getApplicationContext());
 		try {
-			ArrayList<SipgateCallData> calls = api.getCalls();
-			showCalls(calls);
-		} catch (Exception e) {
-			Log.e(TAG,"foo");
+			if (serviceBinding != null) {
+				List<SipgateCallData> calls = serviceBinding.getCalls();
+				if (calls != null) {
+					showCalls(calls);
+				} else {
+					Log.d(TAG, "got 'null' events result");
+				}
+			} else {
+				Log.d(TAG, "no service binding");
+			}
+
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -190,16 +325,26 @@ public class CallListActivity extends Activity {
 	}
 	
 	
-	@Override
-	public void onStart() {
-		super.onStart();
-	}
+
 	
 	@Override
 	public void onResume() {
 		super.onResume();
 
+		startScanService();
+		serviceRefresh();
+		getCalls();
 	}	
+	
+	private void serviceRefresh() {
+		if (serviceBinding != null) {
+			try {
+				serviceBinding.refreshCalls();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -209,6 +354,35 @@ public class CallListActivity extends Activity {
 		m.createMenu(menu,"CallList");
 		
 		return result;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		boolean result = super.onOptionsItemSelected(item);
+		OptionsMenu m = new OptionsMenu();
+		m.selectItem(item, this.getApplicationContext(), this);
+
+		return result;
+	}
+	
+	public void onPause() {
+		super.onPause();
+		Log.d(TAG, "onPause()");
+		stopservice();
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {
+		Log.v(TAG, "received intent: " + intent);
+		Log.v(TAG, "action: " + intent.getAction());
+
+		String action = intent.getAction();
+		if (action != null && action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
+			getCalls();
+		} else {
+			super.onNewIntent(intent);
+		}
+		getCalls();
 	}
 
 	void call_menu(String target)

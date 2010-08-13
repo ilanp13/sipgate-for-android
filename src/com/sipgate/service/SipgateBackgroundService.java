@@ -34,11 +34,12 @@ import com.sipgate.ui.SipgateFramesMessage;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.NotificationClient;
 import com.sipgate.util.SettingsClient;
+import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 import com.sipgate.util.NotificationClient.NotificationType;
 
 public class SipgateBackgroundService extends Service implements EventService {
 
-	private static final String TAG = "background service";
+	private static final String TAG = "SipgateBackgroundService";
 	private static final long EVENTREFRESH_INTERVAL = 30000;
 	public static final String ACTION_NEWEVENTS = "action_newEvents";
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
@@ -48,7 +49,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 	private static final String PREF_FIRSTLAUNCHDATE = "firstLaunchDate";
 	private boolean serviceEnabled = false;
 	private Timer timer;
-	private List<Event> events = new ArrayList<Event>();
+	private List<Event> voicemails = new ArrayList<Event>();
 	private List<SipgateCallData> calls = new ArrayList<SipgateCallData>();
 	private Set<PendingIntent> onNewVoicemailsTriggers = new HashSet<PendingIntent>();
 	private Set<PendingIntent> onNewCallsTriggers = new HashSet<PendingIntent>();
@@ -77,7 +78,12 @@ public class SipgateBackgroundService extends Service implements EventService {
 			public void run() {
 				Log.v(TAG, "timer tick tack");
 				if(serviceEnabled) {
-					refreshVoicemails();
+					if (hasVmListFeature()) {
+						Log.d(TAG, "get vms");
+						refreshVoicemailEvents();
+					}
+					Log.d(TAG, "get calls");
+					refreshCallEvents();
 				}
 			}
 
@@ -93,8 +99,9 @@ public class SipgateBackgroundService extends Service implements EventService {
 			Log.d(TAG, "timer canceled");
 		}
 		Log.d(TAG,"cancel notifications");
-		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		notificationManager.cancelAll();
+		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+		notifyClient.deleteNotification(NotificationType.VOICEMAIL);
+		notifyClient.deleteNotification(NotificationType.CALL);
 	}
 
 	public void onDestroy() {
@@ -103,26 +110,27 @@ public class SipgateBackgroundService extends Service implements EventService {
 			Log.d(TAG,"timer.cancel");
 			timer.cancel();
 		}		
-		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		notificationManager.cancelAll();
+		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+		notifyClient.deleteNotification(NotificationType.VOICEMAIL);
+		notifyClient.deleteNotification(NotificationType.CALL);
 	}
 
-	private void refreshVoicemails() {
+	private void refreshVoicemailEvents() {
 		
 		try {
 
 			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
 			List<Event> currentEvents = apiClient.getEvents();
-			List<Event> oldEvents = events;
-			events = currentEvents;
+			List<Event> oldEvents = voicemails;
+			voicemails = currentEvents;
 			notifyIfUnreadsVoicemails(oldEvents, currentEvents);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void refreshCalls() {
+	private void refreshCallEvents() {
 		
 		try {
 
@@ -299,8 +307,12 @@ public class SipgateBackgroundService extends Service implements EventService {
 		return null;
 	}
 
-	public List<Event> getEvents() throws RemoteException {
-		return events;
+	public List<Event> getVoicemails() throws RemoteException {
+		return voicemails;
+	}
+	
+	public List<SipgateCallData> getCalls() throws RemoteException {
+		return calls;
 	}
 
 	public void registerOnEventsIntent(PendingIntent i)
@@ -330,21 +342,44 @@ public class SipgateBackgroundService extends Service implements EventService {
 				service.registerOnEventsIntent(i);
 			}
 
-			public List<Event> getEvents() throws RemoteException {
-				return service.getEvents();
+			public List<Event> getVoicemails() throws RemoteException {
+				return service.getVoicemails();
+			}
+			
+			public List<SipgateCallData> getCalls() throws RemoteException {
+				return service.getCalls();
 			}
 
 			@Override
-			public void refreshEvents() throws RemoteException {
-				service.refreshEvents();
+			public void refreshVoicemails() throws RemoteException {
+				service.refreshVoicemails();
+			}
+			
+			@Override
+			public void refreshCalls() throws RemoteException {
+				service.refreshCalls();
 			}
 		};
 	}
 
 
-	@Override
-	public void refreshEvents() throws RemoteException {
-		refreshVoicemails();
+	public void refreshVoicemails() throws RemoteException {
+		refreshVoicemailEvents();
+	}
+	
+	public void refreshCalls() throws RemoteException {
+		refreshCallEvents();
+	}
+	
+	private boolean hasVmListFeature() {
+		boolean hasVmListFeature = false;
+		try {
+			hasVmListFeature = ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
+		} catch (Exception e) {
+			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
+		}
+		
+		return hasVmListFeature;
 	}
 
 }

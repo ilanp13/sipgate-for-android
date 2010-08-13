@@ -207,6 +207,15 @@ public class ApiServiceProvider {
 			apiClient.setVoicemailRead(voicemail);
 		}
 	}
+	
+	/*
+	 * mark specific call as read
+	 */
+	public void setCallRead(String call) throws ApiException, FeatureNotAvailableException, NetworkProblemException {
+		synchronized (this.apiClient) {
+			apiClient.setCallRead(call);
+		}
+	}
 
 	public ArrayList<SipgateCallData> getCalls() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {

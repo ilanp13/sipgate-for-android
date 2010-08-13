@@ -18,6 +18,8 @@ public interface RestAuthenticationInterface {
 	public InputStream getVoicemail(String voicemail) throws AccessProtectedResourceException, NetworkProblemException;
 
 	public void setVoicemailRead(String voicemail) throws AccessProtectedResourceException, NetworkProblemException;
+	
+	public void setCallRead(String call) throws AccessProtectedResourceException, NetworkProblemException;
 
 	public InputStream getMobileExtensions() throws AccessProtectedResourceException, NetworkProblemException;
 

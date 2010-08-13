@@ -98,7 +98,13 @@ public class RestAuthenticationWrapper implements RestAuthenticationInterface {
 	}
 	
 	public void setVoicemailRead(String voicemail) throws AccessProtectedResourceException {
-		accessProtectedResource(voicemail);
+		//TODO: ADD PARAMS
+		accessProtectedResource("PUT", voicemail);
+	}
+	
+	public void setCallRead(String call) throws AccessProtectedResourceException {
+		//TODO: ADD PARAMS
+		accessProtectedResource("PUT", call);
 	}
 
 

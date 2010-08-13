@@ -227,9 +227,11 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	}
 	
 	public void setVoicemailRead(String voicemail) throws AccessProtectedResourceException, NetworkProblemException {
-		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("value", "true");
-		accessProtectedResource("PUT", voicemail+"/?value=true"/*, params*/);
+		accessProtectedResource("PUT", voicemail+"/?value=true");
+	}
+	
+	public void setCallRead(String call) throws AccessProtectedResourceException, NetworkProblemException {
+		accessProtectedResource("PUT", call+"/?value=true");
 	}
 
 

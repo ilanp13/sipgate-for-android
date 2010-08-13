@@ -13,7 +13,7 @@ import android.util.Log;
 public class NotificationClient {
 	private static final String TAG = "NotificationClient";
 	
-	public enum NotificationType { VOICEMAIL, CALL };
+	public enum NotificationType { DUMMY, DUMMY1, VOICEMAIL, CALL };
 	
 	private static NotificationClient singleton = null;
 	private NotificationManager notificationManager = null;

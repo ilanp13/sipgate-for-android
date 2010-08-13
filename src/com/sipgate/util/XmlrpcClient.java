@@ -235,7 +235,6 @@ public class XmlrpcClient implements ApiClientInterface {
 
 		HashMap<String, Object> apiResponse = null;
 		
-		InputStream inputStream = null;
 		try {
 			apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.HistoryGetByDate", params);
 		} catch (Exception e) {
@@ -260,11 +259,13 @@ public class XmlrpcClient implements ApiClientInterface {
 				if(!HistorySet.get("TOS").equals("voice")) continue;
 				
 				call.setCallId((String) HistorySet.get("EntryID"));
-				call.setCallTime((Date) getDate((String) HistorySet.get("Timestamp")));
+				Date created = (Date) getDate((String) HistorySet.get("Timestamp"));
+				SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+				call.setCallTime(dateformatterPretty.format(created));
 
 				String status = (String) HistorySet.get("Status");
 				String direction = "";
-				Boolean missed = false;
+				String missed = "false";
 				
 				Log.d("call Status: ", status);
 				if(status.equals("accepted")) {
@@ -272,7 +273,7 @@ public class XmlrpcClient implements ApiClientInterface {
 				}
 				if(status.equals("missed")) {
 					direction = "incoming";
-					missed = true;
+					missed = "true";
 				}
 				if(status.equals("outgoing")) {
 					direction = "outgoing";
@@ -299,18 +300,18 @@ public class XmlrpcClient implements ApiClientInterface {
 					src_number = numberRemote;
 				}
 
-				String src_name = ""; // TODO: Match Phonebook Contacts - Here or somewhere else?
+				String src_name = "";
 				String src_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(src_number, locale.getCountry());
 				String src_numberE164 = formatter.e164NumberWithPrefix("");
 				call.setCallSource(src_numberE164, src_numberPretty, src_name);
 
-				String tgt_name = ""; // TODO: Match Phonebook Contacts - Here or somewhere else?
+				String tgt_name = "";
 				String tgt_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(tgt_number, locale.getCountry());
 				String tgt_numberE164 = formatter.e164NumberWithPrefix("");
 				call.setCallTarget(tgt_numberE164, tgt_numberPretty, tgt_name);
 				
 				//XMLRPC doesn't provide a read/unread attribute .. so we assume it's a new call
-				call.setCallRead(false);
+				call.setCallRead("false");
 
 				calls.add(call);
 			}
@@ -408,7 +409,10 @@ public class XmlrpcClient implements ApiClientInterface {
 	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
-
+	
+	public void setCallRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+		throw new FeatureNotAvailableException();
+	}
 	
 	public boolean connectivityOk() throws ApiException {
 		boolean ret = true;
