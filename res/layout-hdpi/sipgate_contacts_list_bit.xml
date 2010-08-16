@@ -7,8 +7,7 @@
 	<TextView android:layout_height="wrap_content"
 		android:background="#808080" android:textColor="#ffffff" android:text="A"
 		android:layout_width="fill_parent" android:id="@+id/ContactsLetterTextView"
-		android:paddingLeft="20dip" android:paddingTop="5dip"
-		android:paddingBottom="5dip" android:textStyle="bold"></TextView>
+		android:paddingLeft="5dip" android:textStyle="bold"></TextView>
 
 	<LinearLayout android:id="@+id/ContactsRow"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
