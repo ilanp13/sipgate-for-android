@@ -368,11 +368,26 @@ public class RestClient implements ApiClientInterface {
 	private String parseBaseProductType(Document doc) {
 		NodeList nodeList = doc.getElementsByTagName("BaseProductType");
 	
+		if (nodeList == null) {
+			return null;
+		}
+		
+		Node n = nodeList.item(0);
+		if (n == null) {
+			return null;
+		}
+		
+		nodeList = n.getChildNodes();
+		Log.v(TAG, "parseBasePT " + nodeList.getLength() + " nodes");
+		
 		for (int i = 0; i < nodeList.getLength(); i++) {			
-			Node n = nodeList.item(i);
+			n = nodeList.item(i);
 			
 			if (n.getNodeName().equals("baseproducttype")) {
+				Log.v(TAG, "parseBasePT found baseproducttype");
 				return n.getFirstChild().getNodeValue();
+			} else {
+				Log.v(TAG, "parseBasePT nodename: " + n.getNodeName());
 			}
 		}
 		return null;
