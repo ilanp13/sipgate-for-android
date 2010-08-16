@@ -108,7 +108,7 @@ public class EventListActivity extends Activity {
 							serviceBinding = (EventService) binder;
 							try {
 								Log.d(TAG, "serviceBinding registerOnEventsIntent");
-								serviceBinding.registerOnEventsIntent(getNewMessagesIntent());
+								serviceBinding.registerOnVoicemailsIntent(getNewMessagesIntent());
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}
@@ -135,7 +135,7 @@ public class EventListActivity extends Activity {
 			try {
 				if (serviceBinding != null) {
 					serviceBinding
-							.unregisterOnEventsIntent(getNewMessagesIntent());
+							.unregisterOnVoicemailsIntent(getNewMessagesIntent());
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
