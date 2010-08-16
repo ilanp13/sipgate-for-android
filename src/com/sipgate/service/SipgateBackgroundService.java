@@ -358,7 +358,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 */
 	private void createNewCallNotification(int unreadCounter) {
 		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
-		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_voicemai_48, buildCallNotificationString(unreadCounter));
+		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
 	}
 	
 	/**

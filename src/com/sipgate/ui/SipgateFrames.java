@@ -83,7 +83,7 @@ public class SipgateFrames extends TabActivity {
 		tabs.addTab(this.tabSpecContacts);
 
 		this.tabSpecCallList = tabs.newTabSpec("Calllist");
-		this.tabSpecCallList.setIndicator(res.getText(R.string.sipgate_tab_calllist), res.getDrawable(R.drawable.ic_menu_end_call));
+		this.tabSpecCallList.setIndicator(res.getText(R.string.sipgate_tab_calllist), res.getDrawable(R.drawable.tab_calllist));
 		this.tabSpecCallList.setContent(new Intent(this, CallListActivity.class));
 		tabs.addTab(this.tabSpecCallList);
 
