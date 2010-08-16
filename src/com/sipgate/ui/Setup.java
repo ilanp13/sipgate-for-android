@@ -115,31 +115,27 @@ public class Setup extends Activity implements OnClickListener {
 		this.registrar = provisioningData.getRegistrar();
 		this.outboundProxy = provisioningData.getOutboundProxy();
 
-		do {
-			
-			extensions = provisioningData.getExtensions();
 		
-			if (extensions != null) {
-				
-				for (SipgateProvisioningExtension extension : extensions) {
-					if (extension.getAlias().length() > 0) {
-						extensionsMap.put(extension.getAlias(), extension);
-						aliases.add(extension.getAlias());
-					} else {
-						extensionsMap.put(extension.getSipid(), extension);
-						aliases.add(extension.getSipid());
-					}
+		extensions = provisioningData.getExtensions();
+
+		if (extensions != null) {
+			for (SipgateProvisioningExtension extension : extensions) {
+				if (extension.getAlias().length() > 0) {
+					extensionsMap.put(extension.getAlias(), extension);
+					aliases.add(extension.getAlias());
+				} else {
+					extensionsMap.put(extension.getSipid(), extension);
+					aliases.add(extension.getSipid());
 				}
 			}
-		
-		} while (extensions == null);
-		
-		{
-			extensionSpinner = (Spinner) findViewById(com.sipgate.R.id.extensionList);
-			
-	        MyArrayAdapter adapter = new MyArrayAdapter(this,R.layout.sipgate_spinner_row,R.id.text, aliases);
-	        extensionSpinner.setAdapter( adapter );
+		} else {
+			Log.e(TAG, "no extensions in provisioningdata");
 		}
+
+		extensionSpinner = (Spinner) findViewById(com.sipgate.R.id.extensionList);
+
+		MyArrayAdapter adapter = new MyArrayAdapter(this,R.layout.sipgate_spinner_row,R.id.text, aliases);
+		extensionSpinner.setAdapter( adapter );
 	}
 
 	private SipgateProvisioningData getProvisioningData() {
@@ -332,20 +328,35 @@ public class Setup extends Activity implements OnClickListener {
 			// that's it. setting up the extension failed. we should be sorry.
 			Toast.makeText(this, getResources().getString(R.string.sipgate_error_unable_to_create_mobile_extension), Toast.LENGTH_SHORT).show();
 		} else {
-			alias = (String) extensionSpinner.getSelectedItem();
-			SipgateProvisioningExtension extension = extensionsMap.get(alias);
+			boolean success = false;
+		
+			do {
+				alias = (String) extensionSpinner.getSelectedItem();
+				if (alias == null) {
+					Log.e(TAG, "selected item is null");
+					break;
+				}
+				SipgateProvisioningExtension extension = extensionsMap.get(alias);
+				if (extension == null) {
+					Log.e(TAG, "extension from map is null");
+					break;
+				}
 
+				settingsClient.registerExtension(extension.getSipid(), extension.getPassword(),
+						extension.getAlias(), this.outboundProxy, this.registrar);
+				username = extension.getSipid();
+				password = extension.getPassword();
+				outboundproxy = this.outboundProxy;
+				registrar = this.registrar;
+				alias = extension.getAlias();
 
-			settingsClient.registerExtension(extension.getSipid(), extension.getPassword(),
-					extension.getAlias(), this.outboundProxy, this.registrar);
-			username = extension.getSipid();
-			password = extension.getPassword();
-			outboundproxy = this.outboundProxy;
-			registrar = this.registrar;
-			alias = extension.getAlias();
-			
-			finishExtensionConfiguration(username, password, outboundproxy,
-					registrar, alias);
+				finishExtensionConfiguration(username, password, outboundproxy,
+						registrar, alias);
+				success = true;
+			} while (false);
+			if (!success) {
+				Toast.makeText(this, getResources().getString(R.string.sipgate_unable_to_provision), Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 

@@ -360,9 +360,7 @@ public class RestClient implements ApiClientInterface {
 	
 	private String parseBaseProductType(Document doc) {
 		NodeList nodeList = doc.getElementsByTagName("BaseProductType");
-		Node eventRecord = nodeList.item(0);
-		nodeList = eventRecord.getChildNodes();
-
+	
 		for (int i = 0; i < nodeList.getLength(); i++) {			
 			Node n = nodeList.item(i);
 			

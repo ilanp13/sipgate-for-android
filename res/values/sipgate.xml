@@ -70,4 +70,5 @@
    	<string name="chooseExtensionHelp">you need to specifiy a sipgate mobile extension</string>
    	<string name="sipgate_error_unable_to_create_mobile_extension">unable to create mobile extension</string>
    	<string name="sipgate_network_problem">There is a problem with your network connection. Please make sure your device is connected to the internet and try again.</string>
+   	<string name="sipgate_unable_to_provision">Provisioning error</string>
 </resources>
