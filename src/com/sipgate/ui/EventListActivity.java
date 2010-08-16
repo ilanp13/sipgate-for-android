@@ -38,21 +38,20 @@ import com.sipgate.api.types.Voicemail;
 import com.sipgate.exceptions.DownloadException;
 import com.sipgate.models.holder.EventViewHolder;
 import com.sipgate.service.EventService;
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.Constants;
-//import com.sipgate.util.Oauth;
+import com.sipgate.util.Constants; //import com.sipgate.util.Oauth;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
 public class EventListActivity extends Activity {
-	private static final int REFRESH_MENU_ITEM = 0;
+	//private static final int REFRESH_MENU_ITEM = 0;
 	private static final String TAG = "EventListActivity";
 
-//	private Oauth oauth;
+	// private Oauth oauth;
 	private ArrayAdapter<Event> eventListAdapter;
 	private ServiceConnection serviceConnection;
 	private EventService serviceBinding = null;
-	private PendingIntent onNewEventsPendingIntent;
+	private PendingIntent onNewVoicemailsPendingIntent;
 	private MediaConnector mediaConnector;
 	private MediaController mediaController;
 	private String voicemailFromText;
@@ -64,7 +63,8 @@ public class EventListActivity extends Activity {
 	 * optimization: gets Strings from resources. must be called from onCreate()
 	 */
 	private void initStrings() {
-		voicemailFromText = getResources().getString(R.string.sipgate_voicemail_from);
+		voicemailFromText = getResources().getString(
+				R.string.sipgate_voicemail_from);
 		secondsText = getResources().getString(R.string.sipgate_seconds);
 	}
 
@@ -88,19 +88,20 @@ public class EventListActivity extends Activity {
 			Log.w(TAG, "used API is not capable of 'VM_LIST' feature; not starting service!");
 		} else {
 			Log.v(TAG, "enter startScanService");
-			Intent startIntent = new Intent(this, EventServiceImpl.class);
+			Intent startIntent = new Intent(this, SipgateBackgroundService.class);
 			ctx.startService(startIntent);
 
 			if (serviceConnection == null) {
 				Log.d(TAG, "service connection is null");
 				serviceConnection = new ServiceConnection() {
-	
+
 					public void onServiceDisconnected(ComponentName arg0) {
 						Log.d(TAG, "service disconnected");
 						serviceBinding = null;
 					}
-	
-					public void onServiceConnected(ComponentName name, IBinder binder) {
+
+					public void onServiceConnected(ComponentName name,
+							IBinder binder) {
 						Log.v(TAG, "service " + name + " connected");
 						try {
 							Log.d(TAG, "serviceBinding set");
@@ -111,16 +112,17 @@ public class EventListActivity extends Activity {
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}
-							getEvents();
+							getVoicemails();
 						} catch (ClassCastException e) {
 							e.printStackTrace();
 						}
 					}
 				};
-				Intent intent = new Intent(this, EventServiceImpl.class);
+				Intent intent = new Intent(this, SipgateBackgroundService.class);
 				Log.d(TAG, "bindService");
-				boolean bindret = ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-	
+				boolean bindret = ctx.bindService(intent, serviceConnection,
+						Context.BIND_AUTO_CREATE);
+
 				Log.v(TAG, "leave startScanService: " + bindret);
 			} else {
 				Log.d(TAG, "service connection is not null");
@@ -132,7 +134,8 @@ public class EventListActivity extends Activity {
 		if (serviceConnection != null) {
 			try {
 				if (serviceBinding != null) {
-					serviceBinding.unregisterOnEventsIntent(getNewMessagesIntent());
+					serviceBinding
+							.unregisterOnEventsIntent(getNewMessagesIntent());
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -150,29 +153,33 @@ public class EventListActivity extends Activity {
 	}
 
 	private PendingIntent getNewMessagesIntent() {
-		if (onNewEventsPendingIntent == null) {
+		if (onNewVoicemailsPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
-			onChangedIntent.setAction(EventServiceImpl.ACTION_NEWEVENTS);
-			onNewEventsPendingIntent = PendingIntent.getActivity(this, EventServiceImpl.REQUEST_NEWEVENTS,
-					onChangedIntent, 0);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onNewVoicemailsPendingIntent = PendingIntent.getActivity(this,
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
-		return onNewEventsPendingIntent;
+		return onNewVoicemailsPendingIntent;
 	}
 
 	private void initApi() {
 		if (this.apiClient == null) {
-			this.apiClient = ApiServiceProvider.getInstance(getApplicationContext());
+			this.apiClient = ApiServiceProvider
+					.getInstance(getApplicationContext());
 
 			try {
-				this.hasVmListFeature = this.apiClient.featureAvailable(API_FEATURE.VM_LIST);
+				this.hasVmListFeature = this.apiClient
+						.featureAvailable(API_FEATURE.VM_LIST);
 				Log.d(TAG, "having vmlistfeature: " + hasVmListFeature);
 			} catch (Exception e) {
-				Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
+				Log.w(TAG,
+						"startScanService() exception in call to featureAvailable() -> "
+								+ e.getLocalizedMessage());
 			}
 		}
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -181,7 +188,7 @@ public class EventListActivity extends Activity {
 
 		initApi();
 
-//		oauth = Oauth.getInstance(this);
+		// oauth = Oauth.getInstance(this);
 
 		final LayoutInflater mInflater = getLayoutInflater();
 
@@ -196,24 +203,33 @@ public class EventListActivity extends Activity {
 
 		elementList.setOnItemClickListener(new OnItemClickListener() {
 
-			public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
-				Voicemail voicemail = (Voicemail) parent.getItemAtPosition(position);
+			public void onItemClick(AdapterView<?> parent, View arg1,
+					int position, long id) {
+				Voicemail voicemail = (Voicemail) parent
+						.getItemAtPosition(position);
 				showPlayerDialog(voicemail);
 			}
 		});
 
-		eventListAdapter = new ArrayAdapter<Event>(this, R.layout.eventelement, R.id.EventTitle) {
+		eventListAdapter = new ArrayAdapter<Event>(this, R.layout.eventelement,
+				R.id.EventTitle) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				EventViewHolder holder = null;
 				if (convertView == null) {
-					convertView = mInflater.inflate(R.layout.eventelement, null);
+					convertView = mInflater
+							.inflate(R.layout.eventelement, null);
 					holder = new EventViewHolder();
-					holder.titleView = (TextView) convertView.findViewById(R.id.EventTitle);
-					holder.dateView = (TextView) convertView.findViewById(R.id.DateTextView);
-					holder.categoryView = (TextView) convertView.findViewById(R.id.CategoryTextView);
-					holder.transcriptionView = (TextView) convertView.findViewById(R.id.TranscriptionTextView);
-					holder.iconVM = (ImageView) convertView.findViewById(R.id.IconView);
+					holder.titleView = (TextView) convertView
+							.findViewById(R.id.EventTitle);
+					holder.dateView = (TextView) convertView
+							.findViewById(R.id.DateTextView);
+					holder.categoryView = (TextView) convertView
+							.findViewById(R.id.CategoryTextView);
+					holder.transcriptionView = (TextView) convertView
+							.findViewById(R.id.TranscriptionTextView);
+					holder.iconVM = (ImageView) convertView
+							.findViewById(R.id.IconView);
 					convertView.setTag(holder);
 				} else {
 					holder = (EventViewHolder) convertView.getTag();
@@ -226,10 +242,12 @@ public class EventListActivity extends Activity {
 
 				if (item.isRead()) {
 					holder.titleView.setTypeface(Typeface.DEFAULT);
-					holder.iconVM.setImageDrawable(getResources().getDrawable(R.drawable.voicemail_read));
+					holder.iconVM.setImageDrawable(getResources().getDrawable(
+							R.drawable.voicemail_read));
 				} else {
 					holder.titleView.setTypeface(Typeface.DEFAULT_BOLD);
-					holder.iconVM.setImageDrawable(getResources().getDrawable(R.drawable.voicemail_unread));
+					holder.iconVM.setImageDrawable(getResources().getDrawable(
+							R.drawable.voicemail_unread));
 				}
 
 				holder.dateView.setText(formatDateAsTime(createdOn));
@@ -242,7 +260,8 @@ public class EventListActivity extends Activity {
 
 				if (position > 0) {
 					Event lastItem = getItem(position - 1);
-					String lastDay = formatDateAsDay(lastItem.getCreateOnAsDate());
+					String lastDay = formatDateAsDay(lastItem
+							.getCreateOnAsDate());
 					if (lastDay.equals(thisDay)) {
 						holder.categoryView.setVisibility(View.GONE);
 					} else {
@@ -253,29 +272,33 @@ public class EventListActivity extends Activity {
 				return convertView;
 			}
 
-			private void showVoicemailDetails(EventViewHolder holder, Voicemail item) {
+			private void showVoicemailDetails(EventViewHolder holder,
+					Voicemail item) {
 
-				holder.titleView.setText(voicemailFromText + ": " + item.getNumberPretty());
+				holder.titleView.setText(voicemailFromText + ": "
+						+ item.getNumberPretty());
 
 				String transcription = item.getTranscription();
 
 				if (transcription == null || transcription.equals("")) {
-					holder.transcriptionView.setText("" + item.getDuration() + " " + secondsText);
+					holder.transcriptionView.setText("" + item.getDuration()
+							+ " " + secondsText);
 				} else {
 					holder.transcriptionView.setText(transcription);
 				}
 			}
 		};
 		elementList.setAdapter(eventListAdapter);
-		getEvents();
-		showEvents(new ArrayList<Event>(0)); // begin with empty list
+		getVoicemails();
+		showVoicemails(new ArrayList<Event>(0)); // begin with empty list
 	}
 
 	protected void showPlayerDialog(Voicemail voicemail) {
 		try {
 			this.mediaConnector.pause();
 			// TODO: change to async call
-			this.mediaConnector.setMp3(MediaUrlPlayer.download(voicemail, getApplicationContext()));
+			this.mediaConnector.setMp3(MediaUrlPlayer.download(voicemail,
+					getApplicationContext()));
 			this.mediaConnector.start();
 			mediaController.show(0);
 		} catch (DownloadException e) {
@@ -288,14 +311,17 @@ public class EventListActivity extends Activity {
 		Thread t = new Thread() {
 			public void start() {
 				try {
-					String url = String.format(Constants.VOICEMAILREAD_URL, voiceMail.getVoicemail_id());
-					ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
+					String url = String.format(Constants.VOICEMAILREAD_URL,
+							voiceMail.getVoicemail_id());
+					ApiServiceProvider apiClient = ApiServiceProvider
+							.getInstance(getApplicationContext());
 					apiClient.setVoicemailRead(url);
 				} catch (RuntimeException e) {
-//					Log.e(TAG, "RuntimeException, setting voicemail to read");
+					// Log.e(TAG,
+					// "RuntimeException, setting voicemail to read");
 					e.printStackTrace();
 				} catch (Exception e) {
-//					Log.e(TAG, e.getLocalizedMessage());
+					// Log.e(TAG, e.getLocalizedMessage());
 					e.printStackTrace();
 				}
 			}
@@ -305,23 +331,23 @@ public class EventListActivity extends Activity {
 	}
 
 	protected String formatDateAsDay(Date d) {
-		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(getResources().getString(
-				R.string.dateTimeFormatForDay));
+		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(
+				getResources().getString(R.string.dateTimeFormatForDay));
 		return dateformatterPretty.format(d);
 	}
 
 	protected String formatDateAsTime(Date d) {
-		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(getResources().getString(
-				R.string.dateTimeFormatForTime));
+		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(
+				getResources().getString(R.string.dateTimeFormatForTime));
 		return dateformatterPretty.format(d);
 	}
 
-	public void getEvents() {
+	public void getVoicemails() {
 		try {
 			if (serviceBinding != null) {
-				List<Event> events = serviceBinding.getEvents();
+				List<Event> events = serviceBinding.getVoicemails();
 				if (events != null) {
-					showEvents(events);
+					showVoicemails(events);
 				} else {
 					Log.d(TAG, "got 'null' events result");
 				}
@@ -334,7 +360,7 @@ public class EventListActivity extends Activity {
 		}
 	}
 
-	private void showEvents(List<Event> events) {
+	private void showVoicemails(List<Event> events) {
 		eventListAdapter.clear();
 		Log.i(TAG, "showEvents " + new Date().toString());
 		boolean itemsAdded = false;
@@ -359,7 +385,9 @@ public class EventListActivity extends Activity {
 				if (b == a) {
 					return 0;
 				}
-				return -1 * a.getCreateOnAsDate().compareTo(b.getCreateOnAsDate());
+				return -1
+						* a.getCreateOnAsDate()
+								.compareTo(b.getCreateOnAsDate());
 			}
 		});
 
@@ -372,7 +400,7 @@ public class EventListActivity extends Activity {
 			eventlist.setVisibility(View.GONE);
 			emptylist.setVisibility(View.VISIBLE);
 		}
-		
+
 		Log.i(TAG, "showEvents done " + new Date().toString());
 	}
 
@@ -382,28 +410,29 @@ public class EventListActivity extends Activity {
 
 		initApi();
 
-//		Intent i = getIntent();
-//
-//		if (i != null && oauth.isOauthIntent(getIntent()) && oauth.registrationInProgress()) {
-//			try {
-//				Log.d(TAG, "oauth intent :) " + i.getDataString());
-//				oauth.register(i);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
+		// Intent i = getIntent();
+		//
+		// if (i != null && oauth.isOauthIntent(getIntent()) &&
+		// oauth.registrationInProgress()) {
+		// try {
+		// Log.d(TAG, "oauth intent :) " + i.getDataString());
+		// oauth.register(i);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
 		Log.v(TAG, "onResume");
-		//if (serviceBinding == null) {
+		// if (serviceBinding == null) {
 		startScanService();
 		serviceRefresh();
-		getEvents();
-		//}
+		getVoicemails();
+		// }
 	}
 
 	private void serviceRefresh() {
 		if (serviceBinding != null) {
 			try {
-				serviceBinding.refreshEvents();
+				serviceBinding.refreshVoicemails();
 			} catch (RemoteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -416,11 +445,10 @@ public class EventListActivity extends Activity {
 		boolean result = super.onCreateOptionsMenu(menu);
 
 		OptionsMenu m = new OptionsMenu();
-		m.createMenu(menu,"EventList");
-		
+		m.createMenu(menu, "EventList");
+
 		return result;
 	}
-
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -430,14 +458,12 @@ public class EventListActivity extends Activity {
 
 		return result;
 	}
-	
+
 	public void onPause() {
 		super.onPause();
 		Log.d(TAG, "onPause()");
 		stopservice();
 	}
-
-	
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -445,12 +471,12 @@ public class EventListActivity extends Activity {
 		Log.v(TAG, "action: " + intent.getAction());
 
 		String action = intent.getAction();
-		if (action != null && action.equals(EventServiceImpl.ACTION_NEWEVENTS)) {
-			getEvents();
+		if (action != null && action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
+			getVoicemails();
 		} else {
 			super.onNewIntent(intent);
 		}
-		getEvents();
+		getVoicemails();
 	}
 
 	public class MediaConnector implements MediaController.MediaPlayerControl {
@@ -460,29 +486,27 @@ public class EventListActivity extends Activity {
 		public MediaConnector() {
 			mediaPlayer = new MediaPlayer();
 		}
-		
+
 		public int getBufferPercentage() {
 			return 0;
 		}
-		
+
 		public int getCurrentPosition() {
 			return mediaPlayer.getCurrentPosition();
 		}
-		
+
 		public int getDuration() {
 			return mediaPlayer.getDuration();
 		}
-		
+
 		public boolean isPlaying() {
 			return mediaPlayer.isPlaying();
 		}
 
-		
 		public void pause() {
 			mediaPlayer.pause();
 		}
 
-		
 		public void seekTo(int pos) {
 			mediaPlayer.seekTo(pos);
 		}
@@ -505,25 +529,21 @@ public class EventListActivity extends Activity {
 			}
 		}
 
-		
 		public void start() {
 			mediaPlayer.start();
 		}
 
-		
 		public boolean canPause() {
 			return true;
 		}
 
-		
 		public boolean canSeekBackward() {
 			return true;
 		}
 
-		
 		public boolean canSeekForward() {
 			return true;
 		}
-    }
+	}
 
 }

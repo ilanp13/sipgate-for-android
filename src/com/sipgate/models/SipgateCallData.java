@@ -1,15 +1,18 @@
 package com.sipgate.models;
 
-import java.io.Serializable;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public class SipgateCallData implements Serializable {
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 
-	private class SipgateEndpointData implements Serializable {
+public class SipgateCallData implements Parcelable {
+	protected static final String TAG = "SipgateCallData";
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -8701506242154628479L;
+	private class SipgateEndpointData implements Parcelable {
+
 		private String numberE164 = null;
 		private String numberPretty = null;
 		private String name = null;
@@ -31,19 +34,43 @@ public class SipgateCallData implements Serializable {
 		}
 		public String getName() {
 			return name;
+		}
+		
+		public SipgateEndpointData() {
+		}
+		
+		@SuppressWarnings("unused")
+		public SipgateEndpointData(Parcel in) {
+			readFromParcel(in);
+		}
+		
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+		@Override
+		public void writeToParcel(Parcel out, int flags) {
+			out.writeString(numberE164);
+			out.writeString(numberPretty);
+			out.writeString(name);
+			
+		}	
+		public void readFromParcel(Parcel in) {
+			this.numberE164 = in.readString();
+			this.numberPretty = in.readString();
+			this.name = in.readString();
+			
 		}	
 	}
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1737101473384001118L;
 	private String id = null;
 	private String direction = null;
-	private Boolean missed = null;
+	private String missed = null;
+	private String isRead = null;
 	private String time = null;
 	private SipgateEndpointData target = null;
 	private SipgateEndpointData source = null;
+	private String readModifyUrl = null;
 	
 	public void setCallId(String id) {
 		this.id = id;
@@ -61,12 +88,15 @@ public class SipgateCallData implements Serializable {
 		return direction;
 	}
 	
-	public void setCallMissed(Boolean type) {
+	public void setCallMissed(String type) {
 		this.missed = type;
 	}
 	
 	public Boolean getCallMissed() {
-		return missed;
+		if (missed.equals("true")) {
+			return true;
+		}
+		return false;
 	}
 	
 	public void setCallTarget(String numberE164, String numberPretty, String name) {
@@ -111,8 +141,86 @@ public class SipgateCallData implements Serializable {
 		this.time = time;
 	}
 	
-	public String getCallTime() {
-		return time;
+	public Date getCallTime() {
+		try {
+			if (time == null) {
+				return new Date(0);
+			}
+			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+			return dateformatterIso.parse(time, new ParsePosition(0));
+		} catch (IllegalArgumentException e) {
+			Log.e(TAG, "badly formated date");
+			
+		}
+		return new Date(0);
 	}
+
+	public void setCallRead(String isRead) {
+		this.isRead = isRead;
+	}
+
+	public Boolean getCallRead() {
+		if (isRead.equals("true")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void setCallReadModifyUrl(String readModifyUrl) {
+		this.readModifyUrl = readModifyUrl;
+	}
+
+	public String getCallReadModifyUrl() {
+		return readModifyUrl;
+	}
+
+	public SipgateCallData() {
+	}
+	
+	public SipgateCallData(Parcel in) {
+		readFromParcel(in);
+	}
+	
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel out, int flags) {
+		out.writeString(id);
+		out.writeString(direction);
+		out.writeString(missed);
+		out.writeString(isRead);
+		out.writeString(time);
+		out.writeParcelable((Parcelable)target, 0);
+		out.writeParcelable((Parcelable)source, 0);
+		out.writeString(readModifyUrl);
+		
+	}
+	
+	public void readFromParcel(Parcel in) {
+		this.id = in.readString();
+		this.direction = in.readString();
+		this.missed = in.readString();
+		this.isRead = in.readString();
+		this.time = in.readString();
+		//TODO: ????
+		this.target = in.readParcelable(null);
+		this.source = in.readParcelable(null);
+		this.readModifyUrl = in.readString();
+		
+	}
+	
+    public static final Parcelable.Creator<SipgateCallData> CREATOR = new Parcelable.Creator<SipgateCallData>() {
+
+    	public SipgateCallData createFromParcel(Parcel in) {
+                return new SipgateCallData(in);
+        }
+
+        public SipgateCallData[] newArray(int size) {
+                return new SipgateCallData[size];
+        }
+    };
 
 }

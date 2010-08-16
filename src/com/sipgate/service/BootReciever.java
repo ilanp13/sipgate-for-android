@@ -11,8 +11,8 @@ public class BootReciever extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		Log.v(TAG,"recieved boot message");
-		Intent serviceIntent = new Intent(context,EventServiceImpl.class);
-		serviceIntent.setAction(EventServiceImpl.ACTION_START_ON_BOOT);
+		Intent serviceIntent = new Intent(context,SipgateBackgroundService.class);
+		serviceIntent.setAction(SipgateBackgroundService.ACTION_START_ON_BOOT);
 		context.startService(serviceIntent);
 	}
 	

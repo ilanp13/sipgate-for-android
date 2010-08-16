@@ -2,12 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/sipgateCallList" android:layout_height="fill_parent"
 	android:layout_width="fill_parent" android:orientation="vertical">
-	<TextView android:id="@+id/sipgateCallListTitle" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:text="@string/call_list_title" android:typeface="normal" android:textSize="30px">
-	</TextView>
-	
-	<ListView android:id="@+id/InboxListView"
+	<ListView android:id="@+id/CalllistListView"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
 		android:divider="#808080" android:dividerHeight="1px">
 	</ListView>
+	<TextView android:text="@string/sipgate_empty_calllist"
+		android:id="@+id/EmptyCallListTextView" android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:gravity="center"
+		android:textColor="#FFFFFF"></TextView>
 </LinearLayout>

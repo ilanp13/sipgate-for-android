@@ -40,6 +40,7 @@
 	<string name="sipgate_tab_dialpad">Dialpad</string>   	
 	<string name="sipgate_tab_voicemail">Voicemail</string>   		
 	<string name="sipgate_tab_contacts">Contacts</string>
+	<string name="sipgate_tab_calllist">Calllist</string>   	
 	<string name="sipgate_decimal_separator">.</string>
    	<string name="sipgate_empty_contactlist">Your contactlist is empty.</string>
    	<string name="sipgate_phonetype_home">Home</string>
@@ -71,4 +72,8 @@
    	<string name="sipgate_error_unable_to_create_mobile_extension">unable to create mobile extension</string>
    	<string name="sipgate_network_problem">There is a problem with your network connection. Please make sure your device is connected to the internet and try again.</string>
    	<string name="sipgate_unable_to_provision">Provisioning error</string>
+   	<string name="sipgate_me">Me</string>
+   	<string name="sipgate_empty_calllist">Your calllist is empty.</string>
+   	<string name="sipgate_a_new_call">You have %d new calls.</string>
+   	<string name="sipgate_unknown_caller">Unknown</string>
 </resources>

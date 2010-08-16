@@ -29,9 +29,9 @@ public interface ApiClientInterface {
 	public boolean connectivityOk() throws ApiException, NetworkProblemException;
 	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException;
 	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException;
+	public void setCallRead(String call) throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public boolean featureAvailable(API_FEATURE feature);
 	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException;
 	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException;
-	public MobileExtension setupMobileExtension(String phoneNumber,
-			String model, String vendor, String firmware) throws FeatureNotAvailableException;
+	public MobileExtension setupMobileExtension(String phoneNumber,	String model, String vendor, String firmware) throws FeatureNotAvailableException;
 }

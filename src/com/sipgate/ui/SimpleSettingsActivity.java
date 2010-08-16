@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.sipgate.R;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
@@ -137,7 +137,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
 
 							Receiver.engine(getApplicationContext()).halt();
 							
-							stopService(new Intent(getApplicationContext(),EventServiceImpl.class));
+							stopService(new Intent(getApplicationContext(),SipgateBackgroundService.class));
 							stopService(new Intent(getApplicationContext(),RegisterService.class));
             		
 							Intent intent = new Intent(getApplicationContext(), Login.class);

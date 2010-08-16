@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-
-import net.oauth.OAuthException;
+import java.util.Locale;
 
 import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
@@ -24,8 +26,6 @@ import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateCallData;
@@ -69,6 +69,20 @@ public class XmlrpcClient implements ApiClientInterface {
 		this.client.setBasicAuthentication(ApiUser, ApiPassword);
 	}
 
+	private Date getDate(String createOn) {
+		try {
+			if (createOn == null) {
+				return new Date(0);
+			}
+			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ");
+			return dateformatterIso.parse(createOn, new ParsePosition(0));
+		} catch (IllegalArgumentException e) {
+			Log.e(TAG,"badly formated date");
+			
+		}
+		return new Date(0);
+	}
+	
 	@SuppressWarnings("unchecked")
 	private HashMap<String, Object> doXmlrpcCall(String method, Object param) throws XMLRPCException, NetworkProblemException {
 		HashMap<String, Object> res = null;
@@ -202,8 +216,99 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	
-	public ArrayList<SipgateCallData> getCalls() throws ApiException, FeatureNotAvailableException {
-		throw new FeatureNotAvailableException();
+	@SuppressWarnings("unchecked")
+	public ArrayList<SipgateCallData> getCalls() throws ApiException {
+		
+		Hashtable<String, String> params = new Hashtable<String, String>();
+
+		HashMap<String, Object> apiResponse = null;
+		
+		try {
+			apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.HistoryGetByDate", params);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.e(TAG, "XMLRPC call to 'samurai.HistoryGetByDate' failed with " + e.getLocalizedMessage());
+			throw new ApiException();
+		}
+		
+		if (apiResponse == null) {
+			Log.e(TAG, "wtf, inputstream is null");
+			return null;
+		}
+		
+		ArrayList<SipgateCallData> calls = new ArrayList<SipgateCallData>();
+
+		try {
+			Object[] HistoryList = (Object[]) apiResponse.get("History");
+			for (Object HistoryObject : HistoryList) {
+				SipgateCallData call = new SipgateCallData();
+				HashMap<String, Object> HistorySet = (HashMap<String, Object>) HistoryObject;
+				
+				if(!HistorySet.get("TOS").equals("voice")) continue;
+				
+				call.setCallId((String) HistorySet.get("EntryID"));
+				Date created = (Date) getDate((String) HistorySet.get("Timestamp"));
+				SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+				call.setCallTime(dateformatterPretty.format(created));
+
+				String status = (String) HistorySet.get("Status");
+				String direction = "";
+				String missed = "false";
+				
+				Log.d("call Status: ", status);
+				if(status.equals("accepted")) {
+					direction = "incoming";
+				}
+				if(status.equals("missed")) {
+					direction = "incoming";
+					missed = "true";
+				}
+				if(status.equals("outgoing")) {
+					direction = "outgoing";
+				}
+
+				call.setCallDirection(direction);
+				call.setCallMissed(missed);
+
+				PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+				Locale locale = Locale.getDefault();
+				
+				String numberLocal = (String) HistorySet.get("LocalUri");
+				String numberRemote = (String) HistorySet.get("RemoteUri");
+
+				String src_number = "";
+				String tgt_number = "";
+				
+				if(direction.equals("outgoing")) {
+					src_number = numberLocal;
+					tgt_number = numberRemote;
+				}
+				if(direction.equals("incoming")) {
+					tgt_number = numberLocal;
+					src_number = numberRemote;
+				}
+
+				String src_name = "";
+				String src_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(src_number, locale.getCountry());
+				String src_numberE164 = formatter.e164NumberWithPrefix("");
+				call.setCallSource(src_numberE164, src_numberPretty, src_name);
+
+				String tgt_name = "";
+				String tgt_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(tgt_number, locale.getCountry());
+				String tgt_numberE164 = formatter.e164NumberWithPrefix("");
+				call.setCallTarget(tgt_numberE164, tgt_numberPretty, tgt_name);
+				
+				//XMLRPC doesn't provide a read/unread attribute .. so we assume it's a new call
+				call.setCallRead("false");
+
+				calls.add(call);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return calls;
+
 	}
 
 
@@ -292,7 +397,10 @@ public class XmlrpcClient implements ApiClientInterface {
 	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
-
+	
+	public void setCallRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+		throw new FeatureNotAvailableException();
+	}
 	
 	public boolean connectivityOk() throws ApiException {
 		boolean ret = true;
@@ -312,14 +420,12 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	
-	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException,
-			OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
 	
-	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException,
-			OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 

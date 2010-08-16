@@ -1,6 +1,6 @@
 package com.sipgate.ui;
 
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.sipua.ui.Settings;
@@ -21,7 +21,7 @@ import android.view.MenuItem;
 
 import com.sipgate.R;
 
-// @SuppressWarnings("deprecation")
+@SuppressWarnings("deprecation")
 public class OptionsMenu {
 	
 	
@@ -34,6 +34,7 @@ public class OptionsMenu {
 	public static final int CONTACTS_MENU_ITEM = FIRST_MENU_ID + 5;
 	public static final int EVENTLIST_MENU_ITEM = FIRST_MENU_ID + 6;
 	public static final int REFRESH_VOICEMAIL_LIST = FIRST_MENU_ID + 7;
+	public static final int REFRESH_CALL_LIST = FIRST_MENU_ID + 8;
 	
 	private static AlertDialog m_AlertDlg;
 
@@ -61,6 +62,12 @@ public class OptionsMenu {
 			m.setIcon(R.drawable.ic_menu_refresh);
 		}
 		
+		// refresh for calllist tab only
+		if(caller == "CallList") {
+			m = menu.add(0, REFRESH_CALL_LIST, 0, R.string.menu_refresh);
+			m.setIcon(R.drawable.ic_menu_refresh);
+		}
+
 		// Eventlist
 //		m = menu.add(0, EVENTLIST_MENU_ITEM, 0, R.string.menu_event_list);
 //		m.setIcon(R.drawable.menu_icon_voicemail_48);
@@ -107,7 +114,7 @@ public class OptionsMenu {
 			Log.d(TAG, "stopping voicemail service");
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	        notificationManager.cancelAll();
-			context.stopService(new Intent(context,EventServiceImpl.class));
+			context.stopService(new Intent(context,SipgateBackgroundService.class));
 			activity.finish();
 			break;
 
@@ -124,6 +131,16 @@ public class OptionsMenu {
 			try {
 				intent = new Intent(activity, SipgateFrames.class);
 				intent.putExtra("view", SipgateFrames.SipgateTab.VM);
+				activity.startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(TAG, e.getLocalizedMessage());
+			}
+			break;
+		}
+		case REFRESH_CALL_LIST: {
+			try {
+				intent = new Intent(activity, SipgateFrames.class);
+				intent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
 				activity.startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Log.e(TAG, e.getLocalizedMessage());

@@ -13,7 +13,7 @@ import java.util.Map.Entry;
  *
  */
 public class PhoneNumberFormatter {
-	private static final String TAG = "PhoneNumberFormatter";
+	//private static final String TAG = "PhoneNumberFormatter";
 	private static final int MAX_ARRAY_SIZE = 1000000;
 	
 	private enum PrefixType { SGE123Prefix, SGInvalidPrefix, SGInternationalPrefix, SGNationalPrefix, SGNationalPrefixOmitted };

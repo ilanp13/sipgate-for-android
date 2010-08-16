@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
 import com.sipgate.interfaces.ContactsInterface;
@@ -49,7 +50,9 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	            String firstName = null;
 	            String title = null;
 
-	            ArrayList<SipgateContactNumber> numbers = getPhonerNumbers(id);
+	            ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
+	            
+	            if(numbers == null) continue;
 	            
 	            Bitmap photo = getPhoto(id);
 	           
@@ -81,7 +84,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		                String firstName = null;
 		                String title = null;
 		
-		                ArrayList<SipgateContactNumber> numbers = getPhonerNumbers(id);
+		                ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
 		                
 		                Bitmap photo = getPhoto(id);
 		               
@@ -95,7 +98,19 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		return contact;
 	}
 	
-	private ArrayList<SipgateContactNumber> getPhonerNumbers(Integer id) {
+	public String getContactName(String phoneNumber) {
+		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+		Cursor nameCursor = this.activity.managedQuery(uri, new String[]{PhoneLookup.DISPLAY_NAME}, null, null, null);
+		
+		if(nameCursor != null && nameCursor.moveToFirst()) {
+			String name = nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+			return name;
+		}
+		
+		return phoneNumber;
+	}
+	
+	private ArrayList<SipgateContactNumber> getPhoneNumbers(Integer id) {
         ArrayList<SipgateContactNumber> numbers = null;
         
     	

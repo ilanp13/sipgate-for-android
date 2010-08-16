@@ -22,7 +22,7 @@
 package com.sipgate.ui;
 
 import com.sipgate.R;
-import com.sipgate.service.EventServiceImpl;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
@@ -41,12 +41,13 @@ import android.widget.TabHost.TabSpec;
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
 public class SipgateFrames extends TabActivity {
-	public enum SipgateTab { DIALPAD, CONTACTS, VM};
+	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};
 	
 	private static final String TAG = "TabActivity";
 	private static final int TAB_DIAL = 0;
 	private static final int TAB_CONTACTS = 1;
-	private static final int TAB_VMLIST = 2;
+	private static final int TAB_CALLLIST = 2;
+	private static final int TAB_VMLIST = 3;
 	
 	private SipgateTab currentTab = SipgateTab.DIALPAD;
 	private ApiServiceProvider apiClient = null;
@@ -55,6 +56,7 @@ public class SipgateFrames extends TabActivity {
 		
 	private TabSpec tabSpecDial = null;
 	private TabSpec tabSpecContacts = null;
+	private TabSpec tabSpecCallList = null;
 	private TabSpec tabSpecVmList = null;
 
 	@Override
@@ -80,10 +82,13 @@ public class SipgateFrames extends TabActivity {
 		this.tabSpecContacts.setContent(new Intent(this, ContactListActivity.class));
 		tabs.addTab(this.tabSpecContacts);
 
+		this.tabSpecCallList = tabs.newTabSpec("Calllist");
+		this.tabSpecCallList.setIndicator(res.getText(R.string.sipgate_tab_calllist), res.getDrawable(R.drawable.tab_calllist));
+		this.tabSpecCallList.setContent(new Intent(this, CallListActivity.class));
+		tabs.addTab(this.tabSpecCallList);
+
 		// check if used API is capable of VM-list and only start service when feature available:
 		if (!this.hasVmListFeature()) {
-			this.stopService(new Intent(this, EventServiceImpl.class));
-
 			this.vmTabVisible = false;
 			
 			Log.i(TAG, "used API is NOT capable of 'VM_LIST' feature; background-service disabled ...");
@@ -91,9 +96,9 @@ public class SipgateFrames extends TabActivity {
 			Log.i(TAG, "used API is capable of 'VM_LIST' feature ...");
 
 			this.addVmTab();
-			
-			this.startService(new Intent(this, EventServiceImpl.class));
 		}
+		
+		this.startService(new Intent(this, SipgateBackgroundService.class));
 		
 		this.setCurrentTab(bundle);
 	}
@@ -104,9 +109,14 @@ public class SipgateFrames extends TabActivity {
 			Log.d("bundle", this.currentTab.toString());
 		} else {
 			Log.e("bundle", "Not provided");
+			this.currentTab = SipgateTab.DIALPAD;
 		}
 
 		switch (this.currentTab) {
+		case CALLS:
+			tabs.setCurrentTab(TAB_CALLLIST);
+			break;
+		
 		case VM:
 			tabs.setCurrentTab(TAB_VMLIST);
 			break;
@@ -137,6 +147,7 @@ public class SipgateFrames extends TabActivity {
 			this.tabs.clearAllTabs();
 			tabs.addTab(tabSpecDial);
 			tabs.addTab(tabSpecContacts);
+			tabs.addTab(tabSpecCallList);
 		} catch (NullPointerException e) {
 			Log.i(TAG, "removeVmTab() -> "+e.getLocalizedMessage());
 		}
@@ -145,14 +156,14 @@ public class SipgateFrames extends TabActivity {
 	}
 	
 	private boolean hasVmListFeature() {
-		boolean hastVmListFeature = false;
+		boolean hasVmListFeature = false;
 		try {
-			hastVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
+			hasVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
 		} catch (Exception e) {
 			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
 		}
 		
-		return hastVmListFeature;
+		return hasVmListFeature;
 	}
 	
 	public void onResume() {

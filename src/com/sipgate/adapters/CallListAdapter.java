@@ -88,7 +88,7 @@ public class CallListAdapter implements ListAdapter {
 		// need to reinflate it. We only inflate a new View when the convertView
 		// supplied by ListView is null.
 		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.sipgate_call_list_item, null);
+			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 
 			// Creates a ViewHolder and store references to the two children
 			// views
@@ -123,7 +123,7 @@ public class CallListAdapter implements ListAdapter {
 		holder.callerNumberPretty.setText(inboxItem.getCallSourceNumberPretty());
 		holder.callerNumberE164 = inboxItem.getCallSourceNumberE164();
 
-		holder.dateTime.setText(this.dateIsoToPretty(inboxItem.getCallTime()));
+		//holder.dateTime.setText(this.dateIsoToPretty(inboxItem.getCallTime()));
 
 		String name = inboxItem.getCallSourceName();
 		if (name != null && name.length() > 0) {
@@ -153,6 +153,7 @@ public class CallListAdapter implements ListAdapter {
 		return convertView;
 	}
 
+	@SuppressWarnings("unused")
 	private CharSequence dateIsoToPretty(String dateTimeIso) {
 		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(context.getResources().getString(R.string.dateTimeFormat));
 		SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss"); // TODO fixme!

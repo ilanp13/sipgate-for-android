@@ -3,13 +3,15 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import net.oauth.OAuthException;
 
@@ -17,7 +19,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import android.util.Log;
 
@@ -151,6 +152,20 @@ public class RestClient implements ApiClientInterface {
 		return provisioningData;
 	}
 	
+	private Date getDate(String createOn) {
+		try {
+			if (createOn == null) {
+				return new Date(0);
+			}
+			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+			return dateformatterIso.parse(createOn, new ParsePosition(0));
+		} catch (IllegalArgumentException e) {
+			Log.e(TAG,"badly formated date");
+			
+		}
+		return new Date(0);
+	}
+	
 	public ArrayList<SipgateCallData> getCalls() throws ApiException {
 		
 		InputStream inputStream = null;
@@ -194,18 +209,31 @@ public class RestClient implements ApiClientInterface {
 					call.setCallId(getElementById(fstElmnt, "id"));
 					String direction = getElementById(fstElmnt, "direction");
 					if(direction.equals("incoming")){
-						call.setCallMissed(false);
+						call.setCallMissed("false");
 						call.setCallDirection("incoming");
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
 					else if(direction.equals("missed_incoming")){
-						call.setCallMissed(true);
+						call.setCallMissed("true");
 						call.setCallDirection("incoming");
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
-					call.setCallTime(getElementById(fstElmnt, "created"));
+					if(direction.equals("outgoing")){
+						call.setCallMissed("false");
+						call.setCallDirection("outgoing");
+						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
+						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
+					}
+					Date created = getDate(getElementById(fstElmnt, "created"));
+					SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+					call.setCallTime(dateformatterPretty.format(created));
+					
+					Element readStatus = getNodeById(fstElmnt, "read");
+					call.setCallRead(getElementById(readStatus, "value"));
+					call.setCallReadModifyUrl(getElementById(readStatus, "modify"));
+					
 					calls.add(call);
 				}
 			}
@@ -240,14 +268,7 @@ public class RestClient implements ApiClientInterface {
 				String ret = parseBaseProductType(doc);
 			
 				return ret;	
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			return null;
@@ -299,14 +320,7 @@ public class RestClient implements ApiClientInterface {
 			
 			return new MobileExtension(sipid, null, null, null, sippassword);
 				
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;	
@@ -345,14 +359,7 @@ public class RestClient implements ApiClientInterface {
 			
 			return extensions;
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -460,6 +467,15 @@ public class RestClient implements ApiClientInterface {
 	public void setVoicemailRead(String voicemail) throws ApiException, NetworkProblemException {
 		try {
 			RestClient.authenticationInterface.setVoicemailRead(voicemail);
+		} catch (AccessProtectedResourceException e) {
+			e.printStackTrace();
+			throw new ApiException();
+		}
+	}
+	
+	public void setCallRead(String call) throws ApiException, NetworkProblemException {
+		try {
+			RestClient.authenticationInterface.setCallRead(call);
 		} catch (AccessProtectedResourceException e) {
 			e.printStackTrace();
 			throw new ApiException();

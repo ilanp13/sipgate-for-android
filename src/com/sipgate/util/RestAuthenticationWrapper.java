@@ -48,12 +48,11 @@ public class RestAuthenticationWrapper implements RestAuthenticationInterface {
 		return accessProtectedResource("GET", url, null);
 	}
 
-	@SuppressWarnings("unused")
 	private InputStream accessProtectedResource(String httpMethod, String url) throws AccessProtectedResourceException {
 		return accessProtectedResource(httpMethod, url, null);
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	private InputStream accessProtectedResource(String httpMethod, String url, Collection<? extends Entry> params) throws AccessProtectedResourceException {
 		OAuthMessage message = null;
 		if (params == null) {
@@ -98,7 +97,13 @@ public class RestAuthenticationWrapper implements RestAuthenticationInterface {
 	}
 	
 	public void setVoicemailRead(String voicemail) throws AccessProtectedResourceException {
-		accessProtectedResource(voicemail);
+		//TODO: ADD PARAMS
+		accessProtectedResource("PUT", voicemail);
+	}
+	
+	public void setCallRead(String call) throws AccessProtectedResourceException {
+		//TODO: ADD PARAMS
+		accessProtectedResource("PUT", call);
 	}
 
 

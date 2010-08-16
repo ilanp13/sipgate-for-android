@@ -38,7 +38,6 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.CallLog.Calls;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,7 +64,7 @@ import com.sipgate.util.PhoneNumberFormatter;
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
 public class Sipgate extends Activity implements OnClickListener, OnLongClickListener {
-	private static final String TAG = "Dialpad";
+	//private static final String TAG = "Dialpad";
 
 	public static final boolean release = true;
 	public static final boolean market = false;
