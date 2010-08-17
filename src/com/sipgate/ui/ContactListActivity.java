@@ -1,15 +1,21 @@
 package com.sipgate.ui;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.sipgate.R;
 import com.sipgate.adapters.ContactListAdapter;
+import com.sipgate.models.SipgateContact;
 
-public class ContactListActivity extends Activity {
+public class ContactListActivity extends Activity implements OnItemClickListener {
 	private static final String TAG = "ContactListActivity";
 	
 	private ContactListAdapter contactListAdapter = null;
@@ -24,6 +30,8 @@ public class ContactListActivity extends Activity {
         contactListAdapter = new ContactListAdapter(this);
         
         elementList.setAdapter(contactListAdapter);
+        
+        elementList.setOnItemClickListener(this);
 	}
 	
 	@Override
@@ -53,6 +61,16 @@ public class ContactListActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
+		Log.d(TAG, "onItemClick() position "+position+"; id "+id);
+		
+		SipgateContact contact = (SipgateContact) parent.getItemAtPosition(position);
+		Intent intent = new Intent(getApplicationContext(), ContactDetailsActivity.class);
+		intent.putExtra("contactId", contact.getId());
+		startActivity(intent);
 	}
 
 }

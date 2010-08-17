@@ -27,12 +27,21 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		this.activity = activity;
 	}
 
+	private String getContactSortOrder() {
+		return ContactsContract.Contacts.DISPLAY_NAME + " ASC";
+	}
+
+	private Cursor getManagedCursorOnContacts() {
+		return this.activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
+				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, getContactSortOrder());
+	}
+
 	public ArrayList<SipgateContact> getContacts() {
 		ArrayList<SipgateContact> contactsList = null;
 
 		// Make the query.
-		Cursor managedCursor = this.activity
-				.managedQuery(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+		
+		Cursor managedCursor = getManagedCursorOnContacts();
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
@@ -61,6 +70,8 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			} while (managedCursor.moveToNext());
 		}
 
+		managedCursor.close();
+		
 		return contactsList;
 	}
 
@@ -68,8 +79,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		SipgateContact contact = null;
 
 		// Make the query.
-		Cursor managedCursor = this.activity
-				.managedQuery(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+		Cursor managedCursor = getManagedCursorOnContacts();
 
 		if (managedCursor.moveToFirst()) {
 			do {
@@ -94,6 +104,8 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			} while (managedCursor.moveToNext());
 		}
 
+		managedCursor.close();
+		
 		return contact;
 	}
 
@@ -102,27 +114,26 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		Cursor managedCursor = null;
 
 		try {
-		// Make the query.
-		managedCursor = this.activity
-				.managedQuery(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+			// Make the query.
+			managedCursor = getManagedCursorOnContacts();
 
-		if (managedCursor.moveToPosition(index)) {
-			Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
+			if (managedCursor.moveToPosition(index)) {
+				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
 
-			// Get the field values
-			String lastName = managedCursor.getString(managedCursor
-					.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-			if (lastName != null) {
-				String firstName = null;
-				String title = null;
+				// Get the field values
+				String lastName = managedCursor.getString(managedCursor
+						.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+				if (lastName != null) {
+					String firstName = null;
+					String title = null;
 
-				ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
+					ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
 
-				Bitmap photo = getPhoto(id);
+					Bitmap photo = getPhoto(id);
 
-				contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
+					contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
+				}
 			}
-		}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -142,6 +153,8 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			return name;
 		}
 
+		nameCursor.close();
+		
 		return phoneNumber;
 	}
 
@@ -235,6 +248,8 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			} while (personCursor.moveToNext());
 		}
 
+		personCursor.close();
+		
 		return numbers;
 	}
 
@@ -254,11 +269,12 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 	@Override
 	public int getCount() {
-		Cursor managedCursor = this.activity
-				.managedQuery(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+		Cursor managedCursor = getManagedCursorOnContacts();
 
 		int count = managedCursor.getCount();
 
+		managedCursor.close();
+		
 		return count;
 	}
 

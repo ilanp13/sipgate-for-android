@@ -22,16 +22,15 @@ import com.sipgate.util.AndroidContactsClient;
 public class ContactListAdapter implements ListAdapter {
 	private final static String TAG = "ContactListAdapter";
 	protected final Activity activity;
-    private final LayoutInflater mInflater;
+	private final LayoutInflater mInflater;
 	private AndroidContactsClient contactsClient;
 
 	public ContactListAdapter(Activity activity) {
 		this.activity = activity;
 		this.mInflater = activity.getLayoutInflater();
-		
+
 		this.contactsClient = new AndroidContactsClient(activity);
 	}
-
 
 	@Override
 	public boolean areAllItemsEnabled() {
@@ -66,69 +65,62 @@ public class ContactListAdapter implements ListAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-        final SipgateContact item = (SipgateContact) getItem(position);
-        
-		  ContactViewHolder holder = null;
-          if (convertView == null) {
-              convertView = mInflater.inflate(R.layout.sipgate_contacts_list_bit, null);
-              holder = new ContactViewHolder();
-              holder.contactName = (TextView)convertView.findViewById(R.id.contactName);
-              holder.contactImage = (ImageView)convertView.findViewById(R.id.contactPhoto);
-              holder.category = (TextView)convertView.findViewById(R.id.ContactsLetterTextView);
-              holder.separator = (View)convertView.findViewById(R.id.ContactsSeparator);
-              convertView.setTag(holder);
-              convertView.setOnClickListener(new OnClickListener() {
-            		@Override
-            		public void onClick(View v) {		
-            			Intent intent = new Intent(activity.getApplicationContext(), ContactDetailsActivity.class);
-            			intent.putExtra("contactId", item.getId());
-            			activity.startActivity(intent);
-            		}
-			});
-          } else {
-              holder = (ContactViewHolder) convertView.getTag();
-          }
+		final SipgateContact item = (SipgateContact) getItem(position);
 
-          String name = item.getLastName();
-          if (name != null) {
-        	  Log.d(TAG, name);
-          } else {
-        	  Log.d(TAG, "no name");
-          }
-          String thisFirstLetter = name.substring(0, 1);
-                     
-          holder.contactName.setText(name);
-          holder.category.setText(thisFirstLetter);
-          
-          Bitmap photo = item.getPhoto();
-          if (photo != null) {
-        	  holder.contactImage.setImageBitmap(photo);
-        	  Log.d(TAG, "has pic");
-          } else {
-        	  Log.d(TAG, "no pic");
-          }
-           
-          if (position >= 1) {
-        	  SipgateContact lastItem = (SipgateContact) getItem(position -1);
-        	  String firstLetter = lastItem.getLastName().substring(0, 1);
-        	  if (firstLetter.equals(thisFirstLetter)) {
-        		  holder.category.setVisibility(View.GONE);
-        	  } else {
-        		  holder.category.setVisibility(View.VISIBLE);
-        	  }
-          }
-          
-          if (position < getCount() - 1) {
-        	  SipgateContact nextItem = (SipgateContact) getItem(position + 1);
-        	  String firstLetter = nextItem.getLastName().substring(0, 1);
-        	  if (!firstLetter.equals(thisFirstLetter)) {
-        		  holder.separator.setVisibility(View.GONE);
-        	  } else {
-        		  holder.separator.setVisibility(View.VISIBLE);
-        	  }
-          }
-          
-          return convertView;
+		ContactViewHolder holder = null;
+		if (convertView == null) {
+			convertView = mInflater.inflate(R.layout.sipgate_contacts_list_bit, null);
+			holder = new ContactViewHolder();
+			holder.contactName = (TextView) convertView.findViewById(R.id.contactName);
+			holder.contactImage = (ImageView) convertView.findViewById(R.id.contactPhoto);
+			holder.category = (TextView) convertView.findViewById(R.id.ContactsLetterTextView);
+			holder.separator = (View) convertView.findViewById(R.id.ContactsSeparator);
+			convertView.setTag(holder);
+
+		} else {
+			holder = (ContactViewHolder) convertView.getTag();
+		}
+
+		String name = item.getLastName();
+		if (name != null) {
+			Log.d(TAG, name);
+		} else {
+			Log.d(TAG, "no name");
+		}
+		String thisFirstLetter = name.substring(0, 1);
+
+		holder.contactName.setText(name);
+		holder.category.setText(thisFirstLetter);
+
+		Bitmap photo = item.getPhoto();
+		if (photo != null) {
+			holder.contactImage.setImageBitmap(photo);
+			Log.d(TAG, "has pic");
+		} else {
+			Log.d(TAG, "no pic");
+		}
+
+		if (position >= 1) {
+			SipgateContact lastItem = (SipgateContact) getItem(position - 1);
+			String firstLetter = lastItem.getLastName().substring(0, 1);
+			if (firstLetter.equalsIgnoreCase(thisFirstLetter)) {
+				holder.category.setVisibility(View.GONE);
+			} else {
+				holder.category.setVisibility(View.VISIBLE);
+			}
+		}
+
+		if (position < getCount() - 1) {
+			SipgateContact nextItem = (SipgateContact) getItem(position + 1);
+			String firstLetter = nextItem.getLastName().substring(0, 1);
+			if (!firstLetter.equalsIgnoreCase(thisFirstLetter)) {
+				holder.separator.setVisibility(View.GONE);
+			} else {
+				holder.separator.setVisibility(View.VISIBLE);
+			}
+		}
+
+		return convertView;
 	}
 
 	@Override
@@ -159,5 +151,5 @@ public class ContactListAdapter implements ListAdapter {
 	public void unregisterDataSetObserver(DataSetObserver observer) {
 		// TODO FIXME
 	}
-	
+
 }
