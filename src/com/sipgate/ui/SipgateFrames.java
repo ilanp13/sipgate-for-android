@@ -41,7 +41,7 @@ import android.widget.TabHost.TabSpec;
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
 public class SipgateFrames extends TabActivity {
-	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};
+	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};  // FIXME: replace by class integrating the TAB_-constants
 	
 	private static final String TAG = "TabActivity";
 	private static final int TAB_DIAL = 0;
@@ -98,6 +98,9 @@ public class SipgateFrames extends TabActivity {
 			this.addVmTab();
 		}
 		
+		this.startService(new Intent(this, SipgateBackgroundService.class));
+		Log.d(TAG, "calling setcurrenttab from oncreate");
+
 		this.setCurrentTab(bundle);
 	}
 
@@ -181,6 +184,7 @@ public class SipgateFrames extends TabActivity {
 	public void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		Bundle bundle = intent.getExtras();
+		Log.d(TAG, "calling setcurrenttab from onNewIntent");
 		this.setCurrentTab(bundle);
 	}
 }

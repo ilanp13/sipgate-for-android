@@ -1,14 +1,16 @@
 package com.sipgate.util;
 
-import com.sipgate.R;
-import com.sipgate.ui.SipgateFrames;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
+
+import com.sipgate.R;
+import com.sipgate.ui.SipgateFrames;
 
 /**
  * Handles the notifications for calls and voicemails and allows to remove them individually.
@@ -39,32 +41,14 @@ public class NotificationClient {
 	 * @param context
 	 * @since 1.0
 	 */
-	private NotificationClient(Context context) {
+	public NotificationClient(Context context) {
 		/*
 		 * save the context for later use and initialise the NotificationManager
 		 */
 		this.context = context;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
-	
-	/**
-	 * Returns the single instance of the NotificationClient
-	 * 
-	 * @param context The application context needed to access the notifications
-	 * @return Returns the instance of the NotificationClient
-	 * @since 1.0
-	 */
-	synchronized public static NotificationClient getInstance(Context context) {
-		/*
-		 * only construct the class when it is first requested
-		 */
-		if (singleton == null) {
-			singleton = new NotificationClient(context);
-		}
-
-		return singleton;
-	}
-	
+		
 	/**
 	 * Adds a notification of a certain type with a certain message and an icon.
 	 * 
@@ -81,25 +65,34 @@ public class NotificationClient {
 		 * add the right tab, which will be opened when the user clicks on the notification000
 		 */
 		Intent notificationIntent = new Intent(this.context, SipgateFrames.class);
+		Bundle extras = new Bundle();
 		switch (notificationType) {
 			case CALL:
-				notificationIntent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
+				extras.putSerializable("view", SipgateFrames.SipgateTab.CALLS);
 				break;
 			case VOICEMAIL:
-				notificationIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
+				Log.d(TAG, "notification view: voicemail");
+				extras.putSerializable("view", SipgateFrames.SipgateTab.VM);
 				break;
 			default:
+				Log.d(TAG, "notification view: unknown");
 				break;	
 		}
+		notificationIntent.putExtras(extras);
 
-		Log.d("createNewMessagesNotification","Executed");
+		Log.d("createNewMessagesNotification","Executed, type: " + notificationType);
+		notificationIntent.setData(Uri.parse("sipgatetab:" + notificationType));
+		
+		
 		PendingIntent contentIntent = PendingIntent.getActivity(this.context, 0, notificationIntent, 0);
-
+		
 		/*
 		 * add the new notification to the bar
 		 */
 		notification.setLatestEventInfo(this.context, this.context.getResources().getText(R.string.sipgate), message, contentIntent);
+		
 		notificationManager.notify(notificationType.ordinal(), notification);
+		
 		Log.d(TAG,"send notification");
 	}
 	
