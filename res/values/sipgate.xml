@@ -36,7 +36,7 @@
   	<string name="alert_unregister">You are about to change accounts. When you do this your current account will be logged out and you will then have to login again. Are you sure you want to proceed?</string>
    	<string name="emptycontact">This contact does not seem to have a phone number.</string>
    	<string name="sipgate_empty_eventlist">Your eventlist is empty.</string>
-   	<string name="sipgate_voicemail_from">voicemail from</string>
+   	<string name="sipgate_voicemail_from">from</string>
    	<string name="sipgate_seconds">seconds</string>
 	<string name="sipgate_tab_dialpad">Dialpad</string>   	
 	<string name="sipgate_tab_voicemail">Voicemail</string>   		
