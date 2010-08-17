@@ -154,8 +154,7 @@ public class EventListActivity extends Activity {
 
 	private PendingIntent getNewMessagesIntent() {
 		if (onNewVoicemailsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
+			Intent onChangedIntent = new Intent(this, SipgateFramesVoicemails.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
 			onNewVoicemailsPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);

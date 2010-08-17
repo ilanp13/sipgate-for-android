@@ -6,13 +6,13 @@ import android.os.Bundle;
 import com.sipgate.ui.SipgateFrames;
 
 /**
- * Redirects the user to the voicemail tab in the main activity.
+ * Redirects the user to the call tab in the main activity.
  * 
- * @author Tobias Niepel
+ * @author Karsten Knuth
  * @version 1.0
  *
  */
-public class SipgateFramesMessage extends Activity  {
+public class SipgateFramesCalls extends Activity  {
 	
 	/**
 	 * Overwritten onCreate procedure
@@ -46,7 +46,7 @@ public class SipgateFramesMessage extends Activity  {
 		 * redirect the user to main activity
 		 */
         Intent notificationIntent = new Intent(getApplicationContext(), SipgateFrames.class);
-        notificationIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
+        notificationIntent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
         startActivity(notificationIntent);
 	}
 }

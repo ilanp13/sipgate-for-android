@@ -262,13 +262,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 				}
 			}
 		}
-		if (unreadCounter <= 0) {
-			NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
-			notifyClient.deleteNotification(NotificationClient.NotificationType.CALL);
-		} else {
-			if (hasUnreadEvents) {
-				createNewCallNotification(unreadCounter);
-			}
+		if (unreadCounter > 0) {
+			createNewCallNotification(unreadCounter);
 		}
 	}
 
