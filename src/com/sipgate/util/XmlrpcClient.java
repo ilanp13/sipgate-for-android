@@ -74,8 +74,11 @@ public class XmlrpcClient implements ApiClientInterface {
 			if (createOn == null) {
 				return new Date(0);
 			}
-			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ssZZZZZ");
-			return dateformatterIso.parse(createOn, new ParsePosition(0));
+			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+			Log.d(TAG, "starting date parsing");
+			Date ret = dateformatterIso.parse(createOn, new ParsePosition(0));
+			Log.d(TAG, "finished date parsing");
+			return ret;
 		} catch (IllegalArgumentException e) {
 			Log.e(TAG,"badly formated date");
 			
@@ -247,7 +250,9 @@ public class XmlrpcClient implements ApiClientInterface {
 				if(!HistorySet.get("TOS").equals("voice")) continue;
 				
 				call.setCallId((String) HistorySet.get("EntryID"));
+				Log.d(TAG, "create new date");
 				Date created = (Date) getDate((String) HistorySet.get("Timestamp"));
+				Log.d(TAG, "finished new date");
 				SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
 				call.setCallTime(dateformatterPretty.format(created));
 

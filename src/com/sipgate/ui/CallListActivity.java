@@ -342,7 +342,7 @@ public class CallListActivity extends Activity {
 		super.onResume();
 
 		startScanService();
-		serviceRefresh();
+		//serviceRefresh();
 		getCalls();
 	}	
 	
