@@ -70,6 +70,7 @@
 	<string name="sipgate_unable_to_provision">Fehler beim Provisionieren</string>
    	<string name="sipgate_me">Ich</string>
    	<string name="sipgate_unknown_caller">Unbekannt</string>
+   	<string name="sipgate_no_number">anonym</string>
    	<string name="sipgate_empty_calllist">Keine Einträge in Ihrer Anrufliste.</string>
    	<string name="sipgate_new_calls">%d neue Anrufe</string>
    	<string name="sipgate_a_new_call">Ein neuer Anruf</string>

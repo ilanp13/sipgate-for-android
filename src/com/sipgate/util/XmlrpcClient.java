@@ -243,7 +243,9 @@ public class XmlrpcClient implements ApiClientInterface {
 
 		try {
 			Object[] HistoryList = (Object[]) apiResponse.get("History");
+			Integer counter = 0;
 			for (Object HistoryObject : HistoryList) {
+				if(counter++ == 50) break;
 				SipgateCallData call = new SipgateCallData();
 				HashMap<String, Object> HistorySet = (HashMap<String, Object>) HistoryObject;
 				

@@ -188,7 +188,7 @@ public class RestClient implements ApiClientInterface {
 			Document doc = db.parse(inputStream);
 			doc.getDocumentElement().normalize();
 			NodeList nodeLst = doc.getElementsByTagName("call");
-			for (int s = 0; s < nodeLst.getLength(); s++) {
+			for (int s = 0; s < nodeLst.getLength() && s < 50; s++) {
 				Node fstNode = nodeLst.item(s);
 				if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element fstElmnt = (Element) fstNode;
