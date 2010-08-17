@@ -27,7 +27,7 @@ public class NotificationClient {
 	 * @version 1.0
 	 *
 	 */
-	public enum NotificationType { DUMMY, DUMMY1, VOICEMAIL, CALL };
+	public enum NotificationType { RESERVED, REGISTER_NOTIFICATION, CALL_NOTIFICATION, MISSED_CALL_NOTIFICATION, AUTO_ANSWER_NOTIFICATION, MWI_NOTIFICATION, VOICEMAIL, CALL };
 	
 	private static NotificationClient singleton = null;
 	private NotificationManager notificationManager = null;
