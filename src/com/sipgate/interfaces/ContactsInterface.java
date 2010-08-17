@@ -8,8 +8,11 @@ public interface ContactsInterface {
 
 	public ArrayList<SipgateContact> getContacts();
 	
-	public SipgateContact getContact(Integer id);
+	public SipgateContact getContactById(Integer id);
+	
+	public SipgateContact getContact(Integer index);
 	
 	public String getContactName(String phoneNumber);
 	
+	public int getCount();
 }

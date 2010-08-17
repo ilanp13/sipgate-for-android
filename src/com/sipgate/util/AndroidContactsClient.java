@@ -21,18 +21,26 @@ public class AndroidContactsClient implements ContactsInterface {
 		}	
 	}
 	
-	
 	public ArrayList<SipgateContact> getContacts() {
 		return this.contactsInterface.getContacts();
 	}
 
 	
-	public SipgateContact getContact(Integer id) {
-		return this.contactsInterface.getContact(id);
+	public SipgateContact getContact(Integer index) {
+		return this.contactsInterface.getContact(index);
+	}
+	
+	public SipgateContact getContactById(Integer id) {
+		return this.contactsInterface.getContactById(id);
 	}
 	
 	public String getContactName(String phoneNumber) {
 		return this.contactsInterface.getContactName(phoneNumber);
+	}
+
+	@Override
+	public int getCount() {
+		return this.contactsInterface.getCount();
 	}
 	
 }
