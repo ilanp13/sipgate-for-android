@@ -231,7 +231,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	}
 	
 	public void setCallRead(String call) throws AccessProtectedResourceException, NetworkProblemException {
-		accessProtectedResource("PUT", call+"/?value=true");
+		accessProtectedResource("PUT", call+"?value=true");
 	}
 
 

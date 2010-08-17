@@ -46,12 +46,14 @@ public class CallListActivity extends Activity {
 	private AlertDialog m_AlertDlg;
 	private AndroidContactsClient contactsClient;
 	private String unknownCaller = null;
+	private String noNumber = null;
 	private ServiceConnection serviceConnection;
 	private EventService serviceBinding = null;
 	private PendingIntent onNewCallsPendingIntent;
 
 	private void initStrings() {
 		unknownCaller = getResources().getString( R.string.sipgate_unknown_caller);
+		noNumber = getResources().getString( R.string.sipgate_no_number);
 	}
 	
 	@Override
@@ -136,8 +138,7 @@ public class CallListActivity extends Activity {
 	
 	private PendingIntent getNewMessagesIntent() {
 		if (onNewCallsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
+			Intent onChangedIntent = new Intent(this, SipgateFramesCalls.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
 			onNewCallsPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
@@ -209,6 +210,9 @@ public class CallListActivity extends Activity {
 				if(targetName.equals(targetNumber)) targetName = unknownCaller;
 				if(sourceName.equals(sourceNumber)) sourceName = unknownCaller;
 				
+				if(targetNumber.equals("+anonymous")) targetNumber = noNumber;
+				if(sourceNumber.equals("+anonymous")) sourceNumber = noNumber;
+				
 				if(callDirection.equals("outgoing")) {
 					holder.callerNameView.setText(targetName);
 					holder.callerNumberView.setText(targetNumber);
@@ -248,20 +252,22 @@ public class CallListActivity extends Activity {
 	}
 	
 	private void setRead(final SipgateCallData callData) {
-		Thread t = new Thread() {
-			public void start() {
-				try {
-					String url = callData.getCallReadModifyUrl();
-					ApiServiceProvider apiClient = ApiServiceProvider
-							.getInstance(getApplicationContext());
-					apiClient.setCallRead(url);
-				} catch (Exception e) {
-					e.printStackTrace();
+		if (!callData.getCallRead()) {
+			Thread t = new Thread() {
+				public void start() {
+					try {
+						String url = callData.getCallReadModifyUrl();
+						ApiServiceProvider apiClient = ApiServiceProvider
+								.getInstance(getApplicationContext());
+						apiClient.setCallRead(url);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		};
-		Log.e(TAG, "marking call as read... ");
-		t.start();
+			};
+			Log.e(TAG, "marking call as read... ");
+			t.start();
+		}
 	}
 	
 	protected String formatDateAsDay(Date d) {
@@ -342,7 +348,7 @@ public class CallListActivity extends Activity {
 		super.onResume();
 
 		startScanService();
-		serviceRefresh();
+		//serviceRefresh();
 		getCalls();
 	}	
 	

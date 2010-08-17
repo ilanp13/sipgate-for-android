@@ -368,7 +368,11 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.0
 	 */
 	private String buildVoicemailNotificationString(int unreadCounter) {
-		return String.format((String) getResources().getText(R.string.sipgate_a_new_voicemail), Integer.valueOf(unreadCounter));
+		if(unreadCounter == 1) {
+			return String.format((String) getResources().getText(R.string.sipgate_a_new_voicemail), Integer.valueOf(unreadCounter));
+		} else {
+			return String.format((String) getResources().getText(R.string.sipgate_new_voicemails), Integer.valueOf(unreadCounter));
+		}
 	}
 	
 	/**
@@ -378,7 +382,11 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.1
 	 */
 	private String buildCallNotificationString(int unreadCounter) {
-		return String.format((String) getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(unreadCounter));
+		if(unreadCounter == 1 ) {
+			return String.format((String) getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(unreadCounter));
+		} else {
+			return String.format((String) getResources().getText(R.string.sipgate_new_calls), Integer.valueOf(unreadCounter));
+		}
 	}
 	
 	/**

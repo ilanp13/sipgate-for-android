@@ -19,7 +19,7 @@
 			<ImageView android:id="@+id/CallTypeImage" android:src="@drawable/ic_incall_ongoing"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"
 				android:maxWidth="21dp" android:maxHeight="21dp"
-				android:layout_margin="5dp" android:layout_gravity="center_vertical" />
+				android:layout_gravity="center_vertical" />
 
 			<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 				android:orientation="vertical" android:layout_width="fill_parent"
@@ -30,8 +30,8 @@
 					android:textColor="#ffffff" android:text="Vorname Nachname"
 					android:textStyle="bold" android:layout_width="wrap_content"
 					android:id="@+id/CallerNameTextView" android:textSize="16dp"
-					android:ellipsize="marquee" android:width="200dp" android:maxLines="1"
-					android:height="20px" android:inputType="text" android:lines="1"></TextView>
+					android:ellipsize="marquee" android:singleLine="true" android:width="200dp" android:maxLines="1"
+					android:height="20px" android:lines="1"></TextView>
 
 				<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 					android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
 				<ImageView android:id="@+id/CallImageButton" android:src="@drawable/button_call"
 					android:layout_height="wrap_content" android:layout_width="wrap_content"
 					android:maxWidth="54dp" android:maxHeight="54dp"
-					android:layout_margin="5dp" />
+					/>
 
 			</LinearLayout>
 		</TableRow>

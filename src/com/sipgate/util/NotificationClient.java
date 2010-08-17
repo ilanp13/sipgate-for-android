@@ -82,14 +82,14 @@ public class NotificationClient {
 		 */
 		Intent notificationIntent = new Intent(this.context, SipgateFrames.class);
 		switch (notificationType) {
-		case CALL:
-			notificationIntent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
-			break;
-		case VOICEMAIL:
-			notificationIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
-			break;
-		default:
-			break;	
+			case CALL:
+				notificationIntent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
+				break;
+			case VOICEMAIL:
+				notificationIntent.putExtra("view", SipgateFrames.SipgateTab.VM);
+				break;
+			default:
+				break;	
 		}
 
 		Log.d("createNewMessagesNotification","Executed");
