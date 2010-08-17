@@ -34,7 +34,7 @@
   	<string name="alert_unregister">Hiermit wechseln Sie Ihren Account. Wenn Sie dies tun, wird ihr derzeit eingetragener Account aus der App gelöscht und Sie müssen in jedem Fall Ihre Logindaten erneut eingeben! Wollen Sie wirklich fortfahren?</string>
    	<string name="emptycontact">Dieser Kontakt scheint keine Rufnummer zu besitzen.</string>
    	<string name="sipgate_empty_eventlist">Keine Einträge in Ihrer Ereignisliste.</string>
-   	<string name="sipgate_voicemail_from">Nachricht von</string>
+   	<string name="sipgate_voicemail_from">von</string>
    	<string name="sipgate_seconds">Sekunden</string>
 	<string name="sipgate_tab_dialpad">Ziffernblock</string>   	
 	<string name="sipgate_tab_voicemail">Nachrichten</string>  	

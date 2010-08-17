@@ -6,7 +6,8 @@
 
 	<TextView android:layout_height="wrap_content"
 		android:textColor="#ffffff" android:text="category"
-		android:layout_width="fill_parent" android:id="@+id/CategoryTextView" android:background="#808080"></TextView>
+		android:layout_width="fill_parent" android:id="@+id/CategoryTextView"
+		android:background="#808080"></TextView>
 
 	<LinearLayout android:id="@+id/LinearLayout01"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
@@ -14,26 +15,31 @@
 
 		<ImageView android:id="@+id/IconView" android:src="@drawable/voicemail_unread"
 			android:layout_height="32dp" android:layout_width="32dp"
-			android:scaleType="fitXY" android:layout_marginRight="6dp" android:layout_marginTop="2dp"/>
-				
+			android:scaleType="fitXY" android:layout_marginRight="6dp"
+			android:layout_marginTop="2dp" />
+
 		<LinearLayout android:id="@+id/LinearLayout03"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
 			android:orientation="vertical">
-			<TextView android:text="element" android:id="@+id/EventTitle"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:textColor="#ffffff"></TextView>
+
+			<LinearLayout android:id="@+id/LinearLayout02"
+				android:layout_height="wrap_content" android:gravity="left"
+				android:layout_width="fill_parent">
+				<TextView android:text="element" android:id="@+id/EventTitle"
+					android:layout_width="wrap_content" android:layout_height="wrap_content"
+					android:ellipsize="end" android:textColor="#ffffff" 
+					android:singleLine="true" android:inputType="none" android:gravity="left"
+					android:width="200dp" android:layout_gravity="left"></TextView>
+				<TextView android:layout_width="wrap_content" android:width="70dp"
+					android:layout_height="wrap_content" android:id="@+id/DateTextView"
+					android:text="0:00"  android:gravity="right" android:layout_gravity="right"></TextView>
+			</LinearLayout>
+
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:id="@+id/TranscriptionTextView"
 				android:text="transcription"></TextView>
 		</LinearLayout>
-		
-		<LinearLayout android:id="@+id/LinearLayout02"
-			android:layout_height="wrap_content" android:gravity="right"
-			android:layout_width="fill_parent">
-			<TextView android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:id="@+id/DateTextView"
-				android:text="0:00"></TextView>
-		</LinearLayout>
+
 
 	</LinearLayout>
 
