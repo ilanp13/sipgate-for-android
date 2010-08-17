@@ -37,10 +37,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 				// columns
 				// to
 				// return
-				null, // Which rows to return (all rows)
-				null, // Selection arguments (none)
-				// Put the results in ascending order by name
-				People.NAME + " ASC");
+				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
@@ -98,10 +95,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 				// columns
 				// to
 				// return
-				null, // Which rows to return (all rows)
-				null, // Selection arguments (none)
-				// Put the results in ascending order by name
-				People.NAME + " ASC");
+				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
 
 		if (managedCursor.moveToFirst()) {
 			do {
@@ -140,10 +134,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 					// columns
 					// to
 					// return
-					null, // Which rows to return (all rows)
-					null, // Selection arguments (none)
-					// Put the results in ascending order by name
-					People.NAME + " ASC");
+					People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
 
 			if (managedCursor.moveToPosition(index)) {
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
@@ -236,16 +227,17 @@ public class AndroidContactsClient1x implements ContactsInterface {
 				// columns
 				// to
 				// return
-				null, // Which rows to return (all rows)
-				null, // Selection arguments (none)
-				// Put the results in ascending order by name
-				People.NAME + " ASC");
+				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
 
 		int count = managedCursor.getCount();
 
 		managedCursor.close();
 
 		return count;
+	}
+	
+	private String getContactSortOrder() {
+		return People.NAME+" ASC";
 	}
 
 }
