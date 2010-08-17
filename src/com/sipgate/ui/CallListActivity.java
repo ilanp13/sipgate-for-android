@@ -46,12 +46,14 @@ public class CallListActivity extends Activity {
 	private AlertDialog m_AlertDlg;
 	private AndroidContactsClient contactsClient;
 	private String unknownCaller = null;
+	private String noNumber = null;
 	private ServiceConnection serviceConnection;
 	private EventService serviceBinding = null;
 	private PendingIntent onNewCallsPendingIntent;
 
 	private void initStrings() {
 		unknownCaller = getResources().getString( R.string.sipgate_unknown_caller);
+		noNumber = getResources().getString( R.string.sipgate_no_number);
 	}
 	
 	@Override
@@ -208,6 +210,9 @@ public class CallListActivity extends Activity {
 				
 				if(targetName.equals(targetNumber)) targetName = unknownCaller;
 				if(sourceName.equals(sourceNumber)) sourceName = unknownCaller;
+				
+				if(targetNumber.equals("+anonymous")) targetNumber = noNumber;
+				if(sourceNumber.equals("+anonymous")) sourceNumber = noNumber;
 				
 				if(callDirection.equals("outgoing")) {
 					holder.callerNameView.setText(targetName);
