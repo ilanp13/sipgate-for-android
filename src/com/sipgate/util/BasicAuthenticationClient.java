@@ -122,8 +122,6 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
-        System.err.println("access p resource. username: " + username + " password: " + password);
-
         httpClient.getCredentialsProvider().setCredentials(new AuthScope(url.getHost(), AuthScope.ANY_PORT), new UsernamePasswordCredentials(username, password));
 
 	

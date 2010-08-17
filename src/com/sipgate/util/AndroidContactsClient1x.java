@@ -30,12 +30,13 @@ public class AndroidContactsClient1x implements ContactsInterface {
 		ArrayList<SipgateContact> contactsList = null;
 
 		// Form an array specifying which columns to return.
-		String[] projection = new String[] { People._ID, People.NAME,
-				People.PRIMARY_PHONE_ID, };
+		String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
 
 		// Make the query.
-		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI,
-				projection, // Which columns to return
+		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
+				// columns
+				// to
+				// return
 				null, // Which rows to return (all rows)
 				null, // Selection arguments (none)
 				// Put the results in ascending order by name
@@ -45,10 +46,8 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			contactsList = new ArrayList<SipgateContact>();
 			do {
 				// Get the field values
-				Integer id = managedCursor.getInt(managedCursor
-						.getColumnIndex(People._ID));
-				String lastName = managedCursor.getString(managedCursor
-						.getColumnIndex(People.NAME));
+				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
+				String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
 				if (lastName == null) {
 					Log.d(TAG, "no name");
 					continue;
@@ -63,8 +62,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 				Bitmap photo = getPhoto(id);
 
-				contactsList.add(new SipgateContact(id, firstName, lastName,
-						title, numbers, photo));
+				contactsList.add(new SipgateContact(id, firstName, lastName, title, numbers, photo));
 
 			} while (managedCursor.moveToNext());
 		}
@@ -74,35 +72,32 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 	public String getContactName(String phoneNumber) {
 		// define the columns I want the query to return
-		String[] projection = new String[] { Contacts.Phones.DISPLAY_NAME,
-				Contacts.Phones.NUMBER };
+		String[] projection = new String[] { Contacts.Phones.DISPLAY_NAME, Contacts.Phones.NUMBER };
 		// encode the phone number and build the filter URI
-		Uri contactUri = Uri.withAppendedPath(
-				Contacts.Phones.CONTENT_FILTER_URL, Uri.encode(phoneNumber));
+		Uri contactUri = Uri.withAppendedPath(Contacts.Phones.CONTENT_FILTER_URL, Uri.encode(phoneNumber));
 		// query time
-		Cursor c = this.activity.managedQuery(contactUri, projection, null,
-				null, null);
+		Cursor c = this.activity.managedQuery(contactUri, projection, null, null, null);
 		// if the query returns 1 or more results
 		// return the first result
 		if (c.moveToFirst()) {
-			String name = c.getString(c
-					.getColumnIndex(Contacts.Phones.DISPLAY_NAME));
+			String name = c.getString(c.getColumnIndex(Contacts.Phones.DISPLAY_NAME));
 			return name;
 		}
 		// return the original number if no match was found
 		return phoneNumber;
 	}
 
-	public SipgateContact getContact(Integer id) {
+	public SipgateContact getContactById(Integer id) {
 		SipgateContact contact = null;
 
 		// Form an array specifying which columns to return.
-		String[] projection = new String[] { People._ID, People.NAME,
-				People.PRIMARY_PHONE_ID, };
+		String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
 
 		// Make the query.
-		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI,
-				projection, // Which columns to return
+		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
+				// columns
+				// to
+				// return
 				null, // Which rows to return (all rows)
 				null, // Selection arguments (none)
 				// Put the results in ascending order by name
@@ -110,12 +105,10 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 		if (managedCursor.moveToFirst()) {
 			do {
-				Integer tempID = managedCursor.getInt(managedCursor
-						.getColumnIndex(People._ID));
+				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
 
 				if (tempID == id) {
-					String lastName = managedCursor.getString(managedCursor
-							.getColumnIndex(People.NAME));
+					String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
 					if (lastName != null) {
 						String firstName = null;
 						String title = null;
@@ -124,8 +117,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 						Bitmap photo = getPhoto(id);
 
-						contact = new SipgateContact(id, firstName, lastName,
-								title, numbers, photo);
+						contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
 					}
 					break;
 				}
@@ -135,24 +127,62 @@ public class AndroidContactsClient1x implements ContactsInterface {
 		return contact;
 	}
 
+	public SipgateContact getContact(Integer index) {
+		SipgateContact contact = null;
+		Cursor managedCursor = null;
+
+		try {
+			// Form an array specifying which columns to return.
+			String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
+
+			// Make the query.
+			managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
+					// columns
+					// to
+					// return
+					null, // Which rows to return (all rows)
+					null, // Selection arguments (none)
+					// Put the results in ascending order by name
+					People.NAME + " ASC");
+
+			if (managedCursor.moveToPosition(index)) {
+				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
+
+				String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
+				if (lastName != null) {
+					String firstName = null;
+					String title = null;
+
+					ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
+
+					Bitmap photo = getPhoto(id);
+
+					contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			managedCursor.close();
+		}
+
+		return contact;
+	}
+
 	private ArrayList<SipgateContactNumber> getPhoneNumbers(Integer id) {
 		ArrayList<SipgateContactNumber> numbers = null;
-		Cursor personCursor = this.activity.managedQuery(
-				Contacts.Phones.CONTENT_URI, null, Contacts.Phones.PERSON_ID
-						+ " = ?", new String[] { id.toString() }, null);
+		Cursor personCursor = this.activity.managedQuery(Contacts.Phones.CONTENT_URI, null, Contacts.Phones.PERSON_ID
+				+ " = ?", new String[] { id.toString() }, null);
 
 		if (personCursor.moveToFirst()) {
 			numbers = new ArrayList<SipgateContactNumber>();
 			do {
-				String number = personCursor.getString(personCursor
-						.getColumnIndex(Contacts.Phones.NUMBER));
-				String unformattedNumber = personCursor.getString(
-						personCursor.getColumnIndex(Contacts.Phones.NUMBER))
+				String number = personCursor.getString(personCursor.getColumnIndex(Contacts.Phones.NUMBER));
+				String unformattedNumber = personCursor.getString(personCursor.getColumnIndex(Contacts.Phones.NUMBER))
 						.replace("-", "").replace(" ", "");
 				SipgateContactNumber.PhoneType type = null;
 
-				switch (personCursor.getInt(personCursor
-						.getColumnIndex(Contacts.Phones.TYPE))) {
+				switch (personCursor.getInt(personCursor.getColumnIndex(Contacts.Phones.TYPE))) {
 				case Contacts.Phones.TYPE_CUSTOM:
 					type = SipgateContactNumber.PhoneType.CUSTOM;
 					break;
@@ -183,8 +213,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 				Log.d(TAG, number);
 
-				numbers.add(new SipgateContactNumber(type, number,
-						unformattedNumber));
+				numbers.add(new SipgateContactNumber(type, number, unformattedNumber));
 			} while (personCursor.moveToNext());
 		}
 
@@ -192,10 +221,31 @@ public class AndroidContactsClient1x implements ContactsInterface {
 	}
 
 	private Bitmap getPhoto(Integer id) {
-		Bitmap photo = People.loadContactPhoto(this.activity
-				.getApplicationContext(), ContentUris.withAppendedId(
+		Bitmap photo = People.loadContactPhoto(this.activity.getApplicationContext(), ContentUris.withAppendedId(
 				People.CONTENT_URI, id), R.drawable.ic_contact_picture, null);
 		return photo;
+	}
+
+	@Override
+	public int getCount() {
+		// Form an array specifying which columns to return.
+		String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
+
+		// Make the query.
+		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
+				// columns
+				// to
+				// return
+				null, // Which rows to return (all rows)
+				null, // Selection arguments (none)
+				// Put the results in ascending order by name
+				People.NAME + " ASC");
+
+		int count = managedCursor.getCount();
+
+		managedCursor.close();
+
+		return count;
 	}
 
 }
