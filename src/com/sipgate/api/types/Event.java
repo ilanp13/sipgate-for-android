@@ -85,6 +85,9 @@ public class Event implements Parcelable {
 	private static String getRead(Element fstElmnt) {
 		NodeList lstNmElmntLst1 = fstElmnt.getElementsByTagName("read");
 		Node thNode = lstNmElmntLst1.item(0);
+		if (thNode == null) {
+			return null;
+		}
 		Element lstNmElmnt1 = (Element) thNode;
 		NodeList endpoint = lstNmElmnt1.getElementsByTagName("value");
 		Element test = (Element) endpoint.item(0);

@@ -445,26 +445,32 @@ public class RestClient implements ApiClientInterface {
 			nodeList = eventRecord.getChildNodes();
 			
 			Log.v(TAG,"got voicemail list with " + nodeList.getLength()+ " nodes");
-			for (int i = 0; i < nodeList.getLength(); i++) {			
-				Node n = nodeList.item(i);
-				Event e = null;
+			for (int j = 0; j < nodeList.getLength(); j++) {   // loop through all list of eventgroups. (voicemails, calls, ...) 
+				Node container = nodeList.item(j);
+				NodeList elementNodeList = container.getChildNodes();
 				
-				if (n.getNodeName().equals("voicemail")) {
-					e = Voicemail.fromXMLNode(n);
-				} else if (n.getNodeName().equals("sms")) {
-					e = SMS.fromXMLNode(n);
-				} else if (n.getNodeName().equals("call")) {
-					// handle call object
-					// e = Call.fromXMLNode(n);
-				} else {
-					Log.d(TAG,"unknown nodename " + n.getNodeName());
+				for (int i = 0; i < elementNodeList.getLength(); i++) {
+					Node n = elementNodeList.item(i);
+					Event e = null;
+
+					if (n.getNodeName().equals("voicemail")) {
+						e = Voicemail.fromXMLNode(n);
+					} else if (n.getNodeName().equals("sms")) {
+						e = SMS.fromXMLNode(n);
+					} else if (n.getNodeName().equals("call")) {
+						// handle call object
+						// e = Call.fromXMLNode(n);
+					} else {
+						Log.d(TAG,"unknown nodename " + n.getNodeName());
+					}
+					if (e != null) {
+						ret.add(e);
+					} 
 				}
-				if (e != null) {
-					ret.add(e);
-				} 
 			}
 		}
 		catch (Exception e){
+				e.printStackTrace();
 			Log.e(TAG, e.getLocalizedMessage());
 		}
 		
