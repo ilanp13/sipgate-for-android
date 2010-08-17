@@ -98,8 +98,6 @@ public class SipgateFrames extends TabActivity {
 			this.addVmTab();
 		}
 		
-		this.startService(new Intent(this, SipgateBackgroundService.class));
-		
 		this.setCurrentTab(bundle);
 	}
 
@@ -175,6 +173,8 @@ public class SipgateFrames extends TabActivity {
 		} else if (vmTabVisible && !hasVmListFeature()) {
 			this.removeVmTab();
 		}
+		
+		this.startService(new Intent(this, SipgateBackgroundService.class));
 	}
 	
 	@Override
