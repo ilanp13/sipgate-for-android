@@ -1,6 +1,7 @@
 package com.sipgate.adapters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.database.DataSetObserver;
@@ -26,16 +27,20 @@ public class ContactListAdapter implements ListAdapter {
 	private AndroidContactsClient contactsClient;
 	private ArrayList<DataSetObserver> observerRegistry = null;
 	private ContactsObserver contactsObserver = null;
+	private HashMap<Integer,SipgateContact> contactsCacheMap = null;
 
 	/* nested classes */
 	private class ContactsObserver extends DataSetObserver {
 		private ArrayList<DataSetObserver> observerRegistry = null;
-		public ContactsObserver(ArrayList<DataSetObserver> observerRegistry){
+		private HashMap<Integer, SipgateContact> contactsCacheMap = null;
+		public ContactsObserver(ArrayList<DataSetObserver> observerRegistry, HashMap<Integer,SipgateContact> contactsCacheMap){
 			this.observerRegistry = observerRegistry;
+			this.contactsCacheMap = contactsCacheMap;
 		}
 		
 		public void onChanged() {
 			Log.i(TAG, "onChanged() called");
+			this.contactsCacheMap.clear();
 			for (DataSetObserver obs : this.observerRegistry) {
 				obs.onChanged();
 			}
@@ -43,6 +48,7 @@ public class ContactListAdapter implements ListAdapter {
 		
 		public void onInvalidated() {
 			Log.i(TAG, "onInvalidated() called");
+			this.contactsCacheMap.clear();
 			for (DataSetObserver obs : this.observerRegistry) {
 				obs.onInvalidated();
 			}
@@ -55,10 +61,12 @@ public class ContactListAdapter implements ListAdapter {
 		this.mInflater = activity.getLayoutInflater();
 
 		this.contactsClient = new AndroidContactsClient(activity);
+		
+		this.contactsCacheMap = new HashMap<Integer, SipgateContact>();
 
 		this.observerRegistry = new ArrayList<DataSetObserver>();
 		
-		this.contactsObserver = new ContactsObserver(observerRegistry);
+		this.contactsObserver = new ContactsObserver(observerRegistry, contactsCacheMap);
 		
 		this.contactsClient.registerDataSetObserver(contactsObserver);
 	}
@@ -80,12 +88,12 @@ public class ContactListAdapter implements ListAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		return this.contactsClient.getContact(position);
+		return this.getContact(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return this.contactsClient.getContact(position).getId();
+		return this.getContact(position).getId();
 	}
 
 	@Override
@@ -94,6 +102,15 @@ public class ContactListAdapter implements ListAdapter {
 		return 0;
 	}
 
+	private SipgateContact getContact(int position) {
+		SipgateContact contact = this.contactsCacheMap.get(position);
+		if (contact == null) {
+			contact = this.contactsClient.getContact(position);
+			this.contactsCacheMap.put(position, contact);
+		}
+		return contact;
+	}
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		final SipgateContact item = (SipgateContact) getItem(position);
