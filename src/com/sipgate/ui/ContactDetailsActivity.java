@@ -52,7 +52,7 @@ public class ContactDetailsActivity extends Activity implements
 		contactsClient = new AndroidContactsClient(this);
 
 		SipgateContact currentContact = null;
-		currentContact = (SipgateContact) contactsClient.getContact(contactId);
+		currentContact = (SipgateContact) contactsClient.getContactById(contactId);
 
 		TextView contactName = (TextView) findViewById(R.id.ContactName);
 		ImageView contactPhoto = (ImageView) findViewById(R.id.ContactPhoto);

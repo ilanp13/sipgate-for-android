@@ -79,7 +79,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			do {
 				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
 
-				if (tempID == id) {
+				if (tempID.equals(id)) {
 					// Get the field values
 					String lastName = managedCursor.getString(managedCursor
 							.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
