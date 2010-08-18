@@ -57,6 +57,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 	private Date youngestVoicemail = new Date(0); 
 	private Date firstLaunch = null; // never access directly. use getFirstLaunchDate()
 
+	private NotificationClient notifyClient;
 	/**
 	 * 
 	 * 
@@ -67,6 +68,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 		fetchYoungestVoicemaildate();
 		fetchYoungestCalldate();
 		startservice();
+		notifyClient = new NotificationClient(this); 
 	}
 
 	/**
@@ -110,7 +112,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 			Log.d(TAG, "timer canceled");
 		}
 		Log.d(TAG,"cancel notifications");
-		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+		
 		notifyClient.deleteNotification(NotificationType.VOICEMAIL);
 		notifyClient.deleteNotification(NotificationType.CALL);
 	}
@@ -126,7 +128,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 			Log.d(TAG,"timer.cancel");
 			timer.cancel();
 		}		
-		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
+		
 		notifyClient.deleteNotification(NotificationType.VOICEMAIL);
 		notifyClient.deleteNotification(NotificationType.CALL);
 	}
@@ -214,7 +216,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 			}
 		}
 		if (unreadCounter <= 0) {
-			NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
 			notifyClient.deleteNotification(NotificationClient.NotificationType.VOICEMAIL);
 		} else {
 			if (hasUnreadEvents) {
@@ -342,7 +343,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.0
 	 */
 	private void createNewVoicemailNotification(int unreadCounter) {
-		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
 		notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.statusbar_voicemai_48, buildVoicemailNotificationString(unreadCounter));
 	}
 	
@@ -352,7 +352,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.1
 	 */
 	private void createNewCallNotification(int unreadCounter) {
-		NotificationClient notifyClient = NotificationClient.getInstance(getApplicationContext());
 		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
 	}
 	
