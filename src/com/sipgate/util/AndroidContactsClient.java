@@ -3,6 +3,7 @@ package com.sipgate.util;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.database.DataSetObserver;
 import android.os.Build;
 
 import com.sipgate.interfaces.ContactsInterface;
@@ -41,6 +42,17 @@ public class AndroidContactsClient implements ContactsInterface {
 	@Override
 	public int getCount() {
 		return this.contactsInterface.getCount();
+	}
+
+	@Override
+	public void registerDataSetObserver(DataSetObserver observer) {
+		this.contactsInterface.registerDataSetObserver(observer);
+		
+	}
+
+	@Override
+	public void unregisterDataSetObserver(DataSetObserver observer) {
+		this.contactsInterface.unregisterDataSetObserver(observer);
 	}
 	
 }

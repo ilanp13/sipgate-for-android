@@ -1,14 +1,14 @@
 package com.sipgate.adapters;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
-import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -16,20 +16,51 @@ import android.widget.TextView;
 import com.sipgate.R;
 import com.sipgate.models.SipgateContact;
 import com.sipgate.models.holder.ContactViewHolder;
-import com.sipgate.ui.ContactDetailsActivity;
 import com.sipgate.util.AndroidContactsClient;
 
 public class ContactListAdapter implements ListAdapter {
+	/* member variables and constants */
 	private final static String TAG = "ContactListAdapter";
-	protected final Activity activity;
+	private final Activity activity;
 	private final LayoutInflater mInflater;
 	private AndroidContactsClient contactsClient;
+	private ArrayList<DataSetObserver> observerRegistry = null;
+	private ContactsObserver contactsObserver = null;
 
+	/* nested classes */
+	private class ContactsObserver extends DataSetObserver {
+		private ArrayList<DataSetObserver> observerRegistry = null;
+		public ContactsObserver(ArrayList<DataSetObserver> observerRegistry){
+			this.observerRegistry = observerRegistry;
+		}
+		
+		public void onChanged() {
+			Log.i(TAG, "onChanged() called");
+			for (DataSetObserver obs : this.observerRegistry) {
+				obs.onChanged();
+			}
+		}
+		
+		public void onInvalidated() {
+			Log.i(TAG, "onInvalidated() called");
+			for (DataSetObserver obs : this.observerRegistry) {
+				obs.onInvalidated();
+			}
+		} 
+	}
+	
+	/* methods */
 	public ContactListAdapter(Activity activity) {
 		this.activity = activity;
 		this.mInflater = activity.getLayoutInflater();
 
 		this.contactsClient = new AndroidContactsClient(activity);
+
+		this.observerRegistry = new ArrayList<DataSetObserver>();
+		
+		this.contactsObserver = new ContactsObserver(observerRegistry);
+		
+		this.contactsClient.registerDataSetObserver(contactsObserver);
 	}
 
 	@Override
@@ -144,12 +175,18 @@ public class ContactListAdapter implements ListAdapter {
 
 	@Override
 	public void registerDataSetObserver(DataSetObserver observer) {
-		// TODO FIXME
+//		this.contactsClient.registerDataSetObserver(observer);
+		if (!this.observerRegistry.contains(observer)) {
+			this.observerRegistry.add(observer);
+		}
 	}
 
 	@Override
 	public void unregisterDataSetObserver(DataSetObserver observer) {
-		// TODO FIXME
+//		this.contactsClient.registerDataSetObserver(observer);
+		if (this.observerRegistry.contains(observer)) {
+			this.observerRegistry.remove(observer);
+		}
 	}
 
 }

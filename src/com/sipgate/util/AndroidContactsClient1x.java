@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.Contacts;
@@ -22,22 +23,24 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 	private Activity activity = null;
 
+	private Cursor managedCursor;
+
 	public AndroidContactsClient1x(Activity activity) {
 		this.activity = activity;
-	}
-
-	public ArrayList<SipgateContact> getContacts() {
-		ArrayList<SipgateContact> contactsList = null;
 
 		// Form an array specifying which columns to return.
 		String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
 
 		// Make the query.
-		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
+		this.managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
 				// columns
 				// to
 				// return
 				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
+	}
+
+	public ArrayList<SipgateContact> getContacts() {
+		ArrayList<SipgateContact> contactsList = null;
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
@@ -87,16 +90,6 @@ public class AndroidContactsClient1x implements ContactsInterface {
 	public SipgateContact getContactById(Integer id) {
 		SipgateContact contact = null;
 
-		// Form an array specifying which columns to return.
-		String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
-
-		// Make the query.
-		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
-				// columns
-				// to
-				// return
-				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
-
 		if (managedCursor.moveToFirst()) {
 			do {
 				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
@@ -123,19 +116,8 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 	public SipgateContact getContact(Integer index) {
 		SipgateContact contact = null;
-		Cursor managedCursor = null;
 
 		try {
-			// Form an array specifying which columns to return.
-			String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
-
-			// Make the query.
-			managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
-					// columns
-					// to
-					// return
-					People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
-
 			if (managedCursor.moveToPosition(index)) {
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
 
@@ -153,8 +135,6 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			managedCursor.close();
 		}
 
 		return contact;
@@ -219,25 +199,21 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 	@Override
 	public int getCount() {
-		// Form an array specifying which columns to return.
-		String[] projection = new String[] { People._ID, People.NAME, People.PRIMARY_PHONE_ID, };
-
-		// Make the query.
-		Cursor managedCursor = this.activity.managedQuery(People.CONTENT_URI, projection, // Which
-				// columns
-				// to
-				// return
-				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
-
-		int count = managedCursor.getCount();
-
-		managedCursor.close();
-
-		return count;
+		return managedCursor.getCount();
 	}
 	
 	private String getContactSortOrder() {
 		return People.NAME+" ASC";
+	}
+
+	@Override
+	public void registerDataSetObserver(DataSetObserver observer) {
+		this.managedCursor.registerDataSetObserver(observer);
+	}
+
+	@Override
+	public void unregisterDataSetObserver(DataSetObserver observer) {
+		this.managedCursor.unregisterDataSetObserver(observer);
 	}
 
 }

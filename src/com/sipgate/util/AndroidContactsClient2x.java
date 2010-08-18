@@ -7,6 +7,7 @@ import com.sipgate.R;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -22,9 +23,11 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	private final String TAG = "AndroidContactsClient2x";
 
 	private Activity activity = null;
+	private Cursor managedCursor = null;
 
 	public AndroidContactsClient2x(Activity activity) {
 		this.activity = activity;
+		this.managedCursor = getManagedCursorOnContacts();
 	}
 
 	private String getContactSortOrder() {
@@ -38,10 +41,6 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 	public ArrayList<SipgateContact> getContacts() {
 		ArrayList<SipgateContact> contactsList = null;
-
-		// Make the query.
-		
-		Cursor managedCursor = getManagedCursorOnContacts();
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
@@ -69,17 +68,12 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 			} while (managedCursor.moveToNext());
 		}
-
-		managedCursor.close();
 		
 		return contactsList;
 	}
 
 	public SipgateContact getContactById(Integer id) {
 		SipgateContact contact = null;
-
-		// Make the query.
-		Cursor managedCursor = getManagedCursorOnContacts();
 
 		if (managedCursor.moveToFirst()) {
 			do {
@@ -103,20 +97,14 @@ public class AndroidContactsClient2x implements ContactsInterface {
 				}
 			} while (managedCursor.moveToNext());
 		}
-
-		managedCursor.close();
 		
 		return contact;
 	}
 
 	public SipgateContact getContact(Integer index) {
 		SipgateContact contact = null;
-		Cursor managedCursor = null;
 
 		try {
-			// Make the query.
-			managedCursor = getManagedCursorOnContacts();
-
 			if (managedCursor.moveToPosition(index)) {
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
 
@@ -136,8 +124,6 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			managedCursor.close();
 		}
 
 		return contact;
@@ -268,14 +254,18 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	}
 
 	@Override
-	public int getCount() {
-		Cursor managedCursor = getManagedCursorOnContacts();
+	public int getCount() {		
+		return managedCursor.getCount();
+	}
 
-		int count = managedCursor.getCount();
+	@Override
+	public void registerDataSetObserver(DataSetObserver observer) {
+		this.managedCursor.registerDataSetObserver(observer);
+	}
 
-		managedCursor.close();
-		
-		return count;
+	@Override
+	public void unregisterDataSetObserver(DataSetObserver observer) {
+		this.managedCursor.registerDataSetObserver(observer);
 	}
 
 }
