@@ -38,7 +38,7 @@ import com.sipgate.util.NotificationClient.NotificationType;
 public class SipgateBackgroundService extends Service implements EventService {
 	private static final String TAG = "SipgateBackgroundService";
 	
-	private static final long EVENTREFRESH_INTERVAL = 30000;
+	private static final long EVENTREFRESH_INTERVAL = 600000;
 	public static final String ACTION_NEWEVENTS = "action_newEvents";
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;

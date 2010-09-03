@@ -47,14 +47,12 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			do {
 				// Get the field values
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
-				String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
-				if (lastName == null) {
+				String displayName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
+				if (displayName == null) {
 					Log.d(TAG, "no name");
 					continue;
 				}
 
-				String firstName = null;
-				String title = null;
 
 				ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
 				if (numbers == null)
@@ -62,7 +60,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 				Bitmap photo = getPhoto(id);
 
-				contactsList.add(new SipgateContact(id, firstName, lastName, title, numbers, photo));
+				contactsList.add(new SipgateContact(id, displayName, numbers, photo));
 
 			} while (managedCursor.moveToNext());
 		}
@@ -199,7 +197,11 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 	@Override
 	public int getCount() {
-		return managedCursor.getCount();
+		if (managedCursor.isClosed()) {
+			return 0;
+		} else {
+			return managedCursor.getCount();
+		}
 	}
 	
 	private String getContactSortOrder() {

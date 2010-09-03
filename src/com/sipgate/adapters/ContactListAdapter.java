@@ -26,35 +26,8 @@ public class ContactListAdapter implements ListAdapter {
 	private final LayoutInflater mInflater;
 	private AndroidContactsClient contactsClient;
 	private ArrayList<DataSetObserver> observerRegistry = null;
-	private ContactsObserver contactsObserver = null;
 	private HashMap<Integer,SipgateContact> contactsCacheMap = null;
 
-	/* nested classes */
-	private class ContactsObserver extends DataSetObserver {
-		private ArrayList<DataSetObserver> observerRegistry = null;
-		private HashMap<Integer, SipgateContact> contactsCacheMap = null;
-		public ContactsObserver(ArrayList<DataSetObserver> observerRegistry, HashMap<Integer,SipgateContact> contactsCacheMap){
-			this.observerRegistry = observerRegistry;
-			this.contactsCacheMap = contactsCacheMap;
-		}
-		
-		public void onChanged() {
-			Log.i(TAG, "onChanged() called");
-			this.contactsCacheMap.clear();
-			for (DataSetObserver obs : this.observerRegistry) {
-				obs.onChanged();
-			}
-		}
-		
-		public void onInvalidated() {
-			Log.i(TAG, "onInvalidated() called");
-			this.contactsCacheMap.clear();
-			for (DataSetObserver obs : this.observerRegistry) {
-				obs.onInvalidated();
-			}
-		} 
-	}
-	
 	/* methods */
 	public ContactListAdapter(Activity activity) {
 		this.activity = activity;
@@ -66,9 +39,6 @@ public class ContactListAdapter implements ListAdapter {
 
 		this.observerRegistry = new ArrayList<DataSetObserver>();
 		
-		this.contactsObserver = new ContactsObserver(observerRegistry, contactsCacheMap);
-		
-		this.contactsClient.registerDataSetObserver(contactsObserver);
 	}
 
 	@Override
@@ -83,7 +53,9 @@ public class ContactListAdapter implements ListAdapter {
 
 	@Override
 	public int getCount() {
-		return this.contactsClient.getCount();
+		int count = this.contactsClient.getCount();
+		Log.d(TAG, count + "contacts");
+		return count;
 	}
 
 	@Override
@@ -93,6 +65,7 @@ public class ContactListAdapter implements ListAdapter {
 
 	@Override
 	public long getItemId(int position) {
+		
 		return this.getContact(position).getId();
 	}
 
@@ -108,6 +81,9 @@ public class ContactListAdapter implements ListAdapter {
 			contact = this.contactsClient.getContact(position);
 			this.contactsCacheMap.put(position, contact);
 		}
+		if (contact == null) {
+			Log.w(TAG, "getContact returning null. contactsmap has " + contactsCacheMap.size() + " items. adapter has " + getCount() + " items");
+		}
 		return contact;
 	}
 	
@@ -115,6 +91,12 @@ public class ContactListAdapter implements ListAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		final SipgateContact item = (SipgateContact) getItem(position);
 
+		if (item == null) {
+			Log.e(TAG, "item at position " + position + " is null");
+			return null;
+		}
+		
+		
 		ContactViewHolder holder = null;
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.sipgate_contacts_list_bit, null);
@@ -129,7 +111,7 @@ public class ContactListAdapter implements ListAdapter {
 			holder = (ContactViewHolder) convertView.getTag();
 		}
 
-		String name = item.getLastName();
+		String name = item.getDisplayName();
 		if (name != null) {
 			Log.d(TAG, name);
 		} else {
@@ -150,7 +132,7 @@ public class ContactListAdapter implements ListAdapter {
 
 		if (position >= 1) {
 			SipgateContact lastItem = (SipgateContact) getItem(position - 1);
-			String firstLetter = lastItem.getLastName().substring(0, 1);
+			String firstLetter = lastItem.getDisplayName().substring(0, 1);
 			if (firstLetter.equalsIgnoreCase(thisFirstLetter)) {
 				holder.category.setVisibility(View.GONE);
 			} else {
@@ -160,7 +142,7 @@ public class ContactListAdapter implements ListAdapter {
 
 		if (position < getCount() - 1) {
 			SipgateContact nextItem = (SipgateContact) getItem(position + 1);
-			String firstLetter = nextItem.getLastName().substring(0, 1);
+			String firstLetter = nextItem.getDisplayName().substring(0, 1);
 			if (!firstLetter.equalsIgnoreCase(thisFirstLetter)) {
 				holder.separator.setVisibility(View.GONE);
 			} else {

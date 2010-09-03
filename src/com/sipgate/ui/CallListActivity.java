@@ -207,11 +207,11 @@ public class CallListActivity extends Activity {
 				String targetNumber = item.getCallTargetNumberPretty();
 				String sourceNumber = item.getCallSourceNumberPretty();
 				
-				if(targetName.equals(targetNumber)) targetName = unknownCaller;
-				if(sourceName.equals(sourceNumber)) sourceName = unknownCaller;
+				if(targetName == null || targetName.equals(targetNumber)) targetName = unknownCaller;
+				if(sourceName == null || sourceName.equals(sourceNumber)) sourceName = unknownCaller;
 				
-				if(targetNumber.equals("+anonymous")) targetNumber = noNumber;
-				if(sourceNumber.equals("+anonymous")) sourceNumber = noNumber;
+				if(targetNumber == null || targetNumber.equals("+anonymous")) targetNumber = noNumber;
+				if(sourceNumber == null || sourceNumber.equals("+anonymous")) sourceNumber = noNumber;
 				
 				if(callDirection.equals("outgoing")) {
 					holder.callerNameView.setText(targetName);

@@ -52,17 +52,15 @@ public class ContactDetailsActivity extends Activity implements
 		contactsClient = new AndroidContactsClient(this);
 
 		SipgateContact currentContact = null;
-		currentContact = (SipgateContact) contactsClient.getContact(contactId);
+		currentContact = (SipgateContact) contactsClient.getContactById(contactId);
 
 		TextView contactName = (TextView) findViewById(R.id.ContactName);
 		ImageView contactPhoto = (ImageView) findViewById(R.id.ContactPhoto);
 		ListView elementList = (ListView) findViewById(R.id.ContactPhonenumbers);
 
-		Log.d("ContactDetails", "Name: " + currentContact.getLastName());
+		Log.d("ContactDetails", "Name: " + currentContact.getDisplayName());
 
-		contactName.setText(currentContact.getLastName());
-		contactPhoto.setImageBitmap(currentContact.getPhoto());
-
+		contactName.setText(currentContact.getDisplayName());
 		final LayoutInflater mInflater = getLayoutInflater();
 
 		elementList.setOnItemClickListener(this);
