@@ -57,8 +57,6 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		
 		return contactsList;
 	}
-	
-	
 
 	public SipgateContact getContactById(Integer id) {
 		SipgateContact contact = null;
@@ -79,7 +77,6 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 	private SipgateContact getContactDetailsById(int id) {
 		SipgateContact contact = null;
-
 		
 		String nameWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
 		String[] nameWhereParams = new String[]{String.valueOf(id), 

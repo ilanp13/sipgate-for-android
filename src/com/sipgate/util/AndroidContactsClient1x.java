@@ -92,7 +92,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			do {
 				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
 
-				if (tempID == id) {
+				if (tempID.equals(id)) {
 					String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
 					if (lastName != null) {
 						String firstName = null;

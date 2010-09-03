@@ -31,7 +31,6 @@ public class NotificationClient {
 	 */
 	public enum NotificationType { RESERVED, REGISTER_NOTIFICATION, CALL_NOTIFICATION, MISSED_CALL_NOTIFICATION, AUTO_ANSWER_NOTIFICATION, MWI_NOTIFICATION, VOICEMAIL, CALL };
 	
-	private static NotificationClient singleton = null;
 	private NotificationManager notificationManager = null;
 	private Context context = null;
 
