@@ -79,7 +79,7 @@ public class ApiServiceProvider {
 	}
 
 	/*
-	 * check wether the application was registered to an account. This is
+	 * check whether the application was registered to an account. This is
 	 * transparent for OAuth and Basic-Auth use.
 	 */
 	public boolean isRegistered() {

@@ -93,7 +93,12 @@ public class ContactListAdapter implements ListAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return this.getContact(position).getId();
+		SipgateContact contact = this.getContact(position);
+		if (contact != null) {
+			return contact.getId();
+		} else {
+			return -1;
+		}
 	}
 
 	@Override

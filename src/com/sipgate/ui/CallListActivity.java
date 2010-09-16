@@ -202,8 +202,18 @@ public class CallListActivity extends Activity {
 					holder.callTypeIconView.setImageDrawable(getResources().getDrawable(R.drawable.icon_outgoing));
 				}
 
-				String targetName = contactsClient.getContactName(item.getCallTargetNumberPretty());
-				String sourceName = contactsClient.getContactName(item.getCallSourceNumberPretty());
+				String targetName = null;
+				if(item.getCallTargetNumberPretty() != "") {
+					targetName = contactsClient.getContactName(item.getCallTargetNumberPretty());
+				} else {
+					targetName = unknownCaller;
+				}
+				String sourceName = null;
+				if (item.getCallSourceNumberPretty() != "") {
+					sourceName = contactsClient.getContactName(item.getCallSourceNumberPretty());
+				} else {
+					sourceName = unknownCaller;
+				}
 				String targetNumber = item.getCallTargetNumberPretty();
 				String sourceNumber = item.getCallSourceNumberPretty();
 				

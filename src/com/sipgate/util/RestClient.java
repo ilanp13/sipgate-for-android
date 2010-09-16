@@ -197,14 +197,20 @@ public class RestClient implements ApiClientInterface {
 					Element sources = getNodeById(fstElmnt, "sources");
 					Element sourceEndpoint = getNodeById(sources, "endpoint");
 					String sourceName = getElementById(sourceEndpoint, "contactFN");
+					sourceName = (sourceName != null) ? sourceName : "";
 					String sourceNumberPretty = getElementById(sourceEndpoint, "numberPretty");
+					sourceNumberPretty = (sourceNumberPretty != null) ? sourceNumberPretty : "";
 					String sourceNumberE164 = getElementById(sourceEndpoint, "numberE164");
+					sourceNumberE164 = (sourceNumberE164 != null) ? sourceNumberE164 : "";
 					
 					Element targets = getNodeById(fstElmnt, "targets");
 					Element targetEndpoint = getNodeById(targets, "endpoint");
 					String targetName = getElementById(targetEndpoint, "contactFN");
+					targetName = (targetName != null) ? targetName : "";
 					String targetNumberPretty = getElementById(targetEndpoint, "numberPretty");
+					targetNumberPretty = (targetNumberPretty != null) ? targetNumberPretty : "";
 					String targetNumberE164 = getElementById(targetEndpoint, "numberE164");
+					targetNumberE164 = (targetNumberE164 != null) ? targetNumberE164 : "";
 					
 					call.setCallId(getElementById(fstElmnt, "id"));
 					String direction = getElementById(fstElmnt, "direction");
