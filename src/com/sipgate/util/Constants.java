@@ -34,7 +34,7 @@ public abstract class Constants {
 	public static String ACCESS_TOKEN = "";
 	public static String OAUTH_TOKEN_SECRET = "";
 
-	public static final String API_VERSION_SUFFIX = "version=2.15";  // TODO FIXME
+	public static final String API_VERSION_SUFFIX = "version=2.16";  // TODO FIXME
 
 	//public static final String API_BASEURL =  "https://api.sipgate.net";
 	public static final String API_10_HOSTNAME = "samurai.sipgate.net";

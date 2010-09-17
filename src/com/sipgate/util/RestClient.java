@@ -219,16 +219,24 @@ public class RestClient implements ApiClientInterface {
 						call.setCallDirection("incoming");
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
-					}
-					else if(direction.equals("missed_incoming")){
+					} else if(direction.equals("missed_incoming")){
 						call.setCallMissed("true");
 						call.setCallDirection("incoming");
 						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
-					}
-					if(direction.equals("outgoing")){
+					} else if(direction.equals("outgoing")){
 						call.setCallMissed("false");
 						call.setCallDirection("outgoing");
+						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
+						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
+					} else if(direction.equals("missed_outgoing")){
+						call.setCallMissed("true");
+						call.setCallDirection("outgoing");
+						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
+						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
+					} else {
+						call.setCallMissed("");
+						call.setCallDirection("");
 						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
 						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
 					}
