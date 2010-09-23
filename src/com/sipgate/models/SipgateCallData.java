@@ -89,7 +89,12 @@ public class SipgateCallData implements Parcelable {
 	}
 	
 	public void setCallMissed(String type) {
-		this.missed = type;
+		if (type != null) {
+			this.missed = type;
+		}
+		else {
+			this.missed = "";
+		}
 	}
 	
 	public Boolean getCallMissed() {
