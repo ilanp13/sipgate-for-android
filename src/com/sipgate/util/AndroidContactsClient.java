@@ -54,5 +54,23 @@ public class AndroidContactsClient implements ContactsInterface {
 	public void unregisterDataSetObserver(DataSetObserver observer) {
 		this.contactsInterface.unregisterDataSetObserver(observer);
 	}
+
+	@Override
+	public ArrayList<SipgateContact> getContacts(boolean withPicture)
+	{
+		return this.contactsInterface.getContacts(withPicture);
+	}
+
+	@Override
+	public SipgateContact getContactById(Integer id, boolean withPicture)
+	{
+		return this.contactsInterface.getContactById(id, withPicture);
+	}
+
+	@Override
+	public SipgateContact getContact(Integer index, boolean withPicture)
+	{
+		return this.contactsInterface.getContact(index, withPicture);
+	}
 	
 }

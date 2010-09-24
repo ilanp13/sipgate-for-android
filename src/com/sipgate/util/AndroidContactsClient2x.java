@@ -42,15 +42,19 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		return this.activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
 				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, getContactSortOrder());
 	}
-
+	
 	public ArrayList<SipgateContact> getContacts() {
+		return getContacts(true);
+	}
+
+	public ArrayList<SipgateContact> getContacts(boolean withPicture) {
 		ArrayList<SipgateContact> contactsList = null;
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
 			do {
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
-				SipgateContact contact = getContactDetailsById(id);
+				SipgateContact contact = getContactDetailsById(id, withPicture);
 				contactsList.add(contact);
 			} while (managedCursor.moveToNext());
 		}
@@ -59,6 +63,10 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	}
 
 	public SipgateContact getContactById(Integer id) {
+		return getContactById(id, true);
+	}
+	
+	public SipgateContact getContactById(Integer id, boolean withPicture) {
 		SipgateContact contact = null;
 
 		if (managedCursor.moveToFirst()) {
@@ -66,7 +74,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
 				Log.d(TAG, "tempID: " + tempID);
 				if (tempID.equals(id)) {
-					contact = getContactDetailsById(id);
+					contact = getContactDetailsById(id, withPicture);
 					break;
 				}
 			} while (managedCursor.moveToNext());
@@ -76,6 +84,10 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	}
 
 	private SipgateContact getContactDetailsById(int id) {
+		return getContactDetailsById(id, true);
+	}
+	
+	private SipgateContact getContactDetailsById(int id, boolean withPicture) {
 		SipgateContact contact = null;
 		
 		String nameWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
@@ -94,7 +106,13 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		nameCur.close();
 
 		ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
-		Bitmap photo = getPhoto(id);
+		
+		Bitmap photo = null;
+		
+		if (withPicture)
+		{
+			photo = getPhoto(id);
+		}
 		
 		if (numbers == null || numbers.size() < 1) {
 			Log.d(TAG, "no number");
@@ -122,6 +140,10 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	}
 
 	public SipgateContact getContact(Integer index) {
+		return getContact(index, true);
+	}
+	
+	public SipgateContact getContact(Integer index, boolean withPicture) {
 		SipgateContact contact = null;
 
 		try {
@@ -143,7 +165,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 		if (nameCursor != null && nameCursor.moveToFirst()) {
 			Integer id = nameCursor.getInt(nameCursor.getColumnIndex(ContactsContract.PhoneLookup._ID));
-			SipgateContact contact = getContactDetailsById(id);
+			SipgateContact contact = getContactDetailsById(id, false);
 			if (contact != null) {
 				return contact.getDisplayName();
 			}
@@ -281,5 +303,4 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	public void unregisterDataSetObserver(DataSetObserver observer) {
 		this.managedCursor.registerDataSetObserver(observer);
 	}
-
 }

@@ -102,10 +102,10 @@ public class CallListActivity extends Activity {
 					}
 				}
 			};
+			
 			Intent intent = new Intent(this, SipgateBackgroundService.class);
 			Log.d(TAG, "bindService");
-			boolean bindret = ctx.bindService(intent, serviceConnection,
-					Context.BIND_AUTO_CREATE);
+			boolean bindret = ctx.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
 			Log.v(TAG, "leave startScanService: " + bindret);
 		} else {
@@ -118,8 +118,7 @@ public class CallListActivity extends Activity {
 		if (serviceConnection != null) {
 			try {
 				if (serviceBinding != null) {
-					serviceBinding
-							.unregisterOnCallsIntent(getNewMessagesIntent());
+					serviceBinding.unregisterOnCallsIntent(getNewMessagesIntent());
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -169,10 +168,11 @@ public class CallListActivity extends Activity {
 		contactsClient = new AndroidContactsClient(this);
 
 		callListAdapter = new ArrayAdapter<SipgateCallData>(this, R.layout.sipgate_call_list_bit, R.id.CallerNameTextView) {
-
+			
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				CallViewHolder holder = null;
+				
 				if (convertView == null) {
 					convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 					holder = new CallViewHolder();
@@ -203,40 +203,53 @@ public class CallListActivity extends Activity {
 				}
 
 				String targetName = null;
-				if(item.getCallTargetNumberPretty() != "") {
+				String sourceName = null;
+				
+				if(item.getCallTargetNumberPretty().length() > 0) {
 					targetName = contactsClient.getContactName(item.getCallTargetNumberPretty());
 				}
-				else {
+				
+				if (targetName == null)
+				{
 					targetName = unknownCaller;
 				}
-				String sourceName = null;
-				if (item.getCallSourceNumberPretty() != "") {
+				
+				if (item.getCallSourceNumberPretty().length() > 0) {
 					sourceName = contactsClient.getContactName(item.getCallSourceNumberPretty());
 				}
-				else {
+			
+				if (sourceName == null) {
 					sourceName = unknownCaller;
 				}
+				
 				String targetNumber = item.getCallTargetNumberPretty();
 				String sourceNumber = item.getCallSourceNumberPretty();
+			
+				if(targetNumber == null || targetNumber.length() == 0 || targetNumber.equals("+anonymous")) {
+					targetNumber = noNumber;
+				}
 				
-				if(targetName == null || targetName.equals(targetNumber)) targetName = unknownCaller;
-				if(sourceName == null || sourceName.equals(sourceNumber)) sourceName = unknownCaller;
-				
-				if(targetNumber == null || targetNumber.equals("+anonymous")) targetNumber = noNumber;
-				if(sourceNumber == null || sourceNumber.equals("+anonymous")) sourceNumber = noNumber;
+				if(sourceNumber == null || sourceNumber.length() == 0 || sourceNumber.equals("+anonymous")) {
+					sourceNumber = noNumber;
+				}
 				
 				if(callDirection.equals("outgoing")) {
+					holder.callerNameView.setText(sourceName);
+					holder.callerNumberView.setText(sourceNumber);
+				}
+				else if(callDirection.equals("incoming")) {
 					holder.callerNameView.setText(targetName);
 					holder.callerNumberView.setText(targetNumber);
 				}
-				
-				if(callDirection.equals("incoming")) {
-					holder.callerNameView.setText(sourceName);
-					holder.callerNumberView.setText(sourceNumber);
+				else
+				{
+					holder.callerNameView.setText(unknownCaller);
+					holder.callerNumberView.setText(noNumber);
 				}
 				
 				Date callTime = item.getCallTime();
 				String thisDay = formatDateAsDay(callTime);
+				
 				holder.callTimeView.setText(formatDateAsTime(callTime));
 				holder.categoryTextView.setText(thisDay);
 				holder.categoryTextView.setVisibility(View.VISIBLE);
@@ -351,9 +364,6 @@ public class CallListActivity extends Activity {
 		
 		Log.i(TAG, "showEvents done " + new Date().toString());
 	}
-	
-	
-
 	
 	@Override
 	public void onResume() {

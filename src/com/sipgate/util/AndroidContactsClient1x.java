@@ -218,4 +218,25 @@ public class AndroidContactsClient1x implements ContactsInterface {
 		this.managedCursor.unregisterDataSetObserver(observer);
 	}
 
+	@Override
+	public ArrayList<SipgateContact> getContacts(boolean withPicture)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SipgateContact getContactById(Integer id, boolean withPicture)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SipgateContact getContact(Integer index, boolean withPicture)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
