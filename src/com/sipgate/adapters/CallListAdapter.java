@@ -12,8 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.sipgate.R;
@@ -22,7 +22,7 @@ import com.sipgate.db.CallDataDBObject;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.AndroidContactsClient;
 
-public class CallListAdapter implements ListAdapter 
+public class CallListAdapter extends BaseAdapter
 {
 	private final static String TAG = "CallListAdapter";
 
@@ -51,8 +51,8 @@ public class CallListAdapter implements ListAdapter
 	private Calendar currentDay = null;
 	private Calendar lastDay = null;
 	
+	private SimpleDateFormat timeFormatter = null;
 	private SimpleDateFormat dateFormatter = null;
-	private String formatedDate = null;
 		
 	private long callDirection = 0;
 	private boolean callMissed = false;
@@ -61,8 +61,12 @@ public class CallListAdapter implements ListAdapter
 	private Drawable missedIcon = null;
 	private Drawable outgoingIcon = null;
 	
+	private Activity activity = null;
+	
 	public CallListAdapter(Activity activity) 
 	{
+		this.activity = activity;
+		
 		mInflater = activity.getLayoutInflater();
 		
 		contactsClient = new AndroidContactsClient(activity);
@@ -83,6 +87,7 @@ public class CallListAdapter implements ListAdapter
 		outgoingIcon = activity.getResources().getDrawable(R.drawable.icon_outgoing);
 		
 		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
+		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
 		
 		currentDay = Calendar.getInstance();
 		lastDay = Calendar.getInstance();
@@ -186,10 +191,8 @@ public class CallListAdapter implements ListAdapter
 
 		currentDay.setTimeInMillis(item.getTime());
 		
-		formatedDate = dateFormatter.format(currentDay.getTime());		
-		
-		holder.callTimeView.setText(formatedDate);
-		holder.categoryTextView.setText(formatedDate);
+		holder.callTimeView.setText(timeFormatter.format(currentDay.getTime()));
+		holder.categoryTextView.setText(dateFormatter.format(currentDay.getTime()));
 		holder.categoryTextView.setVisibility(View.VISIBLE);
 
 		if (position > 0) 
@@ -235,15 +238,9 @@ public class CallListAdapter implements ListAdapter
 	}
 	*/
 	
-	public int getViewTypeCount() 
-	{
-		return 1 + this.getCount();
-	}
-
-	
 	public boolean hasStableIds() 
 	{
-		return false;
+		return true;
 	}
 
 	@Override
@@ -274,5 +271,15 @@ public class CallListAdapter implements ListAdapter
 	public int getCount()
 	{
 		return callData.size();
+	}
+	
+	@Override
+	public void notifyDataSetChanged() {
+		
+		callDataDBAdapter = new CallDataDBAdapter(activity);
+		callData = callDataDBAdapter.getAllCallData();
+		callDataDBAdapter.close();
+		
+		super.notifyDataSetChanged();
 	}
 }
