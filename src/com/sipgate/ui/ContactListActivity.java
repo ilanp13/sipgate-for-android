@@ -52,17 +52,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 
 		return result;
 	}
-	
-	@Override
-	public void onStart() {
-		super.onStart();
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-
+		
 	@Override
 	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
 		Log.d(TAG, "onItemClick() position "+position+"; id "+id);

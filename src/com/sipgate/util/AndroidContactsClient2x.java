@@ -173,7 +173,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 		nameCursor.close();
 		
-		return phoneNumber;
+		return null;
 	}
 
 	private ArrayList<SipgateContactNumber> getPhoneNumbers(Integer id) {

@@ -82,7 +82,7 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			return name;
 		}
 		// return the original number if no match was found
-		return phoneNumber;
+		return null;
 	}
 
 	public SipgateContact getContactById(Integer id) {

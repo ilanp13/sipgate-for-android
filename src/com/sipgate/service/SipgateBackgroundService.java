@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,6 +22,8 @@ import android.util.Log;
 
 import com.sipgate.R;
 import com.sipgate.api.types.Event;
+import com.sipgate.db.CallDataDBAdapter;
+import com.sipgate.db.CallDataDBObject;
 import com.sipgate.models.SipgateCallData;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.NotificationClient;
@@ -164,10 +167,42 @@ public class SipgateBackgroundService extends Service implements EventService {
 
 			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
+			CallDataDBAdapter callDataDBAdapter = new CallDataDBAdapter(this);
+			
 			List<SipgateCallData> currentCalls = apiClient.getCalls();
+			
+			callDataDBAdapter.removeAllCallData();
+			
+			CallDataDBObject callDataDBObject = null;
+			
+			for (SipgateCallData currentCall : currentCalls)
+			{
+				callDataDBObject = new CallDataDBObject();
+						
+				callDataDBObject.setDirection(currentCall.getCallDirection().equals("incoming") ? CallDataDBObject.INCOMING : CallDataDBObject.OUTGOING);
+				callDataDBObject.setMissed(currentCall.getCallMissed());
+				callDataDBObject.setIsRead(currentCall.getCallRead());
+				callDataDBObject.setTime(currentCall.getCallTime().getTime());
+				callDataDBObject.setTargetNumberE164(currentCall.getCallTargetNumberE164());
+				callDataDBObject.setTargetNumberPretty(currentCall.getCallTargetNumberPretty());
+				callDataDBObject.setTargetName(currentCall.getCallTargetName());
+				callDataDBObject.setSourceNumberE164(currentCall.getCallSourceNumberE164());
+				callDataDBObject.setSourceNumberPretty(currentCall.getCallSourceNumberPretty());
+				callDataDBObject.setSourceName(currentCall.getCallSourceName());
+				callDataDBObject.setReadModifyUrl(currentCall.getCallReadModifyUrl());
+						
+				callDataDBAdapter.insert(callDataDBObject);
+			}
+			
+			callDataDBAdapter.close();
+			
+			/*
+			
 			List<SipgateCallData> oldCalls = calls;
 			calls = currentCalls;
 			notifyIfUnreadsCalls(oldCalls, currentCalls);
+			*/
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

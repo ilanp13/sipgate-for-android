@@ -19,7 +19,8 @@ import com.sipgate.models.SipgateContact;
 import com.sipgate.models.holder.ContactViewHolder;
 import com.sipgate.util.AndroidContactsClient;
 
-public class ContactListAdapter implements ListAdapter {
+public class ContactListAdapter implements ListAdapter 
+{
 	/* member variables and constants */
 	private final static String TAG = "ContactListAdapter";
 	private final Activity activity;
@@ -83,7 +84,7 @@ public class ContactListAdapter implements ListAdapter {
 	private SipgateContact getContact(int position) {
 		SipgateContact contact = this.contactsCacheMap.get(position);
 		if (contact == null) {
-			contact = this.contactsClient.getContact(position);
+			contact = this.contactsClient.getContact(position, false);
 			this.contactsCacheMap.put(position, contact);
 		}
 		if (contact == null) {
