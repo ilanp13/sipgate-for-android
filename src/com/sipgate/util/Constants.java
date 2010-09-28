@@ -67,4 +67,5 @@ public abstract class Constants {
 	public static final String REST_API_20_SERVER_URL = API_20_BASEURL;
 	public static final String XMLRPC_API_10_SERVER_URL = API_10_BASEURL + "/RPC2";
 
+	public static final long ONE_DAY_IN_MS = 86400000;
 }

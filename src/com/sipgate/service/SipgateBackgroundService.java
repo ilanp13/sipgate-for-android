@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,10 +25,11 @@ import com.sipgate.db.CallDataDBAdapter;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.models.SipgateCallData;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.NotificationClient;
-import com.sipgate.util.SettingsClient;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.Constants;
+import com.sipgate.util.NotificationClient;
 import com.sipgate.util.NotificationClient.NotificationType;
+import com.sipgate.util.SettingsClient;
 
 /**
  * 
@@ -336,21 +336,27 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @return
 	 * @since 1.0
 	 */
-	private Date getFirstLaunchDate() {
-		if (firstLaunch != null) {
+	private Date getFirstLaunchDate() 
+	{
+		if (firstLaunch != null) 
+		{
 			return firstLaunch;
 		}
 		
 		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
 		
-		firstLaunch = new Date(pref.getLong(PREF_FIRSTLAUNCHDATE, 0));
+		long firstLaunchMS = pref.getLong(PREF_FIRSTLAUNCHDATE, 0);
 		
-		if (firstLaunch.equals(new Date(0))) {
-			firstLaunch = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); // yesterday
+		if (firstLaunchMS == 0) 
+		{
+			firstLaunchMS =  System.currentTimeMillis() - Constants.ONE_DAY_IN_MS; // yesterday
 			
 			Editor editor = pref.edit();
-			editor.putLong(PREF_FIRSTLAUNCHDATE, firstLaunch.getTime());
+			editor.putLong(PREF_FIRSTLAUNCHDATE, firstLaunchMS);
 		}
+		
+		firstLaunch = new Date(firstLaunchMS);
+		
 		return firstLaunch;
 	}
 	
