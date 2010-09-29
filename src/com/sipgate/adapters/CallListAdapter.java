@@ -244,24 +244,6 @@ public class CallListAdapter extends BaseAdapter
 	}
 
 	@Override
-	public void registerDataSetObserver(DataSetObserver observer) 
-	{
-		if (!observerRegistry.contains(observer)) 
-		{
-			observerRegistry.add(observer);
-		}
-	}
-
-	@Override
-	public void unregisterDataSetObserver(DataSetObserver observer) 
-	{
-		if (observerRegistry.contains(observer)) 
-		{
-			observerRegistry.remove(observer);
-		}
-	}
-
-	@Override
 	public boolean isEmpty()
 	{
 		return (callData.size() > 0);

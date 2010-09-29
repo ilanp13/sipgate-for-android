@@ -38,13 +38,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	}
 	
 	@Override
-	protected void onResume() {
-		super.onResume();
-		
-		callListAdapter.notifyDataSetChanged();
-	}
-	
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
 		boolean result = super.onCreateOptionsMenu(menu);

@@ -155,7 +155,7 @@ public class ContactListAdapter implements ListAdapter
 				holder.separator.setVisibility(View.VISIBLE);
 			}
 		}
-
+		
 		return convertView;
 	}
 

@@ -121,8 +121,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		
 		if (lastName == null && firstName == null) {
 			// no detailed name. let's try displayname
-			String displayName = managedCursor.getString(managedCursor
-					.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+			String displayName = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 			if (displayName == null && numbers == null || numbers.size() < 1) {
 				Log.d(TAG, "no name");
 				return null; // we dont want contacts without name
