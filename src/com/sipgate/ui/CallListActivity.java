@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
@@ -22,6 +23,9 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	private CallListAdapter callListAdapter = null;
 	private AlertDialog m_AlertDlg = null;
 	
+	private ListView elementList = null;
+	private TextView emptyList = null;
+	
 	@Override
 	public void onCreate(Bundle bundle) 
 	{
@@ -29,7 +33,8 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		
 		setContentView(R.layout.sipgate_call_list);
 		
-		ListView elementList = (ListView) findViewById(R.id.CalllistListView);
+		elementList = (ListView) findViewById(R.id.CalllistListView);
+		emptyList = (TextView) findViewById(R.id.EmptyCallListTextView);
 
 		callListAdapter = new CallListAdapter(this);
         
@@ -40,6 +45,14 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		if (callListAdapter.isEmpty()) {
+			elementList.setVisibility(View.GONE);
+			emptyList.setVisibility(View.VISIBLE);
+		} else {
+			elementList.setVisibility(View.VISIBLE);
+			emptyList.setVisibility(View.GONE);
+		}
 		
 		callListAdapter.notifyDataSetChanged();
 	}
