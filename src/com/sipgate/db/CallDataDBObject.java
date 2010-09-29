@@ -14,7 +14,7 @@ public class CallDataDBObject extends BaseDBObject
 	private long id = 0;
 	private long direction = 0;
 	private long missed = 0;
-	private long isRead = 0;
+	private long read = 0;
 	private long time = 0;
 		
 	private String targetNumberE164 = null;
@@ -36,7 +36,7 @@ public class CallDataDBObject extends BaseDBObject
 	{
 		statement.bindLong(1, direction);
 		statement.bindLong(2, missed);
-		statement.bindLong(3, isRead);
+		statement.bindLong(3, read);
 		statement.bindLong(4, time);
 		
 		statement.bindString(5, targetNumberE164);	
@@ -54,7 +54,7 @@ public class CallDataDBObject extends BaseDBObject
 	{
 		statement.bindLong(1, direction);
 		statement.bindLong(2, missed);
-		statement.bindLong(3, isRead);
+		statement.bindLong(3, read);
 		statement.bindLong(4, time);
 		
 		statement.bindString(5, targetNumberE164);
@@ -72,7 +72,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getCreateStatement()
 	{
-		return "CREATE TABLE CallData (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, direction INTEGER, missed INTEGER, isRead INTEGER, time INTEGER, targetNumberE164 VARCHAR, targetNumberPretty VARCHAR, targetName VARCHAR, sourceNumberE164 VARCHAR, sourceNumberPretty VARCHAR, sourceName VARCHAR, readModifyUrl VARCHAR)";
+		return "CREATE TABLE CallData (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, direction INTEGER, missed INTEGER, read INTEGER, time INTEGER, targetNumberE164 VARCHAR, targetNumberPretty VARCHAR, targetName VARCHAR, sourceNumberE164 VARCHAR, sourceNumberPretty VARCHAR, sourceName VARCHAR, readModifyUrl VARCHAR)";
 	}
 
 	public String getDeleteStatement()
@@ -82,7 +82,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO CallData (direction, missed, isRead, time, 	targetNumberE164, targetNumberPretty, targetName, sourceNumberE164, sourceNumberPretty, sourceName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return "INSERT INTO CallData (direction, missed, read, time, targetNumberE164, targetNumberPretty, targetName, sourceNumberE164, sourceNumberPretty, sourceName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
@@ -92,7 +92,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getUpdateStatement()
 	{
-		return "UPDATE CallData SET direction = ?, missed = ?, isRead = ?, time = ?, targetNumberE164 = ?, targetNumberPretty = ?, targetName = ?, sourceNumberE164 = ?, sourceNumberPretty = ?, sourceName = ?, readModifyUrl = ? WHERE id = ?";
+		return "UPDATE CallData SET direction = ?, missed = ?, read = ?, time = ?, targetNumberE164 = ?, targetNumberPretty = ?, targetName = ?, sourceNumberE164 = ?, sourceNumberPretty = ?, sourceName = ?, readModifyUrl = ? WHERE id = ?";
 	}
 
 	public long getId()
@@ -130,19 +130,19 @@ public class CallDataDBObject extends BaseDBObject
 		this.missed = (missed ? 1 : 0);
 	}
 
-	public boolean getIsRead()
+	public boolean isRead()
 	{
-		return (isRead > 0);
+		return (read > 0);
 	}
 
-	public void setIsRead(long isRead)
+	public void setRead(long read)
 	{
-		this.isRead = isRead;
+		this.read = read;
 	}
 
-	public void setIsRead(boolean isRead)
+	public void setRead(boolean read)
 	{
-		this.isRead = (isRead ? 1 : 0);
+		this.read = (read ? 1 : 0);
 	}
 	
 	public long getTime()

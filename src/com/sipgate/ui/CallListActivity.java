@@ -2,7 +2,15 @@ package com.sipgate.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +22,8 @@ import android.widget.ListView;
 import com.sipgate.R;
 import com.sipgate.adapters.CallListAdapter;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.service.EventService;
+import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 
 public class CallListActivity extends Activity implements OnItemClickListener 
@@ -26,6 +36,12 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	private ListView elementList = null;
 	private TextView emptyList = null;
 	
+	private ServiceConnection serviceConnection = null;
+	private EventService serviceBinding = null;
+	private PendingIntent onNewCallPendingIntent = null;
+	
+	private Context appContext = null;
+	
 	@Override
 	public void onCreate(Bundle bundle) 
 	{
@@ -36,15 +52,22 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		elementList = (ListView) findViewById(R.id.CalllistListView);
 		emptyList = (TextView) findViewById(R.id.EmptyCallListTextView);
 
+		appContext = getApplicationContext();
+		
 		callListAdapter = new CallListAdapter(this);
         
         elementList.setAdapter(callListAdapter);
         elementList.setOnItemClickListener(this);
+               
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		startScanActivity();		
+		
+		callListAdapter.notifyDataSetChanged();
 		
 		if (callListAdapter.isEmpty()) {
 			elementList.setVisibility(View.GONE);
@@ -52,9 +75,89 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		} else {
 			elementList.setVisibility(View.VISIBLE);
 			emptyList.setVisibility(View.GONE);
-		}
+		}	
+	}
+	
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+	
+		stopScanActivity();
+	}
 		
-		callListAdapter.notifyDataSetChanged();
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		
+		stopScanActivity();
+	}
+	
+	private void startScanActivity()
+	{
+		Intent intent = new Intent(this, SipgateBackgroundService.class);
+		appContext.startService(intent);
+
+		if (serviceConnection == null) {
+			Log.d(TAG, "service connection is null -> create new");
+			
+			serviceConnection = new ServiceConnection() {
+
+				public void onServiceDisconnected(ComponentName name) {
+					Log.d(TAG, "service " + name + " disconnected -> clear binding");
+					serviceBinding = null;
+				}
+
+				public void onServiceConnected(ComponentName name, IBinder binder) {
+					Log.v(TAG, "service " + name + " connected -> bind");
+					try {
+						serviceBinding = (EventService) binder;
+						try {
+							Log.d(TAG, "service binding -> registerOnCallsIntent");
+							serviceBinding.registerOnCallsIntent(getNewMessagesIntent());
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					} catch (ClassCastException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			
+			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+			Log.v(TAG, "bind service -> " + bindret);
+		} else {
+			Log.d(TAG, "service connection is not null -> already running");
+		}
+	}
+	
+	public void stopScanActivity()
+	{
+		if (serviceConnection != null) {
+			try {
+				if (serviceBinding != null) {
+					Log.d(TAG, "service unbinding -> unregisterOnCallsIntent");
+					serviceBinding.unregisterOnCallsIntent(getNewMessagesIntent());
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			Log.v(TAG, "unbind service");
+			appContext.unbindService(serviceConnection);
+			serviceConnection = null;
+		}
+	}
+
+	private PendingIntent getNewMessagesIntent() {
+		if (onNewCallPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFramesCalls.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onNewCallPendingIntent = PendingIntent.getActivity(this,
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNewCallPendingIntent;
 	}
 	
 	@Override
@@ -111,6 +214,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) 
 	{
 		CallDataDBObject callDataDBObject = (CallDataDBObject) parent.getItemAtPosition(position);
-		call_menu(callDataDBObject.getSourceNumberE164().replaceAll("tel:", ""));
+		call_menu(callDataDBObject.getSourceNumberE164().replaceAll("tel:", "").replaceAll("dd:", ""));
 	}
 }

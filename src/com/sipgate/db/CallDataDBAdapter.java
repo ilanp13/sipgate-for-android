@@ -36,7 +36,7 @@ public class CallDataDBAdapter extends BaseDBAdapter
 			call.setId(cursor.getLong(0));
 			call.setDirection(cursor.getLong(1));
 			call.setMissed(cursor.getLong(2));
-			call.setIsRead(cursor.getLong(3));
+			call.setRead(cursor.getLong(3));
 			call.setTime(cursor.getLong(4));
 			call.setTargetNumberE164(cursor.getString(5));
 			call.setTargetNumberPretty(cursor.getString(6));
@@ -72,7 +72,7 @@ public class CallDataDBAdapter extends BaseDBAdapter
 			call.setId(cursor.getLong(0));
 			call.setDirection(cursor.getLong(1));
 			call.setMissed(cursor.getLong(2));
-			call.setIsRead(cursor.getLong(3));
+			call.setRead(cursor.getLong(3));
 			call.setTime(cursor.getLong(4));
 			call.setTargetNumberE164(cursor.getString(5));
 			call.setTargetNumberPretty(cursor.getString(6));
@@ -81,8 +81,7 @@ public class CallDataDBAdapter extends BaseDBAdapter
 			call.setSourceNumberPretty(cursor.getString(9));
 			call.setSourceName(cursor.getString(10));
 			call.setReadModifyUrl(cursor.getString(11));
-			
-		
+				
 			break;
 		}
 			

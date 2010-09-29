@@ -185,8 +185,10 @@ public class RestClient implements ApiClientInterface {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
+			Log.d(TAG, "start parsing");
 			Document doc = db.parse(inputStream);
 			doc.getDocumentElement().normalize();
+			Log.d(TAG, "finnish parsing");
 			NodeList nodeLst = doc.getElementsByTagName("call");
 			for (int s = 0; s < nodeLst.getLength() && s < 50; s++) {
 				Node fstNode = nodeLst.item(s);

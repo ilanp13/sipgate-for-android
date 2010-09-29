@@ -1,13 +1,12 @@
 package com.sipgate.adapters;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Vector;
 
 import android.app.Activity;
-import android.database.DataSetObserver;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,41 +20,44 @@ import com.sipgate.db.CallDataDBAdapter;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.AndroidContactsClient;
+import com.sipgate.util.ApiServiceProvider;
 
 public class CallListAdapter extends BaseAdapter
 {
+	@SuppressWarnings("unused")
 	private final static String TAG = "CallListAdapter";
 
-	private final LayoutInflater mInflater;
+	private LayoutInflater mInflater = null;
 	
-	private AndroidContactsClient contactsClient;
+	private ApiServiceProvider apiClient = null;
+	private AndroidContactsClient contactsClient = null;
 	
-	private ArrayList<DataSetObserver> observerRegistry = null;
 	private CallDataDBAdapter callDataDBAdapter = null;
 	
-	private Vector<CallDataDBObject> callData = null;
+	private Vector<CallDataDBObject> callDataDBObjects = null;
 	private HashMap<String, String> contactNameCache = null; 	
 	
-	private String unknownCaller = null;
-	private String noNumber = null;
+	private String unknownCallerString = null;
+	private String noNumberString = null;
 	
 	private CallViewHolder holder = null;
 	
-	private CallDataDBObject item = null;
-	private CallDataDBObject lastItem = null;
+	private CallDataDBObject currentCallDataDBObject = null;
+	private CallDataDBObject lastCallDataDBObject = null;
 	
 	private String sourceName = null;
 	private String sourceNumberPretty = null;
 	private String sourceNumber = null;
 	
-	private Calendar currentDay = null;
-	private Calendar lastDay = null;
+	private Calendar currentDayCalendar = null;
+	private Calendar lastDayCalendar = null;
 	
 	private SimpleDateFormat timeFormatter = null;
 	private SimpleDateFormat dateFormatter = null;
 		
 	private long callDirection = 0;
-	private boolean callMissed = false;
+	private boolean isMissed = false;
+	private boolean isRead = false;
 	
 	private Drawable incomingIcon = null;
 	private Drawable missedIcon = null;
@@ -70,17 +72,16 @@ public class CallListAdapter extends BaseAdapter
 		mInflater = activity.getLayoutInflater();
 		
 		contactsClient = new AndroidContactsClient(activity);
+		apiClient = ApiServiceProvider.getInstance(activity);
 		
 		callDataDBAdapter = new CallDataDBAdapter(activity);
-		callData = callDataDBAdapter.getAllCallData();
+		callDataDBObjects = callDataDBAdapter.getAllCallData();
 		callDataDBAdapter.close();
 		
 		contactNameCache = new HashMap<String, String>();
-		
-		observerRegistry = new ArrayList<DataSetObserver>();
 				
-		unknownCaller = activity.getResources().getString(R.string.sipgate_unknown_caller);
-		noNumber = activity.getResources().getString(R.string.sipgate_no_number);		
+		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
+		noNumberString = activity.getResources().getString(R.string.sipgate_no_number);		
 		
 		incomingIcon = activity.getResources().getDrawable(R.drawable.icon_incoming);
 		missedIcon = activity.getResources().getDrawable(R.drawable.icon_missed);
@@ -89,8 +90,8 @@ public class CallListAdapter extends BaseAdapter
 		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
 		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
 		
-		currentDay = Calendar.getInstance();
-		lastDay = Calendar.getInstance();
+		currentDayCalendar = Calendar.getInstance();
+		lastDayCalendar = Calendar.getInstance();
 	}
 		
 	public boolean areAllItemsEnabled() 
@@ -105,12 +106,12 @@ public class CallListAdapter extends BaseAdapter
 		
 	public Object getItem(int position) 
 	{
-		return callData.elementAt(position);
+		return callDataDBObjects.elementAt(position);
 	}
 	
 	public long getItemId(int position) 
 	{
-		return callData.elementAt(position).getId();
+		return callDataDBObjects.elementAt(position).getId();
 	}
 	
 	@Override
@@ -138,16 +139,17 @@ public class CallListAdapter extends BaseAdapter
 			holder = (CallViewHolder) convertView.getTag();
 		}
 		
-		item = (CallDataDBObject) getItem(position);
+		currentCallDataDBObject = (CallDataDBObject) getItem(position);
 
-		callDirection = item.getDirection();
-		callMissed = item.isMissed();
+		callDirection = currentCallDataDBObject.getDirection();
+		isMissed = currentCallDataDBObject.isMissed();
+		isRead = currentCallDataDBObject.isRead();
 		
-		if(callDirection == CallDataDBObject.INCOMING && !callMissed) 
+		if(callDirection == CallDataDBObject.INCOMING && !isMissed) 
 		{
 			holder.callTypeIconView.setImageDrawable(incomingIcon);
 		}
-		else if(callDirection == CallDataDBObject.INCOMING && callMissed) 
+		else if(callDirection == CallDataDBObject.INCOMING && isMissed) 
 		{
 			holder.callTypeIconView.setImageDrawable(missedIcon);
 		}
@@ -157,7 +159,7 @@ public class CallListAdapter extends BaseAdapter
 		}
 
 		sourceName = null;
-		sourceNumberPretty = item.getSourceNumberPretty();
+		sourceNumberPretty = currentCallDataDBObject.getSourceNumberPretty();
 		
 		if(sourceNumberPretty.length() > 0) 
 		{
@@ -171,38 +173,49 @@ public class CallListAdapter extends BaseAdapter
 		
 		if (sourceName == null) 
 		{
-			sourceName = item.getSourceName();
+			sourceName = currentCallDataDBObject.getSourceName();
 			
 			if (sourceName == null || sourceName.length() == 0 || sourceName.equals(sourceNumberPretty))
 			{
-				sourceName = unknownCaller;
+				sourceName = unknownCallerString;
 			}
 		}
 		
-		sourceNumber = item.getSourceNumberPretty();
+		sourceNumber = currentCallDataDBObject.getSourceNumberPretty();
 	
 		if(sourceNumber == null || sourceNumber.length() == 0 || sourceNumber.equals("+anonymous")) 
 		{
-			sourceNumber = noNumber;
+			sourceNumber = noNumberString;
+		}
+		
+		if (isRead) 
+		{
+			holder.callerNameView.setTypeface(Typeface.DEFAULT);
+			holder.callerNumberView.setTypeface(Typeface.DEFAULT);
+		} 
+		else 
+		{
+			holder.callerNameView.setTypeface(Typeface.DEFAULT_BOLD);
+			holder.callerNumberView.setTypeface(Typeface.DEFAULT_BOLD);
 		}
 		
 		holder.callerNameView.setText(sourceName);
 		holder.callerNumberView.setText(sourceNumber);
 
-		currentDay.setTimeInMillis(item.getTime());
+		currentDayCalendar.setTimeInMillis(currentCallDataDBObject.getTime());
 		
-		holder.callTimeView.setText(timeFormatter.format(currentDay.getTime()));
-		holder.categoryTextView.setText(dateFormatter.format(currentDay.getTime()));
+		holder.callTimeView.setText(timeFormatter.format(currentDayCalendar.getTime()));
+		holder.categoryTextView.setText(dateFormatter.format(currentDayCalendar.getTime()));
 		holder.categoryTextView.setVisibility(View.VISIBLE);
 
 		if (position > 0) 
 		{
-			lastItem = (CallDataDBObject)getItem(position - 1);
+			lastCallDataDBObject = (CallDataDBObject)getItem(position - 1);
 		
-			lastDay.setTimeInMillis(lastItem.getTime());
+			lastDayCalendar.setTimeInMillis(lastCallDataDBObject.getTime());
 						
-			if (lastDay.get(Calendar.DAY_OF_YEAR) == currentDay.get(Calendar.DAY_OF_YEAR) &&
-				lastDay.get(Calendar.YEAR) == currentDay.get(Calendar.YEAR)) 
+			if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) == currentDayCalendar.get(Calendar.DAY_OF_YEAR) &&
+				lastDayCalendar.get(Calendar.YEAR) == currentDayCalendar.get(Calendar.YEAR)) 
 			{
 				holder.categoryTextView.setVisibility(View.GONE);
 			} 
@@ -212,31 +225,35 @@ public class CallListAdapter extends BaseAdapter
 			}
 		}
 		
-		//setRead(item);
+		markAsRead(currentCallDataDBObject); 
 		
 		return convertView;
 	}
 	
-	/*
-	private void setRead(final SipgateCallData callData) {
-		if (!callData.getCallRead()) {
-			Thread t = new Thread() {
-				public void start() {
+	private void markAsRead(final CallDataDBObject callDataDBObject) {
+		if (!callDataDBObject.isRead()) {
+			Thread markThread = new Thread(){
+				public void run()
+				{
+					callDataDBAdapter = new CallDataDBAdapter(activity);
+					
 					try {
-						String url = callData.getCallReadModifyUrl();
-						ApiServiceProvider apiClient = ApiServiceProvider
-								.getInstance(context);
-						apiClient.setCallRead(url);
-					} catch (Exception e) {
+						callDataDBObject.setRead(true);
+						callDataDBAdapter.update(callDataDBObject);
+						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+					} 
+					catch (Exception e) {
 						e.printStackTrace();
+					} 
+					finally {
+						callDataDBAdapter.close();
 					}
 				}
 			};
-			Log.e(TAG, "marking call as read... ");
-			t.start();
+			
+			markThread.start();
 		}
 	}
-	*/
 	
 	public boolean hasStableIds() 
 	{
@@ -246,20 +263,20 @@ public class CallListAdapter extends BaseAdapter
 	@Override
 	public boolean isEmpty()
 	{
-		return (callData.size() == 0);
+		return (callDataDBObjects.size() == 0);
 	}
 
 	@Override
 	public int getCount()
 	{
-		return callData.size();
+		return callDataDBObjects.size();
 	}
 	
 	@Override
 	public void notifyDataSetChanged() {
 		
 		callDataDBAdapter = new CallDataDBAdapter(activity);
-		callData = callDataDBAdapter.getAllCallData();
+		callDataDBObjects = callDataDBAdapter.getAllCallData();
 		callDataDBAdapter.close();
 		
 		super.notifyDataSetChanged();
