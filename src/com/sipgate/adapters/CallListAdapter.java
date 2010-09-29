@@ -264,7 +264,7 @@ public class CallListAdapter extends BaseAdapter
 	@Override
 	public boolean isEmpty()
 	{
-		return (callData.size() > 0);
+		return (callData.size() == 0);
 	}
 
 	@Override
