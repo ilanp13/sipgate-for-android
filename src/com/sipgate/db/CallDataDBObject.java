@@ -4,7 +4,7 @@ import java.util.Date;
 
 import android.database.sqlite.SQLiteStatement;
 
-import com.sipgate.base.db.BaseDBObject;
+import com.sipgate.db.base.BaseDBObject;
 
 public class CallDataDBObject extends BaseDBObject
 {

@@ -22,7 +22,7 @@ import android.util.Log;
 
 import com.sipgate.R;
 import com.sipgate.api.types.Event;
-import com.sipgate.db.CallDataDBAdapter;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
@@ -39,46 +39,52 @@ import com.sipgate.util.SettingsClient;
  *
  */
 public class SipgateBackgroundService extends Service implements EventService {
-	private static final String TAG = "SipgateBackgroundService";
 	
-	private static final long EVENTREFRESH_INTERVAL = 60000;
 	public static final String ACTION_NEWEVENTS = "action_newEvents";
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
+
+	private static final long EVENTREFRESH_INTERVAL = 60000;
+		
+	private static final String TAG = "SipgateBackgroundService";
 	private static final String PREF_YOUNGESTVOICEMAILDATE = "youngestVoicemailDate";
-	private static final String PREF_YOUNGESTCALLDATE = "youngestCallDate";
 	private static final String PREF_FIRSTLAUNCHDATE = "firstLaunchDate";
+	
 	private boolean serviceEnabled = false;
 	
 	private Timer voiceMailRefreshTimer = null;
 	private Timer callListRefreshTimer = null;
 	
 	private List<Event> voicemails = new ArrayList<Event>();
+	
 	private Set<PendingIntent> onNewVoicemailsTriggers = new HashSet<PendingIntent>();
 	private Set<PendingIntent> onNewCallsTriggers = new HashSet<PendingIntent>();
 
-	private Date youngestCall = new Date(0); 
-	
 	private Date youngestVoicemail = new Date(0); 
 	private Date firstLaunch = null; // never access directly. use getFirstLaunchDate()
 
-	private NotificationClient notifyClient;
+	private NotificationClient notifyClient = null;
+	private ApiServiceProvider apiClient = null;
+	
+	private SipgateDBAdapter callDataDBAdapter = null;
+	private CallDataDBObject oldDataDBObject = null;
+	
+	private	int unreadCounter = 0;
+	
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
 	public void onCreate() {
 		super.onCreate();
-		fetchYoungestVoicemaildate();
-		fetchYoungestCalldate();
-		startService();
+	
 		notifyClient = new NotificationClient(this); 
+		apiClient = ApiServiceProvider.getInstance(getApplicationContext());
+		
+		fetchYoungestVoicemaildate();
+		startService();
 	}
 
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
 	private void startService() {
@@ -115,8 +121,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	}
 
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
 	public void stopService() {
@@ -139,8 +143,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	}
 	
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
 	public void onDestroy() {
@@ -150,15 +152,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 	}
 
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
 	private void refreshVoicemailEvents() {
-		
 		try {
-
-			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
 			List<Event> currentEvents = apiClient.getEvents();
 			List<Event> oldEvents = voicemails;
@@ -170,29 +167,23 @@ public class SipgateBackgroundService extends Service implements EventService {
 	}
 	
 	/**
-	 * 
-	 * 
+	 * @author graef
 	 * @since 1.1
 	 */
 	private void refreshCallEvents() {
-		
-		Log.v(TAG, "refreshCallEvents()");
+		Log.v(TAG, "refreshCallEvents() -> start");
 		
 		try {
-			
-			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
-
-			Vector<CallDataDBObject> currentCalls = apiClient.getCalls();
-		
-			notifyIfUnreadsCalls(currentCalls);
+			notifyIfUnreadsCalls(apiClient.getCalls());
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		Log.v(TAG, "refreshCallEvents() -> finish");
 	}
 
 	/**
-	 * 
 	 * @param oldList
 	 * @param newList
 	 * @since 1.0
@@ -244,9 +235,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 	
 	
 	/**
-	 * 
-	 * @param oldList
-	 * @param newList
+	 * @author graef
+	 * @param Vector with callDataDBObjects
 	 * @since 1.1
 	 */
 	
@@ -254,11 +244,11 @@ public class SipgateBackgroundService extends Service implements EventService {
 
 		Log.d(TAG, "notifyIfUnreadCalls");
 		
-		CallDataDBAdapter callDataDBAdapter = new CallDataDBAdapter(this);
+		callDataDBAdapter = new SipgateDBAdapter(this);
 		
-		CallDataDBObject oldDataDBObject = null;
+		oldDataDBObject = null;
 		
-		int unreadCounter = 0;
+		unreadCounter = 0;
 				
 		for (CallDataDBObject currentDataDBObject : callDataDBObjects) {
 			oldDataDBObject = callDataDBAdapter.getCallDataDBObjectById(currentDataDBObject.getId());
@@ -298,10 +288,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 			removeNewCallNotification();
 		}
 		
-		for (PendingIntent pInt: onNewCallsTriggers){
+		for (PendingIntent pendingIntent: onNewCallsTriggers){
 			try {
 				Log.d(TAG, "notifying refresh calls to activity");
-				pInt.send();
+				pendingIntent.send();
 			} catch (CanceledException e) {
 				e.printStackTrace();
 			}			
@@ -321,24 +311,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 		editor.putLong(PREF_YOUNGESTVOICEMAILDATE, youngestVoicemail.getTime());
 		editor.commit();
 	}
-	
-	/**
-	 * 
-	 * @param d
-	 * @since 1.1
-	 */
-	private void updateYoungestCalldate(Date d) {
-		youngestCall = d;
 		
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		Editor editor = pref.edit();
-		editor.putLong(PREF_YOUNGESTCALLDATE, youngestCall.getTime());
-		editor.commit();
-	}
-	
 	/**
 	 * 
-	 * @return
+	 * @return firstLaunch as a Date
 	 * @since 1.0
 	 */
 	private Date getFirstLaunchDate() 
@@ -374,15 +350,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 		youngestVoicemail = new Date(pref.getLong(PREF_YOUNGESTVOICEMAILDATE, 0));
 	}
 	
-	/**
-	 * 
-	 * @since 1.1
-	 */
-	private void fetchYoungestCalldate() {
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		youngestCall = new Date(pref.getLong(PREF_YOUNGESTCALLDATE, 0));
-	}
-
 	/**
 	 * 
 	 * @param unreadCounter
@@ -444,7 +411,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.0
 	 */
 	public IBinder asBinder() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -596,14 +562,12 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.1
 	 */
 	private boolean hasVmListFeature() {
-		boolean hasVmListFeature = false;
 		try {
-			hasVmListFeature = ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
+			return ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
 		} catch (Exception e) {
 			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
 		}
 		
-		return hasVmListFeature;
+		return false;
 	}
-
 }

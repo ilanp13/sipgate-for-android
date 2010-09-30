@@ -1,4 +1,4 @@
-package com.sipgate.base.db;
+package com.sipgate.db.base;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

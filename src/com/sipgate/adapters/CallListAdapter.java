@@ -16,7 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
-import com.sipgate.db.CallDataDBAdapter;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.AndroidContactsClient;
@@ -32,7 +32,7 @@ public class CallListAdapter extends BaseAdapter
 	private ApiServiceProvider apiClient = null;
 	private AndroidContactsClient contactsClient = null;
 	
-	private CallDataDBAdapter callDataDBAdapter = null;
+	private SipgateDBAdapter callDataDBAdapter = null;
 	
 	private Vector<CallDataDBObject> callDataDBObjects = null;
 	private HashMap<String, String> contactNameCache = null; 	
@@ -74,7 +74,7 @@ public class CallListAdapter extends BaseAdapter
 		contactsClient = new AndroidContactsClient(activity);
 		apiClient = ApiServiceProvider.getInstance(activity);
 		
-		callDataDBAdapter = new CallDataDBAdapter(activity);
+		callDataDBAdapter = new SipgateDBAdapter(activity);
 		callDataDBObjects = callDataDBAdapter.getAllCallData();
 		callDataDBAdapter.close();
 		
@@ -235,7 +235,7 @@ public class CallListAdapter extends BaseAdapter
 			Thread markThread = new Thread(){
 				public void run()
 				{
-					callDataDBAdapter = new CallDataDBAdapter(activity);
+					callDataDBAdapter = new SipgateDBAdapter(activity);
 					
 					callDataDBObject.setRead(true);
 					callDataDBAdapter.update(callDataDBObject);
@@ -275,7 +275,7 @@ public class CallListAdapter extends BaseAdapter
 	@Override
 	public void notifyDataSetChanged() {
 		
-		callDataDBAdapter = new CallDataDBAdapter(activity);
+		callDataDBAdapter = new SipgateDBAdapter(activity);
 		callDataDBObjects = callDataDBAdapter.getAllCallData();
 		callDataDBAdapter.close();
 		

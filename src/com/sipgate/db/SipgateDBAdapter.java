@@ -7,14 +7,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.sipgate.base.db.BaseDBAdapter;
-import com.sipgate.base.db.BaseDBObject;
+import com.sipgate.db.base.BaseDBAdapter;
+import com.sipgate.db.base.BaseDBObject;
 
-public class CallDataDBAdapter extends BaseDBAdapter
+public class SipgateDBAdapter extends BaseDBAdapter
 {
-	public CallDataDBAdapter(Context context)
+	public SipgateDBAdapter(Context context)
 	{
-		super(context, "callDataDB.sqlite");
+		super(context, "sipgateDB.sqlite");
 	}
 	
 	public Cursor getAllCallDataCursor()
