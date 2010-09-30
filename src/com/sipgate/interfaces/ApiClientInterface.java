@@ -6,8 +6,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Vector;
 
-import net.oauth.OAuthException;
-
 import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
@@ -15,8 +13,6 @@ import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
@@ -31,7 +27,7 @@ public interface ApiClientInterface {
 	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public void setCallRead(String call) throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public boolean featureAvailable(API_FEATURE feature);
-	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException;
-	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException;
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException;
+	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException;
 	public MobileExtension setupMobileExtension(String phoneNumber,	String model, String vendor, String firmware) throws FeatureNotAvailableException;
 }

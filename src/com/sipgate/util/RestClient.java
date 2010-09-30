@@ -13,8 +13,6 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import net.oauth.OAuthException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -31,8 +29,6 @@ import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.interfaces.RestAuthenticationInterface;
 import com.sipgate.models.SipgateBalanceData;
@@ -280,8 +276,8 @@ public class RestClient implements ApiClientInterface {
 		return callDataDBObjects;
 	}
 	
-	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException,
-		OAuthAccessProtectedResourceException, OAuthMissingContextException  {
+	public String getBaseProductType() throws IOException, URISyntaxException
+	{
 			InputStream inputStream = null;
 			try {
 				inputStream = RestClient.authenticationInterface.getBaseProductType();
@@ -362,8 +358,8 @@ public class RestClient implements ApiClientInterface {
 		return null;	
 	}
 	
-	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException,
-	OAuthAccessProtectedResourceException, OAuthMissingContextException  {
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException
+	{
 		InputStream inputStream = null;
 		try {
 			inputStream = RestClient.authenticationInterface.getMobileExtensions();

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import net.oauth.OAuthException;
 import android.content.Context;
 import android.util.Log;
 
@@ -18,8 +17,6 @@ import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
@@ -234,14 +231,14 @@ public class ApiServiceProvider {
 		}
 	}
 
-	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException,
-	OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException,
+	FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getMobileExtensions();
 		}
 	}
 
-	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public String getBaseProductType() throws IOException, URISyntaxException,  FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getBaseProductType();
 		}
