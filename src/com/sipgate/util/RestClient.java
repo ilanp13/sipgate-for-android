@@ -3,12 +3,12 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.text.ParsePosition;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,6 +26,7 @@ import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.api.types.SMS;
 import com.sipgate.api.types.Voicemail;
+import com.sipgate.db.CallDataDBObject;
 import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -35,7 +36,6 @@ import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.interfaces.RestAuthenticationInterface;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
@@ -43,7 +43,8 @@ import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 public class RestClient implements ApiClientInterface {
 	private static final String TAG = "RestClient";
 	private static RestAuthenticationInterface authenticationInterface = null;
-
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+	
 	public RestClient(String username, String password) {
 		super();
 		RestClient.authenticationInterface = new BasicAuthenticationClient(username, password);
@@ -152,21 +153,24 @@ public class RestClient implements ApiClientInterface {
 		return provisioningData;
 	}
 	
-	private Date getDate(String createOn) {
+	private long getCallTime(String dateString) 
+	{
+		long callTime = 0;
+		
 		try {
-			if (createOn == null) {
-				return new Date(0);
+			if (dateString != null)
+			{
+				return dateformatterPretty.parse(dateString).getTime();
 			}
-			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-			return dateformatterIso.parse(createOn, new ParsePosition(0));
-		} catch (IllegalArgumentException e) {
-			Log.e(TAG,"badly formated date");
-			
+		} 
+		catch (ParseException e) {
+			Log.e(TAG, "getCallTime", e);
 		}
-		return new Date(0);
+		
+		return callTime;
 	}
 	
-	public ArrayList<SipgateCallData> getCalls() throws ApiException {
+	public Vector<CallDataDBObject> getCalls() throws ApiException {
 		
 		InputStream inputStream = null;
 		try {
@@ -180,7 +184,7 @@ public class RestClient implements ApiClientInterface {
 			return null;
 		}
 		
-		ArrayList<SipgateCallData> calls = new ArrayList<SipgateCallData>();
+		Vector<CallDataDBObject> callDataDBObjects = new Vector<CallDataDBObject>();
 		// process stream from API
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -194,7 +198,7 @@ public class RestClient implements ApiClientInterface {
 				Node fstNode = nodeLst.item(s);
 				if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element fstElmnt = (Element) fstNode;
-					SipgateCallData call = new SipgateCallData();
+					CallDataDBObject callDataDBObject = new CallDataDBObject();
 					
 					Element sources = getNodeById(fstElmnt, "sources");
 					Element sourceEndpoint = getNodeById(sources, "endpoint");
@@ -214,54 +218,66 @@ public class RestClient implements ApiClientInterface {
 					String targetNumberE164 = getElementById(targetEndpoint, "numberE164");
 					targetNumberE164 = (targetNumberE164 != null) ? targetNumberE164 : "";
 					
-					call.setCallId(getElementById(fstElmnt, "id"));
+					callDataDBObject.setId(Long.parseLong(getElementById(fstElmnt, "id")));
 					String direction = getElementById(fstElmnt, "direction");
+					
 					if(direction.equals("incoming")){
-						call.setCallMissed("false");
-						call.setCallDirection("incoming");
-						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
-						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
+						callDataDBObject.setMissed(false);
+						callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+						callDataDBObject.setLocalNumberE164(targetNumberE164);
+						callDataDBObject.setLocalNumberPretty(targetNumberPretty);
+						callDataDBObject.setLocalName(targetName);
+						callDataDBObject.setRemoteNumberE164(sourceNumberE164);
+						callDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
+						callDataDBObject.setRemoteName(sourceName);
 					}
 					else if(direction.equals("missed_incoming")){
-						call.setCallMissed("true");
-						call.setCallDirection("incoming");
-						call.setCallTarget(targetNumberE164, targetNumberPretty, targetName);
-						call.setCallSource(sourceNumberE164, sourceNumberPretty, sourceName);
+						callDataDBObject.setMissed(true);
+						callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+						callDataDBObject.setLocalNumberE164(targetNumberE164);
+						callDataDBObject.setLocalNumberPretty(targetNumberPretty);
+						callDataDBObject.setLocalName(targetName);
+						callDataDBObject.setRemoteNumberE164(sourceNumberE164);
+						callDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
+						callDataDBObject.setRemoteName(sourceName);
 					}
 					else if(direction.equals("outgoing")){
-						call.setCallMissed("false");
-						call.setCallDirection("outgoing");
-						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
-						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
+						callDataDBObject.setMissed(false);
+						callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
+						callDataDBObject.setRemoteNumberE164(targetNumberE164);
+						callDataDBObject.setRemoteNumberPretty(targetNumberPretty);
+						callDataDBObject.setRemoteName(targetName);
+						callDataDBObject.setLocalNumberE164(sourceNumberE164);
+						callDataDBObject.setLocalNumberPretty(sourceNumberPretty);
+						callDataDBObject.setLocalName(sourceName);
 					}
 					else if(direction.equals("missed_outgoing")){
-						call.setCallMissed("true");
-						call.setCallDirection("outgoing");
-						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
-						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
+						callDataDBObject.setMissed(true);
+						callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
+						callDataDBObject.setRemoteNumberE164(targetNumberE164);
+						callDataDBObject.setRemoteNumberPretty(targetNumberPretty);
+						callDataDBObject.setRemoteName(targetName);
+						callDataDBObject.setLocalNumberE164(sourceNumberE164);
+						callDataDBObject.setLocalNumberPretty(sourceNumberPretty);
+						callDataDBObject.setLocalName(sourceName);
 					}
-					else {
-						call.setCallMissed("");
-						call.setCallDirection("");
-						call.setCallSource(targetNumberE164, targetNumberPretty, targetName);
-						call.setCallTarget(sourceNumberE164, sourceNumberPretty, sourceName);
-					}
-					Date created = getDate(getElementById(fstElmnt, "created"));
-					SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-					call.setCallTime(dateformatterPretty.format(created));
+					
+					callDataDBObject.setTime(getCallTime(getElementById(fstElmnt, "created")));
 					
 					Element readStatus = getNodeById(fstElmnt, "read");
-					call.setCallRead(getElementById(readStatus, "value"));
-					call.setCallReadModifyUrl(getElementById(readStatus, "modify"));
+										
+					callDataDBObject.setRead(getElementById(readStatus, "value"));
+
+					callDataDBObject.setReadModifyUrl(getElementById(readStatus, "modify"));
 					
-					calls.add(call);
+					callDataDBObjects.add(callDataDBObject);
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return calls;
+		return callDataDBObjects;
 	}
 	
 	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException,

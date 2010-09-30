@@ -40,8 +40,8 @@ import com.sipgate.models.holder.EventViewHolder;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.Constants; //import com.sipgate.util.Oauth;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.Constants;
 
 public class EventListActivity extends Activity {
 	//private static final int REFRESH_MENU_ITEM = 0;

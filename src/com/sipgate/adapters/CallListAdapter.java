@@ -45,9 +45,9 @@ public class CallListAdapter extends BaseAdapter
 	private CallDataDBObject currentCallDataDBObject = null;
 	private CallDataDBObject lastCallDataDBObject = null;
 	
-	private String sourceName = null;
-	private String sourceNumberPretty = null;
-	private String sourceNumber = null;
+	private String remoteName = null;
+	private String remoteNumberPretty = null;
+	private String remoteNumber = null;
 	
 	private Calendar currentDayCalendar = null;
 	private Calendar lastDayCalendar = null;
@@ -158,34 +158,34 @@ public class CallListAdapter extends BaseAdapter
 			holder.callTypeIconView.setImageDrawable(outgoingIcon);
 		}
 
-		sourceName = null;
-		sourceNumberPretty = currentCallDataDBObject.getSourceNumberPretty();
+		remoteName = null;
+		remoteNumberPretty = currentCallDataDBObject.getRemoteNumberPretty();
 		
-		if(sourceNumberPretty.length() > 0) 
+		if(remoteNumberPretty.length() > 0) 
 		{
-			if (!contactNameCache.containsKey(sourceNumberPretty))
+			if (!contactNameCache.containsKey(remoteNumberPretty))
 			{
-				contactNameCache.put(sourceNumberPretty, contactsClient.getContactName(sourceNumberPretty));
+				contactNameCache.put(remoteNumberPretty, contactsClient.getContactName(remoteNumberPretty));
 			}
 						
-			sourceName = contactNameCache.get(sourceNumberPretty);
+			remoteName = contactNameCache.get(remoteNumberPretty);
 		}
 		
-		if (sourceName == null) 
+		if (remoteName == null) 
 		{
-			sourceName = currentCallDataDBObject.getSourceName();
+			remoteName = currentCallDataDBObject.getRemoteName();
 			
-			if (sourceName == null || sourceName.length() == 0 || sourceName.equals(sourceNumberPretty))
+			if (remoteName == null || remoteName.length() == 0 || remoteName.equals(remoteNumberPretty))
 			{
-				sourceName = unknownCallerString;
+				remoteName = unknownCallerString;
 			}
 		}
 		
-		sourceNumber = currentCallDataDBObject.getSourceNumberPretty();
+		remoteNumber = currentCallDataDBObject.getRemoteNumberPretty();
 	
-		if(sourceNumber == null || sourceNumber.length() == 0 || sourceNumber.equals("+anonymous")) 
+		if(remoteNumber == null || remoteNumber.length() == 0 || remoteNumber.equals("+anonymous")) 
 		{
-			sourceNumber = noNumberString;
+			remoteNumber = noNumberString;
 		}
 		
 		if (isRead) 
@@ -199,8 +199,8 @@ public class CallListAdapter extends BaseAdapter
 			holder.callerNumberView.setTypeface(Typeface.DEFAULT_BOLD);
 		}
 		
-		holder.callerNameView.setText(sourceName);
-		holder.callerNumberView.setText(sourceNumber);
+		holder.callerNameView.setText(remoteName);
+		holder.callerNumberView.setText(remoteNumber);
 
 		currentDayCalendar.setTimeInMillis(currentCallDataDBObject.getTime());
 		
@@ -237,17 +237,17 @@ public class CallListAdapter extends BaseAdapter
 				{
 					callDataDBAdapter = new CallDataDBAdapter(activity);
 					
+					callDataDBObject.setRead(true);
+					callDataDBAdapter.update(callDataDBObject);
+
+					callDataDBAdapter.close();
+					
 					try {
-						callDataDBObject.setRead(true);
-						callDataDBAdapter.update(callDataDBObject);
 						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
 					} 
 					catch (Exception e) {
 						e.printStackTrace();
 					} 
-					finally {
-						callDataDBAdapter.close();
-					}
 				}
 			};
 			

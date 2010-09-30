@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -62,7 +64,6 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		return accessProtectedResource(httpMethod, url, null);
 	}
 	
-
 	@SuppressWarnings("unchecked")
 	private String appendUrlParameters(String url, Collection<? extends Entry> params) {
 		
@@ -146,23 +147,13 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 			throw new AccessProtectedResourceException("unknown method");	
 		}
 		
+		request.addHeader("Accept-Encoding", "gzip");
+		
 		HttpResponse response = null;
+		
 		InputStream inputStream = null;
+		
 		try {
-
-		/*	httpClient.setRedirectHandler(new DefaultRedirectHandler());
-			response = httpClient.execute(request);
-
-			if (response == null) {
-				throw new AccessProtectedResourceException("no response");
-
-			} else if (response.getStatusLine().getStatusCode() == 200) {
-				Log.v(TAG, "successful request to '"+urlString+"'");
-			} else {
-				Log.w(TAG, "API returned "+response.getStatusLine().getStatusCode()+" - "+response.getStatusLine().getReasonPhrase());
-				throw new RestClientException(response.getStatusLine());
-			}
-*/
 			do {
 				response = httpClient.execute(request);
 				StatusLine statusLine = response.getStatusLine();
@@ -184,9 +175,12 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 				}
 			} while (response == null);
 
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				inputStream = entity.getContent();
+			inputStream = response.getEntity().getContent();
+			
+			Header contentEncoding = response.getFirstHeader("Content-Encoding");
+			
+			if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+				inputStream = new GZIPInputStream(inputStream);
 			}
 		} catch (UnknownHostException e) {
 			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): "+e.getLocalizedMessage());
@@ -200,21 +194,17 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		return inputStream;
 	}
 
-
 	public InputStream getBillingBalance() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/billing/balance/?complexity=full");
 	}
-
 
 	public InputStream getCalls() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/calls/?complexity=full");
 	}
 
-
 	public InputStream getProvisioningData() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/extensions/?complexity=full");
 	}
-
 
 	public InputStream getEvents() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/?complexity=full");
@@ -232,16 +222,13 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		accessProtectedResource("PUT", call+"?value=true");
 	}
 
-
 	public InputStream getMobileExtensions() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/mobile/extensions/");
 	}
 
-
 	public InputStream getBaseProductType() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/baseproducttype/");
 	}
-
 
 	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws AccessProtectedResourceException, NetworkProblemException {

@@ -8,6 +8,8 @@ import android.util.Log;
 
 public abstract class BaseDBAdapter extends SQLiteOpenHelper
 {
+	protected static BaseDBAdapter baseDBAdapter = null;
+	
 	protected SQLiteDatabase database = null;
 	protected String databaseName = "";
 	protected Context context = null;
@@ -36,21 +38,21 @@ public abstract class BaseDBAdapter extends SQLiteOpenHelper
 		statement.close(); 
 	}
 	
-	public void delete(BaseDBObject baseDBObject)
-	{
-		SQLiteStatement statement = database.compileStatement(baseDBObject.getDeleteStatement());     	                    
-		
-		baseDBObject.bindDelete(statement);
-		
-		statement.execute(); 
-		statement.close(); 
-	}
-	
 	public void update(BaseDBObject baseDBObject)
 	{
 		SQLiteStatement statement = database.compileStatement(baseDBObject.getUpdateStatement());     	                    
 		
 		baseDBObject.bindUpdate(statement);
+		
+		statement.execute(); 
+		statement.close(); 
+	}
+	
+	public void delete(BaseDBObject baseDBObject)
+	{
+		SQLiteStatement statement = database.compileStatement(baseDBObject.getDeleteStatement());     	                    
+		
+		baseDBObject.bindDelete(statement);
 		
 		statement.execute(); 
 		statement.close(); 

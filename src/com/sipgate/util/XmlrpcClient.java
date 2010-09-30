@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
@@ -22,13 +24,13 @@ import android.util.Log;
 
 import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.db.CallDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.SipgateOwnUri;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
@@ -50,7 +52,10 @@ public class XmlrpcClient implements ApiClientInterface {
 	private static final String VENDOR = "sipgate GmbH";
 	private static final String NAME = "Sipdroid4sipgate";
 	private XMLRPCClient client = null;
-
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
+	
 	public XmlrpcClient(String ApiUser, String ApiPassword) throws ApiException {
 		super();
 
@@ -142,6 +147,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			userData.setSipUserID((String) sipDataSet.get("SipUserID"));
 			userData.setSipPassword((String) sipDataSet.get("SipPassword"));
 
+			
 			res.add(userData);
 		}
 
@@ -220,7 +226,7 @@ public class XmlrpcClient implements ApiClientInterface {
 
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList<SipgateCallData> getCalls() throws ApiException {
+	public Vector<CallDataDBObject> getCalls() throws ApiException {
 		
 		Hashtable<String, String> params = new Hashtable<String, String>();
 
@@ -239,82 +245,72 @@ public class XmlrpcClient implements ApiClientInterface {
 			return null;
 		}
 		
-		ArrayList<SipgateCallData> calls = new ArrayList<SipgateCallData>();
+		Vector<CallDataDBObject> callDataDBObjects = new Vector<CallDataDBObject>();
 
 		try {
 			Object[] HistoryList = (Object[]) apiResponse.get("History");
 			Integer counter = 0;
 			for (Object HistoryObject : HistoryList) {
 				if(counter++ == 50) break;
-				SipgateCallData call = new SipgateCallData();
+				CallDataDBObject callDataDBObject = new CallDataDBObject();
 				HashMap<String, Object> HistorySet = (HashMap<String, Object>) HistoryObject;
 				
 				if(!HistorySet.get("TOS").equals("voice")) continue;
 				
-				call.setCallId((String) HistorySet.get("EntryID"));
-				Log.d(TAG, "create new date");
-				Date created = (Date) getDate((String) HistorySet.get("Timestamp"));
-				Log.d(TAG, "finished new date");
-				SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-				call.setCallTime(dateformatterPretty.format(created));
+				callDataDBObject.setId(Long.parseLong((String)HistorySet.get("EntryID")));
+				callDataDBObject.setTime(getCallTime((String) HistorySet.get("Timestamp")));
 
-				String status = (String) HistorySet.get("Status");
-				String direction = "";
-				String missed = "false";
-				
-				Log.d("call Status: ", status);
-				if(status.equals("accepted")) {
-					direction = "incoming";
-				}
-				if(status.equals("missed")) {
-					direction = "incoming";
-					missed = "true";
-				}
-				if(status.equals("outgoing")) {
-					direction = "outgoing";
-				}
-
-				call.setCallDirection(direction);
-				call.setCallMissed(missed);
-
-				PhoneNumberFormatter formatter = new PhoneNumberFormatter();
-				Locale locale = Locale.getDefault();
+				String direction = (String) HistorySet.get("Status");
 				
 				String numberLocal = (String) HistorySet.get("LocalUri");
 				String numberRemote = (String) HistorySet.get("RemoteUri");
 
-				String src_number = "";
-				String tgt_number = "";
-				
-				if(direction.equals("outgoing")) {
-					src_number = numberLocal;
-					tgt_number = numberRemote;
+				String sourceNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberLocal, locale.getCountry());
+				String sourceNumberE164 = formatter.e164NumberWithPrefix("");
+
+				String targetNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberRemote, locale.getCountry());
+				String targetNumberE164 = formatter.e164NumberWithPrefix("");
+								
+				if(direction.equals("accepted")){
+					callDataDBObject.setMissed(false);
+					callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+					callDataDBObject.setLocalNumberE164(targetNumberE164);
+					callDataDBObject.setLocalNumberPretty(targetNumberPretty);
+					callDataDBObject.setLocalName("");
+					callDataDBObject.setRemoteNumberE164(sourceNumberE164);
+					callDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
+					callDataDBObject.setRemoteName("");
 				}
-				if(direction.equals("incoming")) {
-					tgt_number = numberLocal;
-					src_number = numberRemote;
+				else if(direction.equals("missed")){
+					callDataDBObject.setMissed(true);
+					callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+					callDataDBObject.setLocalNumberE164(targetNumberE164);
+					callDataDBObject.setLocalNumberPretty(targetNumberPretty);
+					callDataDBObject.setLocalName("");
+					callDataDBObject.setRemoteNumberE164(sourceNumberE164);
+					callDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
+					callDataDBObject.setRemoteName("");
 				}
-
-				String src_name = "";
-				String src_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(src_number, locale.getCountry());
-				String src_numberE164 = formatter.e164NumberWithPrefix("");
-				call.setCallSource(src_numberE164, src_numberPretty, src_name);
-
-				String tgt_name = "";
-				String tgt_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(tgt_number, locale.getCountry());
-				String tgt_numberE164 = formatter.e164NumberWithPrefix("");
-				call.setCallTarget(tgt_numberE164, tgt_numberPretty, tgt_name);
+				else if(direction.equals("outgoing")){
+					callDataDBObject.setMissed(false);
+					callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
+					callDataDBObject.setRemoteNumberE164(targetNumberE164);
+					callDataDBObject.setRemoteNumberPretty(targetNumberPretty);
+					callDataDBObject.setRemoteName("");
+					callDataDBObject.setLocalNumberE164(sourceNumberE164);
+					callDataDBObject.setLocalNumberPretty(sourceNumberPretty);
+					callDataDBObject.setLocalName("");
+				}
 				
-				//XMLRPC doesn't provide a read/unread attribute .. so we assume it's a new call
-				call.setCallRead("false");
+				callDataDBObject.setRead(-1);
 
-				calls.add(call);
+				callDataDBObjects.add(callDataDBObject);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return calls;
+		return callDataDBObjects;
 
 	}
 
@@ -394,8 +390,24 @@ public class XmlrpcClient implements ApiClientInterface {
 
 		return prov;
 	}
-
 	
+	private long getCallTime(String dateString) 
+	{
+		long callTime = 0;
+		
+		try {
+			if (dateString != null)
+			{
+				return dateformatterPretty.parse(dateString).getTime();
+			}
+		} 
+		catch (ParseException e) {
+			Log.e(TAG, "getCallTime", e);
+		}
+		
+		return callTime;
+	}
+		
 	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}

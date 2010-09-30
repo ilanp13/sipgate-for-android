@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.sipgate.base.db.BaseDBAdapter;
+import com.sipgate.base.db.BaseDBObject;
 
 public class CallDataDBAdapter extends BaseDBAdapter
 {
@@ -38,12 +39,12 @@ public class CallDataDBAdapter extends BaseDBAdapter
 			call.setMissed(cursor.getLong(2));
 			call.setRead(cursor.getLong(3));
 			call.setTime(cursor.getLong(4));
-			call.setTargetNumberE164(cursor.getString(5));
-			call.setTargetNumberPretty(cursor.getString(6));
-			call.setTargetName(cursor.getString(7));
-			call.setSourceNumberE164(cursor.getString(8));
-			call.setSourceNumberPretty(cursor.getString(9));
-			call.setSourceName(cursor.getString(10));
+			call.setLocalNumberE164(cursor.getString(5));
+			call.setLocalNumberPretty(cursor.getString(6));
+			call.setLocalName(cursor.getString(7));
+			call.setRemoteNumberE164(cursor.getString(8));
+			call.setRemoteNumberPretty(cursor.getString(9));
+			call.setRemoteName(cursor.getString(10));
 			call.setReadModifyUrl(cursor.getString(11));
 			
 			callData.add(call);
@@ -54,18 +55,18 @@ public class CallDataDBAdapter extends BaseDBAdapter
 		return callData;
 	}
 	
-	public Cursor getCallDataCursor(long id)
+	public Cursor getCallDataCursorById(long id)
 	{
 		return database.query("CallData", null, "id = ?", new String[]{ String.valueOf(id) }, null, null, null);
 	}
 	
-	public CallDataDBObject getCallData(long id)
+	public CallDataDBObject getCallDataDBObjectById(long id)
 	{
-		Cursor cursor = getCallDataCursor(id);
+		Cursor cursor = getCallDataCursorById(id);
 		
 		CallDataDBObject call = null;
 		
-		while (cursor.moveToNext())
+		if (cursor.moveToNext())
 		{
 			call = new CallDataDBObject();
 			
@@ -74,15 +75,13 @@ public class CallDataDBAdapter extends BaseDBAdapter
 			call.setMissed(cursor.getLong(2));
 			call.setRead(cursor.getLong(3));
 			call.setTime(cursor.getLong(4));
-			call.setTargetNumberE164(cursor.getString(5));
-			call.setTargetNumberPretty(cursor.getString(6));
-			call.setTargetName(cursor.getString(7));
-			call.setSourceNumberE164(cursor.getString(8));
-			call.setSourceNumberPretty(cursor.getString(9));
-			call.setSourceName(cursor.getString(10));
+			call.setLocalNumberE164(cursor.getString(5));
+			call.setLocalNumberPretty(cursor.getString(6));
+			call.setLocalName(cursor.getString(7));
+			call.setRemoteNumberE164(cursor.getString(8));
+			call.setRemoteNumberPretty(cursor.getString(9));
+			call.setRemoteName(cursor.getString(10));
 			call.setReadModifyUrl(cursor.getString(11));
-				
-			break;
 		}
 			
 		cursor.close();
@@ -103,13 +102,34 @@ public class CallDataDBAdapter extends BaseDBAdapter
 		return count;
 	}
 
-	public void removeAllCallData()
+	public void deleteAllCallDBObjects()
 	{
 		SQLiteStatement statement = database.compileStatement("Delete from CallData");
 		
 		statement.execute();
 		
 		statement.close();
+	}
+	
+	public void insert(Vector<CallDataDBObject> callDataDBObjects)
+	{
+		if (callDataDBObjects.size() > 0)
+		{
+			database.beginTransaction();
+			
+			SQLiteStatement statement = database.compileStatement(callDataDBObjects.get(0).getInsertStatement());     	                    
+			
+			for (BaseDBObject baseDBObject : callDataDBObjects) 
+			{
+				baseDBObject.bindInsert(statement);
+				statement.execute(); 
+			}
+		
+			statement.close(); 
+			
+			database.setTransactionSuccessful();
+			database.endTransaction();
+		}
 	}
 	
 	@Override

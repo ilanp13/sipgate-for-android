@@ -17,13 +17,13 @@ public class CallDataDBObject extends BaseDBObject
 	private long read = 0;
 	private long time = 0;
 		
-	private String targetNumberE164 = null;
-	private String targetNumberPretty = null;
-	private String targetName = null;
+	private String localNumberE164 = null;
+	private String localNumberPretty = null;
+	private String localName = null;
 
-	private String sourceNumberE164 = null;
-	private String sourceNumberPretty = null;
-	private String sourceName = null;
+	private String remoteNumberE164 = null;
+	private String remoteNumberPretty = null;
+	private String remoteName = null;
 	
 	private String readModifyUrl = null;
 	
@@ -39,13 +39,13 @@ public class CallDataDBObject extends BaseDBObject
 		statement.bindLong(3, read);
 		statement.bindLong(4, time);
 		
-		statement.bindString(5, targetNumberE164);	
-		statement.bindString(6, targetNumberPretty);
-		statement.bindString(7, targetName);
+		statement.bindString(5, localNumberE164);	
+		statement.bindString(6, localNumberPretty);
+		statement.bindString(7, localName);
 		
-		statement.bindString(8, sourceNumberE164);
-		statement.bindString(9, sourceNumberPretty);
-		statement.bindString(10, sourceName);
+		statement.bindString(8, remoteNumberE164);
+		statement.bindString(9, remoteNumberPretty);
+		statement.bindString(10, remoteName);
 		
 		statement.bindString(11, readModifyUrl);
 	}
@@ -57,13 +57,13 @@ public class CallDataDBObject extends BaseDBObject
 		statement.bindLong(3, read);
 		statement.bindLong(4, time);
 		
-		statement.bindString(5, targetNumberE164);
-		statement.bindString(6, targetNumberPretty);
-		statement.bindString(7, targetName);
+		statement.bindString(5, localNumberE164);
+		statement.bindString(6, localNumberPretty);
+		statement.bindString(7, localName);
 		
-		statement.bindString(8, sourceNumberE164);
-		statement.bindString(9, sourceNumberPretty);
-		statement.bindString(10, sourceName);
+		statement.bindString(8, remoteNumberE164);
+		statement.bindString(9, remoteNumberPretty);
+		statement.bindString(10, remoteName);
 		
 		statement.bindString(11, readModifyUrl);
 		
@@ -72,7 +72,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getCreateStatement()
 	{
-		return "CREATE TABLE CallData (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, direction INTEGER, missed INTEGER, read INTEGER, time INTEGER, targetNumberE164 VARCHAR, targetNumberPretty VARCHAR, targetName VARCHAR, sourceNumberE164 VARCHAR, sourceNumberPretty VARCHAR, sourceName VARCHAR, readModifyUrl VARCHAR)";
+		return "CREATE TABLE CallData (id INTEGER PRIMARY KEY NOT NULL, direction INTEGER, missed INTEGER, read INTEGER, time INTEGER, localNumberE164 VARCHAR, localNumberPretty VARCHAR, localName VARCHAR, remoteNumberE164 VARCHAR, remoteNumberPretty VARCHAR, remoteName VARCHAR, readModifyUrl VARCHAR)";
 	}
 
 	public String getDeleteStatement()
@@ -82,7 +82,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO CallData (direction, missed, read, time, targetNumberE164, targetNumberPretty, targetName, sourceNumberE164, sourceNumberPretty, sourceName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return "INSERT INTO CallData (direction, missed, read, time, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
@@ -92,7 +92,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getUpdateStatement()
 	{
-		return "UPDATE CallData SET direction = ?, missed = ?, read = ?, time = ?, targetNumberE164 = ?, targetNumberPretty = ?, targetName = ?, sourceNumberE164 = ?, sourceNumberPretty = ?, sourceName = ?, readModifyUrl = ? WHERE id = ?";
+		return "UPDATE CallData SET direction = ?, missed = ?, read = ?, time = ?, localNumberE164 = ?, localNumberPretty = ?, localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, readModifyUrl = ? WHERE id = ?";
 	}
 
 	public long getId()
@@ -135,11 +135,21 @@ public class CallDataDBObject extends BaseDBObject
 		return (read > 0);
 	}
 
+	public long getRead()
+	{
+		return read;
+	}
+	
 	public void setRead(long read)
 	{
 		this.read = read;
 	}
 
+	public void setRead(String read)
+	{
+		this.read = (read.equals("true") ? 1 : 0);
+	}
+	
 	public void setRead(boolean read)
 	{
 		this.read = (read ? 1 : 0);
@@ -160,64 +170,64 @@ public class CallDataDBObject extends BaseDBObject
 		return new Date(time);
 	}
 
-	public String getTargetNumberE164()
+	public String getLocalNumberE164()
 	{
-		return targetNumberE164;
+		return localNumberE164;
 	}
 
-	public void setTargetNumberE164(String targetNumberE164)
+	public void setLocalNumberE164(String localNumberE164)
 	{
-		this.targetNumberE164 = targetNumberE164;
+		this.localNumberE164 = localNumberE164;
 	}
 
-	public String getTargetNumberPretty()
+	public String getLocalNumberPretty()
 	{
-		return targetNumberPretty;
+		return localNumberPretty;
 	}
 
-	public void setTargetNumberPretty(String targetNumberPretty)
+	public void setLocalNumberPretty(String localNumberPretty)
 	{
-		this.targetNumberPretty = targetNumberPretty;
+		this.localNumberPretty = localNumberPretty;
 	}
 
-	public String getTargetName()
+	public String getLocalName()
 	{
-		return targetName;
+		return localName;
 	}
 
-	public void setTargetName(String targetName)
+	public void setLocalName(String localName)
 	{
-		this.targetName = targetName;
+		this.localName = localName;
 	}
 
-	public String getSourceNumberE164()
+	public String getRemoteNumberE164()
 	{
-		return sourceNumberE164;
+		return remoteNumberE164;
 	}
 
-	public void setSourceNumberE164(String sourceNumberE164)
+	public void setRemoteNumberE164(String remoteNumberE164)
 	{
-		this.sourceNumberE164 = sourceNumberE164;
+		this.remoteNumberE164 = remoteNumberE164;
 	}
 
-	public String getSourceNumberPretty()
+	public String getRemoteNumberPretty()
 	{
-		return sourceNumberPretty;
+		return remoteNumberPretty;
 	}
 
-	public void setSourceNumberPretty(String sourceNumberPretty)
+	public void setRemoteNumberPretty(String remoteNumberPretty)
 	{
-		this.sourceNumberPretty = sourceNumberPretty;
+		this.remoteNumberPretty = remoteNumberPretty;
 	}
 
-	public String getSourceName()
+	public String getRemoteName()
 	{
-		return sourceName;
+		return remoteName;
 	}
 
-	public void setSourceName(String sourceName)
+	public void setRemoteName(String remoteName)
 	{
-		this.sourceName = sourceName;
+		this.remoteName = remoteName;
 	}
 
 	public String getReadModifyUrl()

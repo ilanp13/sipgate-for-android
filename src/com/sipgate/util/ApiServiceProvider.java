@@ -5,14 +5,15 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import net.oauth.OAuthException;
-
 import android.content.Context;
 import android.util.Log;
 
 import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.db.CallDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
@@ -22,7 +23,6 @@ import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.util.SettingsClient.API_TYPE;
 
@@ -217,7 +217,7 @@ public class ApiServiceProvider {
 		}
 	}
 
-	public ArrayList<SipgateCallData> getCalls() throws ApiException, FeatureNotAvailableException {
+	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getCalls();
 		}

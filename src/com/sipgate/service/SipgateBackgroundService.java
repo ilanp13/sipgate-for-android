@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -23,7 +24,6 @@ import com.sipgate.R;
 import com.sipgate.api.types.Event;
 import com.sipgate.db.CallDataDBAdapter;
 import com.sipgate.db.CallDataDBObject;
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 import com.sipgate.util.Constants;
@@ -54,7 +54,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	private Timer callListRefreshTimer = null;
 	
 	private List<Event> voicemails = new ArrayList<Event>();
-	private List<SipgateCallData> calls = new ArrayList<SipgateCallData>();
 	private Set<PendingIntent> onNewVoicemailsTriggers = new HashSet<PendingIntent>();
 	private Set<PendingIntent> onNewCallsTriggers = new HashSet<PendingIntent>();
 
@@ -179,53 +178,16 @@ public class SipgateBackgroundService extends Service implements EventService {
 		
 		Log.v(TAG, "refreshCallEvents()");
 		
-		CallDataDBAdapter callDataDBAdapter = new CallDataDBAdapter(this);
-		
 		try {
 			
 			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
-			List<SipgateCallData> currentCalls = apiClient.getCalls();
-			
-			callDataDBAdapter.removeAllCallData();
-			
-			CallDataDBObject callDataDBObject = null;
-			
-			for (SipgateCallData currentCall : currentCalls)
-			{
-				callDataDBObject = new CallDataDBObject();
-						
-				callDataDBObject.setDirection(currentCall.getCallDirection().equals("incoming") ? CallDataDBObject.INCOMING : CallDataDBObject.OUTGOING);
-				callDataDBObject.setMissed(currentCall.getCallMissed());
-				callDataDBObject.setRead(currentCall.getCallRead());
-				callDataDBObject.setTime(currentCall.getCallTime().getTime());
-				callDataDBObject.setTargetNumberE164(currentCall.getCallTargetNumberE164());
-				callDataDBObject.setTargetNumberPretty(currentCall.getCallTargetNumberPretty());
-				callDataDBObject.setTargetName(currentCall.getCallTargetName());
-				callDataDBObject.setSourceNumberE164(currentCall.getCallSourceNumberE164());
-				callDataDBObject.setSourceNumberPretty(currentCall.getCallSourceNumberPretty());
-				callDataDBObject.setSourceName(currentCall.getCallSourceName());
-				callDataDBObject.setReadModifyUrl(currentCall.getCallReadModifyUrl());
-						
-				callDataDBAdapter.insert(callDataDBObject);
-			}
-			
-			// TODO Reactivate notifyIfUnreadsCalls method() 
-			
-			for (PendingIntent pInt: onNewCallsTriggers) {
-				try {
-					Log.d(TAG, "notifying calls to activity");
-					pInt.send();
-				} catch (CanceledException e) {
-					e.printStackTrace();
-				}			
-			}
+			Vector<CallDataDBObject> currentCalls = apiClient.getCalls();
+		
+			notifyIfUnreadsCalls(currentCalls);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
-		}
-		finally {
-			callDataDBAdapter.close();
 		}
 	}
 
@@ -287,46 +249,65 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @param newList
 	 * @since 1.1
 	 */
-	/*
-	private void notifyIfUnreadsCalls(List<SipgateCallData> oldList, List<SipgateCallData> newList) {
+	
+	private void notifyIfUnreadsCalls(Vector<CallDataDBObject> callDataDBObjects) {
 
 		Log.d(TAG, "notifyIfUnreadCalls");
 		
-		if (oldList == null || !oldList.equals(newList)) {
-			Log.d(TAG, "notifyIfUnreadCalls, oldlist equals newlist not: " + onNewCallsTriggers.size());
-			for (PendingIntent pInt: onNewCallsTriggers){
-				
-				try {
-					Log.d(TAG, "notifying unread calls to activity");
-					pInt.send();
-				} catch (CanceledException e) {
-					e.printStackTrace();
-				}			
-			}
-		} else {
-			Log.d(TAG, "notifyIfUnreadCalls, oldlist equals newlist");
-		}
-
-		Boolean hasUnreadEvents = false;
-
+		CallDataDBAdapter callDataDBAdapter = new CallDataDBAdapter(this);
+		
+		CallDataDBObject oldDataDBObject = null;
+		
 		int unreadCounter = 0;
-		if (newList != null) {
-			for (SipgateCallData call: newList){
-				if (! call.getCallRead()) {
-					if (call.getCallTime().after(youngestCall) && call.getCallMissed() == true){
-						updateYoungestCalldate(call.getCallTime());
-						hasUnreadEvents = true;
-						unreadCounter++;
-					}
+				
+		for (CallDataDBObject currentDataDBObject : callDataDBObjects) {
+			oldDataDBObject = callDataDBAdapter.getCallDataDBObjectById(currentDataDBObject.getId());
+			
+			if (currentDataDBObject.getRead() == -1)
+			{
+				if (oldDataDBObject == null)
+				{
+					currentDataDBObject.setRead(false);
+				}
+				else
+				{
+					currentDataDBObject.setRead(oldDataDBObject.isRead());
 				}
 			}
+			
+			if (oldDataDBObject == null && !currentDataDBObject.isRead())
+			{
+				unreadCounter++;
+			}
+			
+			oldDataDBObject = null;
 		}
-		if (unreadCounter > 0) {
+		
+		callDataDBAdapter.deleteAllCallDBObjects();
+
+		callDataDBAdapter.insert(callDataDBObjects);
+		
+		callDataDBAdapter.close();
+		
+		if (unreadCounter > 0) 
+		{
 			createNewCallNotification(unreadCounter);
 		}
+		else
+		{
+			removeNewCallNotification();
+		}
+		
+		for (PendingIntent pInt: onNewCallsTriggers){
+			try {
+				Log.d(TAG, "notifying refresh calls to activity");
+				pInt.send();
+			} catch (CanceledException e) {
+				e.printStackTrace();
+			}			
+		}
 	}
-	*/
-	
+		
 	/**
 	 * 
 	 * @param d
@@ -420,6 +401,16 @@ public class SipgateBackgroundService extends Service implements EventService {
 		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
 	}
 	
+	
+	/**
+	 * 
+	 * @param unreadCounter
+	 * @since 1.1
+	 */
+	private void removeNewCallNotification() {
+		notifyClient.deleteNotification(NotificationClient.NotificationType.CALL);
+	}
+	
 	/**
 	 * 
 	 * @param unreadCounter
@@ -465,14 +456,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 		return voicemails;
 	}
 	
-	/**
-	 * 
-	 * @since 1.1
-	 */
-	public List<SipgateCallData> getCalls() throws RemoteException {
-		return calls;
-	}
-
 	/**
 	 * 
 	 * @since 1.0
@@ -571,14 +554,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 				return service.getVoicemails();
 			}
 			
-			/**
-			 * 
-			 * @since 1.0
-			 */
-			public List<SipgateCallData> getCalls() throws RemoteException {
-				return service.getCalls();
-			}
-
 			/**
 			 * 
 			 * @since 1.0

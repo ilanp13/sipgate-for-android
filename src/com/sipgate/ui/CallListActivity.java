@@ -214,6 +214,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) 
 	{
 		CallDataDBObject callDataDBObject = (CallDataDBObject) parent.getItemAtPosition(position);
-		call_menu(callDataDBObject.getSourceNumberE164().replaceAll("tel:", "").replaceAll("dd:", ""));
+		call_menu(callDataDBObject.getRemoteNumberE164().replaceAll("tel:", "").replaceAll("dd:", ""));
 	}
 }
