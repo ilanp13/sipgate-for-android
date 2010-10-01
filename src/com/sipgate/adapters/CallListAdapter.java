@@ -32,7 +32,7 @@ public class CallListAdapter extends BaseAdapter
 	private ApiServiceProvider apiClient = null;
 	private AndroidContactsClient contactsClient = null;
 	
-	private SipgateDBAdapter callDataDBAdapter = null;
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private Vector<CallDataDBObject> callDataDBObjects = null;
 	private HashMap<String, String> contactNameCache = null; 	
@@ -74,9 +74,9 @@ public class CallListAdapter extends BaseAdapter
 		contactsClient = new AndroidContactsClient(activity);
 		apiClient = ApiServiceProvider.getInstance(activity);
 		
-		callDataDBAdapter = new SipgateDBAdapter(activity);
-		callDataDBObjects = callDataDBAdapter.getAllCallData();
-		callDataDBAdapter.close();
+		sipgateDBAdapter = new SipgateDBAdapter(activity);
+		callDataDBObjects = sipgateDBAdapter.getAllCallData();
+		sipgateDBAdapter.close();
 		
 		contactNameCache = new HashMap<String, String>();
 				
@@ -106,12 +106,22 @@ public class CallListAdapter extends BaseAdapter
 		
 	public Object getItem(int position) 
 	{
-		return callDataDBObjects.elementAt(position);
+		if (getCount() >= position)
+		{
+			return callDataDBObjects.elementAt(position);
+		}
+	
+		return null;
 	}
 	
 	public long getItemId(int position) 
 	{
-		return callDataDBObjects.elementAt(position).getId();
+		if (getCount() >= position)
+		{
+			return callDataDBObjects.elementAt(position).getId();
+		}
+		
+		return 0;
 	}
 	
 	@Override
@@ -235,12 +245,12 @@ public class CallListAdapter extends BaseAdapter
 			Thread markThread = new Thread(){
 				public void run()
 				{
-					callDataDBAdapter = new SipgateDBAdapter(activity);
+					sipgateDBAdapter = new SipgateDBAdapter(activity);
 					
 					callDataDBObject.setRead(true);
-					callDataDBAdapter.update(callDataDBObject);
+					sipgateDBAdapter.update(callDataDBObject);
 
-					callDataDBAdapter.close();
+					sipgateDBAdapter.close();
 					
 					try {
 						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
@@ -275,9 +285,9 @@ public class CallListAdapter extends BaseAdapter
 	@Override
 	public void notifyDataSetChanged() {
 		
-		callDataDBAdapter = new SipgateDBAdapter(activity);
-		callDataDBObjects = callDataDBAdapter.getAllCallData();
-		callDataDBAdapter.close();
+		sipgateDBAdapter = new SipgateDBAdapter(activity);
+		callDataDBObjects = sipgateDBAdapter.getAllCallData();
+		sipgateDBAdapter.close();
 		
 		super.notifyDataSetChanged();
 	}

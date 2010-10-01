@@ -22,9 +22,9 @@ import org.zoolu.sip.address.SipURL;
 
 import android.util.Log;
 
-import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
@@ -314,11 +314,11 @@ public class XmlrpcClient implements ApiClientInterface {
 
 	}
 
-
-	public List<Event> getEvents() throws ApiException, FeatureNotAvailableException {
+	@Override
+	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException
+	{
 		throw new FeatureNotAvailableException();
 	}
-
 
 	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException,
 			AuthenticationErrorException, NetworkProblemException {
@@ -413,7 +413,7 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	
-	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 	

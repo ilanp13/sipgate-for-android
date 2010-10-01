@@ -36,13 +36,13 @@ import com.sipgate.R;
 import com.sipgate.api.types.Event;
 import com.sipgate.api.types.Voicemail;
 import com.sipgate.exceptions.DownloadException;
-import com.sipgate.models.holder.EventViewHolder;
+import com.sipgate.models.holder.VoiceMailViewHolder;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 import com.sipgate.util.Constants;
-
+/*
 public class EventListActivity extends Activity {
 	//private static final int REFRESH_MENU_ITEM = 0;
 	private static final String TAG = "EventListActivity";
@@ -59,9 +59,6 @@ public class EventListActivity extends Activity {
 	private ApiServiceProvider apiClient = null;
 	private boolean hasVmListFeature = false;
 
-	/**
-	 * optimization: gets Strings from resources. must be called from onCreate()
-	 */
 	private void initStrings() {
 		voicemailFromText = getResources().getString(
 				R.string.sipgate_voicemail_from);
@@ -108,7 +105,7 @@ public class EventListActivity extends Activity {
 							serviceBinding = (EventService) binder;
 							try {
 								Log.d(TAG, "serviceBinding registerOnEventsIntent");
-								serviceBinding.registerOnVoicemailsIntent(getNewMessagesIntent());
+								serviceBinding.registerOnVoiceMailsIntent(getNewMessagesIntent());
 							} catch (RemoteException e) {
 								e.printStackTrace();
 							}
@@ -154,7 +151,7 @@ public class EventListActivity extends Activity {
 
 	private PendingIntent getNewMessagesIntent() {
 		if (onNewVoicemailsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFramesVoicemails.class);
+			Intent onChangedIntent = new Intent(this, SipgateFramesVoiceMails.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
 			onNewVoicemailsPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
@@ -214,14 +211,14 @@ public class EventListActivity extends Activity {
 				R.id.EventTitle) {
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
-				EventViewHolder holder = null;
+				VoiceMailViewHolder holder = null;
 				if (convertView == null) {
 					convertView = mInflater
 							.inflate(R.layout.eventelement, null);
-					holder = new EventViewHolder();
-					holder.titleView = (TextView) convertView
+					holder = new VoiceMailViewHolder();
+					holder.nameView = (TextView) convertView
 							.findViewById(R.id.EventTitle);
-					holder.dateView = (TextView) convertView
+					holder.timeView = (TextView) convertView
 							.findViewById(R.id.DateTextView);
 					holder.categoryView = (TextView) convertView
 							.findViewById(R.id.CategoryTextView);
@@ -231,7 +228,7 @@ public class EventListActivity extends Activity {
 							.findViewById(R.id.IconView);
 					convertView.setTag(holder);
 				} else {
-					holder = (EventViewHolder) convertView.getTag();
+					holder = (VoiceMailViewHolder) convertView.getTag();
 				}
 				Event item = getItem(position);
 
@@ -240,16 +237,16 @@ public class EventListActivity extends Activity {
 				String thisDay = formatDateAsDay(item.getCreateOnAsDate());
 
 				if (item.isRead()) {
-					holder.titleView.setTypeface(Typeface.DEFAULT);
+					holder.nameView.setTypeface(Typeface.DEFAULT);
 					holder.iconVM.setImageDrawable(getResources().getDrawable(
 							R.drawable.voicemail_read));
 				} else {
-					holder.titleView.setTypeface(Typeface.DEFAULT_BOLD);
+					holder.nameView.setTypeface(Typeface.DEFAULT_BOLD);
 					holder.iconVM.setImageDrawable(getResources().getDrawable(
 							R.drawable.voicemail_unread));
 				}
 
-				holder.dateView.setText(formatDateAsTime(createdOn));
+				holder.timeView.setText(formatDateAsTime(createdOn));
 				holder.categoryView.setText(thisDay);
 				holder.categoryView.setVisibility(View.VISIBLE);
 
@@ -271,10 +268,10 @@ public class EventListActivity extends Activity {
 				return convertView;
 			}
 
-			private void showVoicemailDetails(EventViewHolder holder,
+			private void showVoicemailDetails(VoiceMailViewHolder holder,
 					Voicemail item) {
 
-				holder.titleView.setText(voicemailFromText + ": "
+				holder.nameView.setText(voicemailFromText + ": "
 						+ item.getNumberPretty());
 
 				String transcription = item.getTranscription();
@@ -314,7 +311,7 @@ public class EventListActivity extends Activity {
 							voiceMail.getVoicemail_id());
 					ApiServiceProvider apiClient = ApiServiceProvider
 							.getInstance(getApplicationContext());
-					apiClient.setVoicemailRead(url);
+					apiClient.setVoiceMailRead(url);
 				} catch (RuntimeException e) {
 					// Log.e(TAG,
 					// "RuntimeException, setting voicemail to read");
@@ -478,71 +475,7 @@ public class EventListActivity extends Activity {
 		getVoicemails();
 	}
 
-	public class MediaConnector implements MediaController.MediaPlayerControl {
-
-		private MediaPlayer mediaPlayer;
-
-		public MediaConnector() {
-			mediaPlayer = new MediaPlayer();
-		}
-
-		public int getBufferPercentage() {
-			return 0;
-		}
-
-		public int getCurrentPosition() {
-			return mediaPlayer.getCurrentPosition();
-		}
-
-		public int getDuration() {
-			return mediaPlayer.getDuration();
-		}
-
-		public boolean isPlaying() {
-			return mediaPlayer.isPlaying();
-		}
-
-		public void pause() {
-			mediaPlayer.pause();
-		}
-
-		public void seekTo(int pos) {
-			mediaPlayer.seekTo(pos);
-		}
-
-		public void setMp3(String location) {
-			mediaPlayer.stop();
-			// TODO: find out, why this new instance is needed; seems not to
-			// work with
-			// existing MediaPlayer instance
-			mediaPlayer = new MediaPlayer();
-			try {
-				mediaPlayer.setDataSource(location);
-				mediaPlayer.prepare();
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalStateException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		public void start() {
-			mediaPlayer.start();
-		}
-
-		public boolean canPause() {
-			return true;
-		}
-
-		public boolean canSeekBackward() {
-			return true;
-		}
-
-		public boolean canSeekForward() {
-			return true;
-		}
-	}
+	
 
 }
+*/

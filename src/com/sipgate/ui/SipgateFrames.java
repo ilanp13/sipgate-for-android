@@ -137,7 +137,7 @@ public class SipgateFrames extends TabActivity {
 		Resources res = getResources();
 		this.tabSpecVmList = tabs.newTabSpec("Voicemails");
 		this.tabSpecVmList.setIndicator(res.getText(R.string.sipgate_tab_voicemail), res.getDrawable(R.drawable.tab_voicemail));
-		this.tabSpecVmList.setContent(new Intent(this, EventListActivity.class));
+		this.tabSpecVmList.setContent(new Intent(this, VoiceMailListActivity.class));
 		tabs.addTab(this.tabSpecVmList);
 		
 		this.vmTabVisible = true;

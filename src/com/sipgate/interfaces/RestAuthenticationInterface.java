@@ -13,7 +13,7 @@ public interface RestAuthenticationInterface {
 	
 	public InputStream getCalls() throws AccessProtectedResourceException, NetworkProblemException;
 	
-	public InputStream getEvents() throws AccessProtectedResourceException, NetworkProblemException;
+	public InputStream getVoiceMails() throws AccessProtectedResourceException, NetworkProblemException;
 	
 	public InputStream getVoicemail(String voicemail) throws AccessProtectedResourceException, NetworkProblemException;
 

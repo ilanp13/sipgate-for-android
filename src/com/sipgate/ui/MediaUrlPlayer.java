@@ -8,6 +8,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.util.Log;
 import com.sipgate.api.types.Voicemail;
+import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.DownloadException;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.Constants;
@@ -15,9 +16,9 @@ import com.sipgate.util.Constants;
 public class MediaUrlPlayer {
 	private static final String TAG = "Mediaplayer";
 	
-	public static void play (Voicemail vm, Context context){
+	public static void play (VoiceMailDataDBObject voiceMailDataDBObject, Context context){
 		try {
-			String localName = download(vm, context);
+			String localName = download(voiceMailDataDBObject, context);
 			MediaPlayer mp = new MediaPlayer();
 			mp.setDataSource(localName);
 			mp.prepare();
@@ -39,23 +40,23 @@ public class MediaUrlPlayer {
 	}
 		
 	/**
-	 * Downloads voicemail mp3 and returns local path
+	 * Downloads voice mail mp3 and returns local path
 	 * 
 	 * @param Voicemail
 	 * @return
 	 * @throws VoicemailHelperDownloadException
 	 */
-	public static String download(Voicemail voiceMail, Context context) throws DownloadException {
+	public static String download(VoiceMailDataDBObject voiceMailDataDBObject, Context context) throws DownloadException {
 		File voicemailFile = null;
 		setupDownloadDir();
-		voicemailFile = new File(Constants.MP3_DOWNLOAD_DIR, voiceMail.getVoicemail_id() + ".mp3");
+		voicemailFile = new File(Constants.MP3_DOWNLOAD_DIR, voiceMailDataDBObject.getId() + ".mp3");
 		if (! voicemailFile.exists()){
 			try {
 				InputStream inputStream = null;
 				
 				ApiServiceProvider apiClient = ApiServiceProvider.getInstance(context);
-				Log.d(TAG, voiceMail.getContent_url());
-				inputStream = apiClient.getVoicemail(voiceMail.getContent_url());
+				Log.d(TAG, voiceMailDataDBObject.getContentUrl());
+				inputStream = apiClient.getVoicemail(voiceMailDataDBObject.getContentUrl());
 				if (inputStream == null) {
 					throw new RuntimeException("stream is null");
 				}
@@ -84,10 +85,10 @@ public class MediaUrlPlayer {
 				throw new DownloadException();
 			}
 			Log.d(TAG, String.format("downloaded voicemail %s as %s", 
-					voiceMail.getVoicemail_id() , voicemailFile.getAbsolutePath()));
+					voiceMailDataDBObject.getId() , voicemailFile.getAbsolutePath()));
 		} else {
 			Log.d(TAG, String.format("cached voicemail %s as %s", 
-					voiceMail.getVoicemail_id() , voicemailFile.getAbsolutePath()));
+					voiceMailDataDBObject.getId() , voicemailFile.getAbsolutePath()));
 		}
 
 		return voicemailFile.getAbsolutePath();

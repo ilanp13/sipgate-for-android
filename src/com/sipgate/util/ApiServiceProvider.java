@@ -10,9 +10,9 @@ import java.util.Vector;
 import android.content.Context;
 import android.util.Log;
 
-import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
@@ -179,11 +179,11 @@ public class ApiServiceProvider {
 	}
 
 	/*
-	 * event list
+	 * voice mail list
 	 */
-	public List<Event> getEvents() throws ApiException, FeatureNotAvailableException {
+	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
-			return apiClient.getEvents();
+			return apiClient.getVoiceMails();
 		}
 	}
 
@@ -199,9 +199,9 @@ public class ApiServiceProvider {
 	/*
 	 * mark specific vm as read
 	 */
-	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException {
+	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException {
 		synchronized (this.apiClient) {
-			apiClient.setVoicemailRead(voicemail);
+			apiClient.setVoiceMailRead(voicemail);
 		}
 	}
 	
@@ -214,6 +214,9 @@ public class ApiServiceProvider {
 		}
 	}
 
+	/*
+	 * calls list
+	 */
 	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getCalls();

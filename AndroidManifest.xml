@@ -66,7 +66,7 @@
 				<action android:name="com.sipgate.SIPDROID" />
 			</intent-filter>
 		</activity>
-		<activity android:name="com.sipgate.ui.EventListActivity" android:label="@string/app_name" android:launchMode="singleTask"  >
+		<activity android:name="com.sipgate.ui.VoiceMailListActivity" android:label="@string/app_name" android:launchMode="singleTask"  >
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW" />
 			</intent-filter>
@@ -177,7 +177,7 @@
 				<action android:name="com.sipgate.ui.SipgateFrames" />
 			</intent-filter>
 		</activity>
-		<activity android:name="com.sipgate.ui.SipgateFramesVoicemails" android:label="@string/app_name"
+		<activity android:name="com.sipgate.ui.SipgateFramesVoiceMails" android:label="@string/app_name"
 			android:screenOrientation="portrait" android:finishOnTaskLaunch="true"
 			android:noHistory="true">>
 		</activity>

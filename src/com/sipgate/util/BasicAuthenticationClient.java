@@ -42,8 +42,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	
 	@SuppressWarnings("unused")
 	private DefaultRedirectHandler redirectHandler = new DefaultRedirectHandler();
-	
-	
+		
 	private final String TAG = "BasicAuthenticationClient";
 	
 	private String user = null;
@@ -124,7 +123,6 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
         httpClient.getCredentialsProvider().setCredentials(new AuthScope(url.getHost(), AuthScope.ANY_PORT), new UsernamePasswordCredentials(username, password));
-
 	
 		if (urlString.contains("?")) {
 			urlString += "&"+Constants.API_VERSION_SUFFIX; // TODO FIXME
@@ -153,6 +151,8 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		
 		InputStream inputStream = null;
 		
+		HttpEntity entity = null;
+		
 		try {
 			do {
 				response = httpClient.execute(request);
@@ -175,12 +175,17 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 				}
 			} while (response == null);
 
-			inputStream = response.getEntity().getContent();
+			entity = response.getEntity();
 			
-			Header contentEncoding = response.getFirstHeader("Content-Encoding");
-			
-			if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-				inputStream = new GZIPInputStream(inputStream);
+			if (entity != null) 
+			{
+				inputStream = entity.getContent();
+				
+				Header contentEncoding = response.getFirstHeader("Content-Encoding");
+				
+				if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+					inputStream = new GZIPInputStream(inputStream);
+				}
 			}
 		} catch (UnknownHostException e) {
 			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): "+e.getLocalizedMessage());
@@ -202,12 +207,13 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/calls/?complexity=full");
 	}
 
+	public InputStream getVoiceMails() throws AccessProtectedResourceException, NetworkProblemException
+	{
+		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/voicemails/?complexity=full");
+	}
+	
 	public InputStream getProvisioningData() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/extensions/?complexity=full");
-	}
-
-	public InputStream getEvents() throws AccessProtectedResourceException, NetworkProblemException {
-		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/?complexity=full");
 	}
 	
 	public InputStream getVoicemail(String voicemail) throws AccessProtectedResourceException, NetworkProblemException {
@@ -215,7 +221,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	}
 	
 	public void setVoicemailRead(String voicemail) throws AccessProtectedResourceException, NetworkProblemException {
-		accessProtectedResource("PUT", voicemail+"/?value=true");
+		accessProtectedResource("PUT", voicemail+"?value=true");
 	}
 	
 	public void setCallRead(String call) throws AccessProtectedResourceException, NetworkProblemException {
