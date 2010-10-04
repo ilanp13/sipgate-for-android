@@ -1,12 +1,18 @@
 package com.sipgate.ui;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -24,12 +30,13 @@ import com.sipgate.R;
 import com.sipgate.adapters.VoiceMailListAdapter;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
-import com.sipgate.exceptions.DownloadException;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.Constants;
+import com.sipgate.util.MediaConnector;
 
-public class VoiceMailListActivity extends Activity implements OnItemClickListener 
+public class VoiceMailListActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "VoiceMailListActivity";
 	
@@ -51,6 +58,8 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	private Activity activity = this;
 	
 	private SipgateDBAdapter sipgateDBAdapter = null;
+	
+	private DownloadVoiceMailTask downloadVoiceMailTask = null;
 	
 	@Override
 	public void onCreate(Bundle bundle) 
@@ -167,7 +176,8 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		}
 	}
 
-	private PendingIntent getNewMessagesIntent() {
+	private PendingIntent getNewMessagesIntent() 
+	{
 		if (onNewVoiceMailPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFramesVoiceMails.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
@@ -199,21 +209,8 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		return result;
 	}
 	
-	protected void showPlayerDialog(VoiceMailDataDBObject voiceMailDataDBObject) {
-		try {
-			this.mediaConnector.pause();
-			// TODO: change to async call
-			this.mediaConnector.setMp3(MediaUrlPlayer.download(voiceMailDataDBObject,
-					getApplicationContext()));
-			this.mediaConnector.start();
-			mediaController.show(0);
-		} catch (DownloadException e) {
-			e.printStackTrace();
-		}
-		markAsRead(voiceMailDataDBObject);
-	}
-	
-	private void markAsRead(final VoiceMailDataDBObject voiceMailDataDBObject) {
+	private void markAsRead(final VoiceMailDataDBObject voiceMailDataDBObject) 
+	{
 		if (!voiceMailDataDBObject.isRead()) {
 			Thread markThread = new Thread(){
 				public void run()
@@ -239,10 +236,113 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	}
 	
 	@Override
-	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) 
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) 
 	{
-		VoiceMailDataDBObject voicemail = (VoiceMailDataDBObject) parent.getItemAtPosition(position);
-		showPlayerDialog(voicemail);
+		VoiceMailDataDBObject voiceMailDataDBObject = (VoiceMailDataDBObject) parent.getItemAtPosition(position);
+	
+		new DownloadVoiceMailTask().execute(voiceMailDataDBObject);
 	}
 	
+	private class DownloadVoiceMailTask extends AsyncTask <VoiceMailDataDBObject, Void, VoiceMailDataDBObject>
+	{
+		private InputStream inputStream = null;
+		private FileOutputStream fileOutputStream = null; 
+		private ProgressDialog waitDialog = null;
+		
+		protected VoiceMailDataDBObject doInBackground(VoiceMailDataDBObject... voiceMailDataDBObjects)
+		{
+			VoiceMailDataDBObject voiceMailDataDBObject = voiceMailDataDBObjects[0];
+			
+			String localURL = voiceMailDataDBObject.getLocalFileUrl();
+			
+			if (localURL.length() > 0) {
+				File file = new File(localURL);
+				
+				if (file.exists()) {
+					return voiceMailDataDBObject;
+				}
+			}
+			
+			localURL = Constants.MP3_DOWNLOAD_DIR + "/" + voiceMailDataDBObject.getId() + ".mp3";
+			
+			try {
+				Log.d(TAG, voiceMailDataDBObject.getContentUrl());
+				
+				inputStream = apiClient.getVoicemail(voiceMailDataDBObject.getContentUrl());
+				
+				if (inputStream == null) {
+					throw new RuntimeException("voicemail inputstream is null");
+				}
+
+				fileOutputStream = new FileOutputStream(localURL);
+				
+				byte chunk[] = new byte[1024];
+				
+				int length = 0;
+				
+				while ((length = inputStream.read(chunk)) > 0) {
+					fileOutputStream.write(chunk, 0, length);
+				}
+				
+				voiceMailDataDBObject.setLocalFileUrl(localURL);
+				
+				sipgateDBAdapter = new SipgateDBAdapter(activity);
+				sipgateDBAdapter.update(voiceMailDataDBObject);
+			}					
+			catch (Exception e) {
+				Log.e(TAG, e.getLocalizedMessage(), e);
+			}
+			finally {
+				try {
+					fileOutputStream.close();
+				}
+				catch (IOException e) {
+					Log.e(TAG, e.getLocalizedMessage(), e);
+				}
+				
+				try {
+					inputStream.close();
+				}
+				catch (IOException e) {
+					Log.e(TAG, e.getLocalizedMessage(), e);
+				}
+			
+				if (sipgateDBAdapter != null) {
+					sipgateDBAdapter.close();
+				}
+			}
+			
+			File file = new File(localURL);
+			
+			if (file.exists()) {
+				return voiceMailDataDBObject;
+			}
+			else
+			{
+				return null;
+			}
+		} 
+		
+		@Override
+		protected void onPostExecute(VoiceMailDataDBObject voiceMailDataDBObject)
+		{
+			waitDialog.dismiss();
+			
+			if (mediaConnector.isPlaying()) {
+				mediaConnector.pause();
+			}
+			
+			mediaConnector.setMp3(voiceMailDataDBObject.getLocalFileUrl());
+			mediaConnector.start();
+			mediaController.show(0);
+			
+			markAsRead(voiceMailDataDBObject);
+		}
+		
+		@Override
+		protected void onPreExecute()
+		{
+			waitDialog = ProgressDialog.show(activity, "", getResources().getString(R.string.sipgate_loading), true);
+		}
+	}
 }

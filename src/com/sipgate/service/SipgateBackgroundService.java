@@ -109,6 +109,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 					}
 				}
 			}, 0, EVENTREFRESH_INTERVAL);
+			
 		}
 		
 		callListRefreshTimer.scheduleAtFixedRate(new TimerTask() {

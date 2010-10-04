@@ -79,4 +79,5 @@
    	<string name="sipgate_new_calls">You have %d new calls</string>
    	<string name="sipgate_unknown_caller">Unknown</string>
    	<string name="sipgate_no_number">anonymous</string>
+   	<string name="sipgate_loading">Loading. Please wait...</string>
 </resources>

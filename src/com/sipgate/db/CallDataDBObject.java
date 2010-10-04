@@ -34,20 +34,21 @@ public class CallDataDBObject extends BaseDBObject
 
 	public void bindInsert(SQLiteStatement statement)
 	{
-		statement.bindLong(1, direction);
-		statement.bindLong(2, missed);
-		statement.bindLong(3, read);
-		statement.bindLong(4, time);
+		statement.bindLong(1, id);
+		statement.bindLong(2, direction);
+		statement.bindLong(3, missed);
+		statement.bindLong(4, read);
+		statement.bindLong(5, time);
 		
-		statement.bindString(5, localNumberE164);	
-		statement.bindString(6, localNumberPretty);
-		statement.bindString(7, localName);
+		statement.bindString(6, localNumberE164);	
+		statement.bindString(7, localNumberPretty);
+		statement.bindString(8, localName);
 		
-		statement.bindString(8, remoteNumberE164);
-		statement.bindString(9, remoteNumberPretty);
-		statement.bindString(10, remoteName);
+		statement.bindString(9, remoteNumberE164);
+		statement.bindString(10, remoteNumberPretty);
+		statement.bindString(11, remoteName);
 		
-		statement.bindString(11, readModifyUrl);
+		statement.bindString(12, readModifyUrl);
 	}
 
 	public void bindUpdate(SQLiteStatement statement)
@@ -82,7 +83,7 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO CallData (direction, missed, read, time, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return "INSERT INTO CallData (id, direction, missed, read, time, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()

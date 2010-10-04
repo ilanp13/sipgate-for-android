@@ -1,4 +1,4 @@
-package com.sipgate.ui;
+package com.sipgate.util;
 
 import java.io.IOException;
 

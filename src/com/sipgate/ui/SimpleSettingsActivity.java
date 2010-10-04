@@ -4,6 +4,7 @@ package com.sipgate.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.sipgate.R;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
@@ -25,7 +27,8 @@ import com.sipgate.util.SettingsClient;
 
 public class SimpleSettingsActivity extends Activity implements OnClickListener {
 	private static final String TAG = "SimpleSettingsActivity";
-
+	private Context context = this;
+	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTitle(R.string.simple_settings);
@@ -131,15 +134,22 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
 							NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 					        notificationManager.cancelAll();
 
-					        SettingsClient.getInstance(getApplicationContext()).unRegisterExtension();
-							
-							ApiServiceProvider.getInstance(getApplicationContext()).unRegister();
-
 							Receiver.engine(getApplicationContext()).halt();
 							
 							stopService(new Intent(getApplicationContext(),SipgateBackgroundService.class));
 							stopService(new Intent(getApplicationContext(),RegisterService.class));
+							
+					        SettingsClient.getInstance(getApplicationContext()).unRegisterExtension();
+							
+							ApiServiceProvider.getInstance(getApplicationContext()).unRegister();
             		
+							SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(context);
+							
+							sipgateDBAdapter.deleteAllCallDBObjects();
+							sipgateDBAdapter.deleteAllVoiceMailDBObjects();
+							
+							sipgateDBAdapter.close();
+							
 							Intent intent = new Intent(getApplicationContext(), Login.class);
 							startActivity(intent);
 						}

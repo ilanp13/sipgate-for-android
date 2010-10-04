@@ -37,7 +37,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 */
 	public Cursor getAllCallDataCursor()
 	{
-		return database.query("CallData", null, null, null, null, null, null);
+		return database.query("CallData", null, null, null, null, null, "time desc");
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 */
 	public Cursor getAllVoiceMailDataCursor()
 	{
-		return database.query("VoiceMailData", null, null, null, null, null, null);
+		return database.query("VoiceMailData", null, null, null, null, null, "time desc");
 	}
 	
 	/**

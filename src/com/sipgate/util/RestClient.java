@@ -19,10 +19,7 @@ import org.w3c.dom.NodeList;
 
 import android.util.Log;
 
-import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
-import com.sipgate.api.types.SMS;
-import com.sipgate.api.types.Voicemail;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.AccessProtectedResourceException;
@@ -55,6 +52,9 @@ public class RestClient implements ApiClientInterface {
 	
 	private NodeList helperNodeList = null;
 	private Element helperElement = null;
+	
+	private int length = 0;
+	private int subLength = 0;
 	
 	public RestClient(String username, String password) 
 	{
@@ -132,7 +132,9 @@ public class RestClient implements ApiClientInterface {
 			
 			SipgateProvisioningExtension extension = null;
 			
-			for (int s = 0; s < nodeList.getLength(); s++) {
+			length = nodeList.getLength();
+			
+			for (int s = 0; s < length ; s++) {
 				node = nodeList.item(s);
 				
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -202,7 +204,9 @@ public class RestClient implements ApiClientInterface {
 			
 			Element readStatus = null;
 			
-			for (int s = 0; s < nodeList.getLength() && s < 50; s++) {
+			length = nodeList.getLength();
+			
+			for (int s = 0; s < length && s < 50; s++) {
 				node = nodeList.item(s);
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					element = (Element) node;
@@ -318,9 +322,12 @@ public class RestClient implements ApiClientInterface {
 			}
 			
 			nodeList = node.getChildNodes();
-			Log.v(TAG, "parseBasePT " + nodeList.getLength() + " nodes");
 			
-			for (int i = 0; i < nodeList.getLength(); i++) {			
+			length = nodeList.getLength();
+			
+			Log.v(TAG, "parseBasePT " + length + " nodes");
+			
+			for (int i = 0; i < length; i++) {			
 				node = nodeList.item(i);				
 				
 				if (node.getNodeName().equals("baseproducttype")) {
@@ -364,13 +371,18 @@ public class RestClient implements ApiClientInterface {
 			String sipid = null;
 			String sippassword = null;
 			
-			for (int i = 0; i < nodeList.getLength(); i++) {			
+			length = nodeList.getLength();
+			
+			for (int i = 0; i < length; i++) {			
 				node = nodeList.item(i);
 				
 				Log.d(TAG, "setup mobile device node: " + node.getNodeName());
 				
 				if (node.getNodeName().equals("credentials")) {
-					for (int j = 0; j < nodeList.getLength(); j++) {
+					
+					subLength = nodeList.getLength();
+					
+					for (int j = 0; j < subLength; j++) {
 						Node p = nodeList.item(j);
 						if (p.getNodeName().equals("sipId")) {
 							sipid = p.getNodeValue();
@@ -415,11 +427,14 @@ public class RestClient implements ApiClientInterface {
 			
 			nodeList = node.getChildNodes();
 			
-			Log.v(TAG,"got extension list with " + nodeList.getLength()+ " nodes");
+
+			length = nodeList.getLength();
+			
+			Log.v(TAG,"got extension list with " + length + " nodes");
 			
 			MobileExtension e = null;
 			
-			for (int i = 0; i < nodeList.getLength(); i++) 
+			for (int i = 0; i < length; i++) 
 			{			
 				node = nodeList.item(i);
 				
@@ -481,7 +496,9 @@ public class RestClient implements ApiClientInterface {
 			Element readStatus = null;
 			Element content = null;
 			
-			for (int s = 0; s < nodeList.getLength() && s < 50; s++) {
+			length = nodeList.getLength();
+			
+			for (int s = 0; s < length && s < 50; s++) {
 				node = nodeList.item(s);
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					element = (Element) node;

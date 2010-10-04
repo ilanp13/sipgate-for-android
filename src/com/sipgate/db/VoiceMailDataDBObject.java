@@ -35,22 +35,23 @@ public class VoiceMailDataDBObject extends BaseDBObject
 
 	public void bindInsert(SQLiteStatement statement)
 	{
-		statement.bindLong(1, read);
-		statement.bindLong(2, time);
-		statement.bindLong(3, duration);
+		statement.bindLong(1, id);
+		statement.bindLong(2, read);
+		statement.bindLong(3, time);
+		statement.bindLong(4, duration);
 				
-		statement.bindString(4, localNumberE164);	
-		statement.bindString(5, localNumberPretty);
-		statement.bindString(6, localName);
+		statement.bindString(5, localNumberE164);	
+		statement.bindString(6, localNumberPretty);
+		statement.bindString(7, localName);
 		
-		statement.bindString(7, remoteNumberE164);
-		statement.bindString(8, remoteNumberPretty);
-		statement.bindString(9, remoteName);
+		statement.bindString(8, remoteNumberE164);
+		statement.bindString(9, remoteNumberPretty);
+		statement.bindString(10, remoteName);
 		
-		statement.bindString(10, transcription);
-		statement.bindString(11, contentUrl);
-		statement.bindString(12, localFileUrl);
-		statement.bindString(13, readModifyUrl);
+		statement.bindString(11, transcription);
+		statement.bindString(12, contentUrl);
+		statement.bindString(13, localFileUrl);
+		statement.bindString(14, readModifyUrl);
 	}
 
 	public void bindUpdate(SQLiteStatement statement)
@@ -87,7 +88,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO VoiceMailData (read, time, duration, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, transcription, contentUrl, localFileUrl, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return "INSERT INTO VoiceMailData (id, read, time, duration, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, transcription, contentUrl, localFileUrl, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
