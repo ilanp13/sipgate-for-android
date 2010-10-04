@@ -1,9 +1,7 @@
 package com.sipgate.service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,7 +19,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.sipgate.R;
-import com.sipgate.api.types.Event;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
@@ -311,21 +308,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 				e.printStackTrace();
 			}			
 		}
-	}
-		
-	/**
-	 * 
-	 * @param d
-	 * @since 1.0
-	 */
-	private void updateYoungestVoicemaildate(Date d) 
-	{
-		youngestVoicemail = d;
-		
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		Editor editor = pref.edit();
-		editor.putLong(PREF_YOUNGESTVOICEMAILDATE, youngestVoicemail.getTime());
-		editor.commit();
 	}
 		
 	/**
