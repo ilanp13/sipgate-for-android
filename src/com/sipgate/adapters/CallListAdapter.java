@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.models.SipgateContact;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;
@@ -44,6 +45,7 @@ public class CallListAdapter extends BaseAdapter
 	
 	private CallDataDBObject currentCallDataDBObject = null;
 	private CallDataDBObject lastCallDataDBObject = null;
+	private CallDataDBObject nextCallDataDBObject = null;
 	
 	private String remoteName = null;
 	private String remoteNumberPretty = null;
@@ -51,6 +53,7 @@ public class CallListAdapter extends BaseAdapter
 	
 	private Calendar currentDayCalendar = null;
 	private Calendar lastDayCalendar = null;
+	private Calendar nextDayCalendar = null;
 	
 	private SimpleDateFormat timeFormatter = null;
 	private SimpleDateFormat dateFormatter = null;
@@ -92,6 +95,7 @@ public class CallListAdapter extends BaseAdapter
 		
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();
+		nextDayCalendar = Calendar.getInstance();
 	}
 		
 	public boolean areAllItemsEnabled() 
@@ -106,7 +110,7 @@ public class CallListAdapter extends BaseAdapter
 		
 	public Object getItem(int position) 
 	{
-		if (getCount() >= position)
+		if (getCount() > position)
 		{
 			return callDataDBObjects.elementAt(position);
 		}
@@ -116,7 +120,7 @@ public class CallListAdapter extends BaseAdapter
 	
 	public long getItemId(int position) 
 	{
-		if (getCount() >= position)
+		if (getCount() > position)
 		{
 			return callDataDBObjects.elementAt(position).getId();
 		}
@@ -142,6 +146,7 @@ public class CallListAdapter extends BaseAdapter
 			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.CallTypeImage);
 			holder.callButtonView = (ImageView) convertView.findViewById(R.id.CallImageButton);
 			holder.categoryTextView = (TextView) convertView.findViewById(R.id.CategoryTextView);
+			holder.separator = (View) convertView.findViewById(R.id.CallSeparator);
 			convertView.setTag(holder);
 		} 
 		else 
@@ -232,6 +237,23 @@ public class CallListAdapter extends BaseAdapter
 			else 
 			{
 				holder.categoryTextView.setVisibility(View.VISIBLE);
+			}
+		}
+		
+		if (position < (getCount() - 1))
+		{
+			nextCallDataDBObject = (CallDataDBObject)getItem(position + 1);
+			
+			nextDayCalendar.setTimeInMillis(nextCallDataDBObject.getTime());
+			
+			if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) != currentDayCalendar.get(Calendar.DAY_OF_YEAR) ||
+				lastDayCalendar.get(Calendar.YEAR) != currentDayCalendar.get(Calendar.YEAR))
+			{
+				holder.separator.setVisibility(View.GONE);
+			}
+			else
+			{
+				holder.separator.setVisibility(View.VISIBLE);
 			}
 		}
 		

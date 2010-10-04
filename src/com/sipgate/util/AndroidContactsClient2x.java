@@ -33,14 +33,9 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		this.contentResolver = activity.getContentResolver();
 	}
 
-	private String getContactSortOrder() {
-		return ContactsContract.Contacts.DISPLAY_NAME + " ASC";
-	}
-
 	private Cursor getManagedCursorOnContacts() {
-		
-		return this.activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
-				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, getContactSortOrder());
+		return activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
+				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, ContactsContract.Contacts.DISPLAY_NAME + " ASC");
 	}
 	
 	public ArrayList<SipgateContact> getContacts() {
@@ -52,9 +47,11 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
+			int id = 0;
+			SipgateContact contact = null;
 			do {
-				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
-				SipgateContact contact = getContactDetailsById(id, withPicture);
+				id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
+				contact = getContactDetailsById(id, withPicture);
 				contactsList.add(contact);
 			} while (managedCursor.moveToNext());
 		}
@@ -103,6 +100,9 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		String firstName = nameCur.getString(nameCur
 				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME));
 
+		String displayName = nameCur.getString(nameCur
+				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME));
+				
 		nameCur.close();
 
 		ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
@@ -121,7 +121,7 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		
 		if (lastName == null && firstName == null) {
 			// no detailed name. let's try displayname
-			String displayName = managedCursor.getString(managedCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+		
 			if (displayName == null && numbers == null || numbers.size() < 1) {
 				Log.d(TAG, "no name");
 				return null; // we dont want contacts without name
