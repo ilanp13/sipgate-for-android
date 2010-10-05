@@ -2,7 +2,6 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;

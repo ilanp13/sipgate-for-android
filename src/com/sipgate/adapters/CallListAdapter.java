@@ -18,7 +18,6 @@ import android.widget.TextView;
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.CallDataDBObject;
-import com.sipgate.models.SipgateContact;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;

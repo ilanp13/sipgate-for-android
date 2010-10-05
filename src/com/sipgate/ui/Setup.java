@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import net.oauth.OAuthException;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
