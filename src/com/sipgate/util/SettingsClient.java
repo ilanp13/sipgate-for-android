@@ -320,7 +320,7 @@ public class SettingsClient {
 		setServer("");
 		setDomain("");
 		setProtocol("udp");
-		setUseStunServer(true);
+		setUseStunServer(false);
 		setStunServer("stun.sipgate.net");
 		setStunPort("10000");
 	}
