@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
@@ -58,8 +60,9 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	private Activity activity = this;
 	
 	private SipgateDBAdapter sipgateDBAdapter = null;
-	
-	private DownloadVoiceMailTask downloadVoiceMailTask = null;
+
+	private String loadingString = null;
+	private String failedString = null;
 	
 	@Override
 	public void onCreate(Bundle bundle) 
@@ -85,6 +88,9 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		mediaController.setMediaPlayer(mediaConnector);
 		mediaController.setEnabled(true);
 		mediaController.setAnchorView(elementList.getRootView());
+		
+		loadingString = getResources().getString(R.string.sipgate_loading);
+		failedString = getResources().getString(R.string.sipgate_download_failed);
 	}
 	
 	@Override
@@ -258,57 +264,70 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			if (localURL.length() > 0) {
 				File file = new File(localURL);
 				
-				if (file.exists()) {
+				if (file.exists() && file.canRead()) {
 					return voiceMailDataDBObject;
 				}
+			}
+					
+			File folder = new File(Constants.MP3_DOWNLOAD_DIR);
+			
+			if (!folder.exists()) {
+				folder.mkdirs();
 			}
 			
 			localURL = Constants.MP3_DOWNLOAD_DIR + "/" + voiceMailDataDBObject.getId() + ".mp3";
 			
-			try {
-				Log.d(TAG, voiceMailDataDBObject.getContentUrl());
-				
-				inputStream = apiClient.getVoicemail(voiceMailDataDBObject.getContentUrl());
-				
-				if (inputStream == null) {
-					throw new RuntimeException("voicemail inputstream is null");
-				}
-
-				fileOutputStream = new FileOutputStream(localURL);
-				
-				byte chunk[] = new byte[1024];
-				
-				int length = 0;
-				
-				while ((length = inputStream.read(chunk)) > 0) {
-					fileOutputStream.write(chunk, 0, length);
-				}
-				
-				voiceMailDataDBObject.setLocalFileUrl(localURL);
-				
-				sipgateDBAdapter = new SipgateDBAdapter(activity);
-				sipgateDBAdapter.update(voiceMailDataDBObject);
-			}					
-			catch (Exception e) {
-				Log.e(TAG, e.getLocalizedMessage(), e);
-			}
-			finally {
+			if (folder.exists() && folder.canWrite()) {
 				try {
-					fileOutputStream.close();
-				}
-				catch (IOException e) {
+					Log.d(TAG, voiceMailDataDBObject.getContentUrl());
+					
+					inputStream = apiClient.getVoicemail(voiceMailDataDBObject.getContentUrl());
+					
+					if (inputStream == null) {
+						throw new RuntimeException("voicemail inputstream is null");
+					}
+	
+					fileOutputStream = new FileOutputStream(localURL);
+					
+					byte chunk[] = new byte[1024];
+					
+					int length = 0;
+					
+					while ((length = inputStream.read(chunk)) > 0) {
+						fileOutputStream.write(chunk, 0, length);
+					}
+					
+					voiceMailDataDBObject.setLocalFileUrl(localURL);
+					
+					sipgateDBAdapter = new SipgateDBAdapter(activity);
+					sipgateDBAdapter.update(voiceMailDataDBObject);
+				}					
+				catch (Exception e) {
 					Log.e(TAG, e.getLocalizedMessage(), e);
-				}
 				
-				try {
-					inputStream.close();
+					if (waitDialog.isShowing())
+					{
+						waitDialog.dismiss();
+					}
 				}
-				catch (IOException e) {
-					Log.e(TAG, e.getLocalizedMessage(), e);
-				}
-			
-				if (sipgateDBAdapter != null) {
-					sipgateDBAdapter.close();
+				finally {
+					try {
+						fileOutputStream.close();
+					}
+					catch (IOException e) {
+						Log.e(TAG, e.getLocalizedMessage(), e);
+					}
+					
+					try {
+						inputStream.close();
+					}
+					catch (IOException e) {
+						Log.e(TAG, e.getLocalizedMessage(), e);
+					}
+				
+					if (sipgateDBAdapter != null) {
+						sipgateDBAdapter.close();
+					}
 				}
 			}
 			
@@ -326,23 +345,42 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		@Override
 		protected void onPostExecute(VoiceMailDataDBObject voiceMailDataDBObject)
 		{
-			waitDialog.dismiss();
+			if (waitDialog.isShowing())
+			{
+				waitDialog.dismiss();
+			}
 			
 			if (mediaConnector.isPlaying()) {
 				mediaConnector.pause();
 			}
 			
-			mediaConnector.setMp3(voiceMailDataDBObject.getLocalFileUrl());
-			mediaConnector.start();
-			mediaController.show(0);
-			
-			markAsRead(voiceMailDataDBObject);
+			if (voiceMailDataDBObject != null)
+			{
+				mediaConnector.setMp3(voiceMailDataDBObject.getLocalFileUrl());
+				mediaConnector.start();
+				mediaController.show(0);
+				
+				markAsRead(voiceMailDataDBObject);
+			}
+			else
+			{
+				AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+				builder.setMessage(failedString)
+				       .setCancelable(false)
+				       .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				                dialog.dismiss();
+				           }
+				       });
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
 		}
 		
 		@Override
 		protected void onPreExecute()
 		{
-			waitDialog = ProgressDialog.show(activity, "", getResources().getString(R.string.sipgate_loading), true);
+			waitDialog = ProgressDialog.show(activity, "", loadingString, true);
 		}
 	}
 }
