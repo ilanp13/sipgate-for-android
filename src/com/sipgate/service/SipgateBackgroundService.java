@@ -78,7 +78,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 		notifyClient = new NotificationClient(this); 
 		apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 		
-		fetchYoungestVoicemaildate();
 		startService();
 	}
 
@@ -229,6 +228,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 		if (unreadCounter > 0) 
 		{
 			createNewVoiceMailNotification(unreadCounter);
+		
+			Log.d(TAG, "new unread voicemails: " + unreadCounter);
 		}
 		else
 		{
@@ -253,7 +254,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 	
 	private void notifyIfUnreadsCalls(Vector<CallDataDBObject> callDataDBObjects) 
 	{
-
 		Log.d(TAG, "notifyIfUnreadCalls");
 		
 		sipgateDBAdapter = new SipgateDBAdapter(this);
@@ -294,6 +294,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 		if (unreadCounter > 0) 
 		{
 			createNewCallNotification(unreadCounter);
+			
+			Log.d(TAG, "new unread calls: " + unreadCounter);
 		}
 		else
 		{
@@ -310,45 +312,6 @@ public class SipgateBackgroundService extends Service implements EventService {
 		}
 	}
 		
-	/**
-	 * 
-	 * @return firstLaunch as a Date
-	 * @since 1.0
-	 */
-	private Date getFirstLaunchDate() 
-	{
-		if (firstLaunch != null) 
-		{
-			return firstLaunch;
-		}
-		
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		
-		long firstLaunchMS = pref.getLong(PREF_FIRSTLAUNCHDATE, 0);
-		
-		if (firstLaunchMS == 0) 
-		{
-			firstLaunchMS =  System.currentTimeMillis() - Constants.ONE_DAY_IN_MS; // yesterday
-			
-			Editor editor = pref.edit();
-			editor.putLong(PREF_FIRSTLAUNCHDATE, firstLaunchMS);
-		}
-		
-		firstLaunch = new Date(firstLaunchMS);
-		
-		return firstLaunch;
-	}
-	
-	/**
-	 * 
-	 * @since 1.0
-	 */
-	private void fetchYoungestVoicemaildate() 
-	{
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		youngestVoicemail = new Date(pref.getLong(PREF_YOUNGESTVOICEMAILDATE, 0));
-	}
-	
 	/**
 	 * 
 	 * @param unreadCounter
