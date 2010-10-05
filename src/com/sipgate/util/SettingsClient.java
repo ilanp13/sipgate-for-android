@@ -281,7 +281,7 @@ public class SettingsClient {
 		setProtocol("udp");
 		setUseWireless(true);
 		setUse3G(false);
-		setUseStunServer(true);
+		setUseStunServer(false);
 		setStunServer("stun.sipgate.net");
 		setStunPort("10000");
 	}
@@ -303,7 +303,7 @@ public class SettingsClient {
 		setServer(server);
 		setDomain(domain);
 		setProtocol("udp");
-		setUseStunServer(true);
+		setUseStunServer(false);
 		setStunServer("stun.sipgate.net");
 		setStunPort("10000");
 	}
