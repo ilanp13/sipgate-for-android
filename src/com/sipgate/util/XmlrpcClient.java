@@ -265,6 +265,8 @@ public class XmlrpcClient implements ApiClientInterface {
 			String remoteNumberPretty = null;
 			String rempoteNumberE164 = null;
 			
+			String callID = null;
+			
 			for (Object HistoryObject : HistoryList) {
 				
 				if(counter == 50) break;
@@ -279,7 +281,31 @@ public class XmlrpcClient implements ApiClientInterface {
 				
 				counter++;
 				
-				callDataDBObject.setId(Long.parseLong(((String)historySet.get("EntryID")).replace("C_", "").substring(0, 16), 16));
+				callID = (String)historySet.get("EntryID");
+				
+				if (callID != null && callID.length() > 0)
+				{
+					if (callID.substring(0,1).equals("C"))
+					{
+						callID = "0" + callID.substring(2, 17);
+					}
+					else if (callID.substring(0,1).equals("O"))
+					{
+						callID = "1" + callID.substring(2, 17);
+					}
+					else
+					{
+						callID = "2" + callID.substring(2, 17);
+					}
+					
+					callDataDBObject.setId(Long.parseLong(callID, 16));
+				}
+				else
+				{
+					// Better use CurrentTimeMillis as id then nothing ;)
+					callDataDBObject.setId(System.currentTimeMillis());
+				}
+								
 				callDataDBObject.setTime(getCallTime((String) historySet.get("Timestamp")));
 
 				direction = (String) historySet.get("Status");

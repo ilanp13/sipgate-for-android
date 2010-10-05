@@ -61,6 +61,8 @@ public class ContactDetailsActivity extends Activity implements
 		Log.d("ContactDetails", "Name: " + currentContact.getDisplayName());
 
 		contactName.setText(currentContact.getDisplayName());
+		contactPhoto.setImageBitmap(currentContact.getPhoto());
+		
 		final LayoutInflater mInflater = getLayoutInflater();
 
 		elementList.setOnItemClickListener(this);
@@ -78,6 +80,7 @@ public class ContactDetailsActivity extends Activity implements
 							.findViewById(R.id.ContactNumberType);
 					holder.contactNumberValue = (TextView) convertView
 							.findViewById(R.id.ContactNumberValue);
+					
 					// holder.contactCallButton = (ImageButton)
 					// findViewById(R.id.ContactCallButton);
 					convertView.setTag(holder);
@@ -165,7 +168,7 @@ public class ContactDetailsActivity extends Activity implements
 					break;
 				}
 				holder.contactNumberType.setText(type);
-
+				
 				PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 				Locale locale = Locale.getDefault();
 				String numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(number, locale.getCountry());
