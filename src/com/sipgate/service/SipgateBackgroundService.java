@@ -1,12 +1,11 @@
 package com.sipgate.service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -20,13 +19,15 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.sipgate.R;
-import com.sipgate.api.types.Event;
-import com.sipgate.models.SipgateCallData;
+import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.NotificationClient;
-import com.sipgate.util.SettingsClient;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.Constants;
+import com.sipgate.util.NotificationClient;
 import com.sipgate.util.NotificationClient.NotificationType;
+import com.sipgate.util.SettingsClient;
 
 /**
  * 
@@ -36,62 +37,81 @@ import com.sipgate.util.NotificationClient.NotificationType;
  *
  */
 public class SipgateBackgroundService extends Service implements EventService {
-	private static final String TAG = "SipgateBackgroundService";
 	
-	private static final long EVENTREFRESH_INTERVAL = 30000;
 	public static final String ACTION_NEWEVENTS = "action_newEvents";
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
+
+	private static final long EVENTREFRESH_INTERVAL = 60000;
+		
+	private static final String TAG = "SipgateBackgroundService";
 	private static final String PREF_YOUNGESTVOICEMAILDATE = "youngestVoicemailDate";
-	private static final String PREF_YOUNGESTCALLDATE = "youngestCallDate";
 	private static final String PREF_FIRSTLAUNCHDATE = "firstLaunchDate";
+	
 	private boolean serviceEnabled = false;
-	private Timer timer;
-	private List<Event> voicemails = new ArrayList<Event>();
-	private List<SipgateCallData> calls = new ArrayList<SipgateCallData>();
-	private Set<PendingIntent> onNewVoicemailsTriggers = new HashSet<PendingIntent>();
+	
+	private Timer voiceMailRefreshTimer = null;
+	private Timer callListRefreshTimer = null;
+	
+	private Set<PendingIntent> onNewVoiceMailsTriggers = new HashSet<PendingIntent>();
 	private Set<PendingIntent> onNewCallsTriggers = new HashSet<PendingIntent>();
 
-	private Date youngestCall = new Date(0); 
-	
 	private Date youngestVoicemail = new Date(0); 
 	private Date firstLaunch = null; // never access directly. use getFirstLaunchDate()
 
-	private NotificationClient notifyClient;
+	private NotificationClient notifyClient = null;
+	private ApiServiceProvider apiClient = null;
+	
+	private SipgateDBAdapter sipgateDBAdapter = null;
+	private CallDataDBObject oldCallDataDBObject = null;
+	private VoiceMailDataDBObject oldVoiceMailDataDBObject = null;
+	
+	private	int unreadCounter = 0;
+	
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
-	public void onCreate() {
+	public void onCreate() 
+	{
 		super.onCreate();
-		fetchYoungestVoicemaildate();
-		fetchYoungestCalldate();
-		startservice();
+	
 		notifyClient = new NotificationClient(this); 
+		apiClient = ApiServiceProvider.getInstance(getApplicationContext());
+		
+		startService();
 	}
 
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
-	private void startservice() {
+	private void startService() 
+	{
 		if (serviceEnabled) {
 			return;
 		}
+		
 		serviceEnabled = true;
-		timer = new Timer();  
-		timer.scheduleAtFixedRate( new TimerTask() {
-
-			public void run() {
-				Log.v(TAG, "timer tick tack");
-				if(serviceEnabled) {
-					if (hasVmListFeature()) {
+		
+		voiceMailRefreshTimer = new Timer();  
+		callListRefreshTimer = new Timer();  
+		
+		if (hasVmListFeature()) {
+			voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() {
+				public void run() {
+					Log.v(TAG, "voicemail timertask started");
+					if(serviceEnabled) {
 						Log.d(TAG, "get vms");
 						refreshVoicemailEvents();
 					}
-					Log.d(TAG, "get calls");
+				}
+			}, 0, EVENTREFRESH_INTERVAL);
+			
+		}
+		
+		callListRefreshTimer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				Log.v(TAG, "calllist timertask started");
+				if(serviceEnabled) {
 					refreshCallEvents();
 				}
 			}
@@ -100,17 +120,22 @@ public class SipgateBackgroundService extends Service implements EventService {
 	}
 
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
-	public void stopservice() {
+	public void stopService() 
+	{
 		Log.d(TAG,"stopservice");
-		if(timer != null) {
-			Log.d(TAG,"Timer!=null");
-			timer.cancel();
-			Log.d(TAG, "timer canceled");
-		}
+		
+		if (voiceMailRefreshTimer != null){
+			Log.d(TAG,"voiceMailRefreshTimer.cancel");
+			voiceMailRefreshTimer.cancel();
+		}		
+		
+		if (callListRefreshTimer != null){
+			Log.d(TAG,"callListRefreshTimer.cancel");
+			callListRefreshTimer.cancel();
+		}	
+		
 		Log.d(TAG,"cancel notifications");
 		
 		notifyClient.deleteNotification(NotificationType.VOICEMAIL);
@@ -118,231 +143,182 @@ public class SipgateBackgroundService extends Service implements EventService {
 	}
 	
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
-	public void onDestroy() {
+	public void onDestroy() 
+	{
 		Log.d(TAG,"onDestroy");
-		if (timer != null){
-			Log.d(TAG,"timer.cancel");
-			timer.cancel();
-		}		
 		
-		notifyClient.deleteNotification(NotificationType.VOICEMAIL);
-		notifyClient.deleteNotification(NotificationType.CALL);
+		stopService();
 	}
 
 	/**
-	 * 
-	 * 
 	 * @since 1.0
 	 */
-	private void refreshVoicemailEvents() {
+	private void refreshVoicemailEvents() 
+	{
+		Log.v(TAG, "refreshVoicemailEvents() -> start");
 		
 		try {
-
-			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
-
-			List<Event> currentEvents = apiClient.getEvents();
-			List<Event> oldEvents = voicemails;
-			voicemails = currentEvents;
-			notifyIfUnreadsVoicemails(oldEvents, currentEvents);
-		} catch (Exception e) {
+			notifyIfUnreadsVoiceMails(apiClient.getVoiceMails());
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		Log.v(TAG, "refreshVoicemailEvents() -> finish");
 	}
 	
 	/**
-	 * 
-	 * 
+	 * @author graef
 	 * @since 1.1
 	 */
-	private void refreshCallEvents() {
+	private void refreshCallEvents() 
+	{
+		Log.v(TAG, "refreshCallEvents() -> start");
 		
 		try {
-
-			ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
-
-			List<SipgateCallData> currentCalls = apiClient.getCalls();
-			List<SipgateCallData> oldCalls = calls;
-			calls = currentCalls;
-			notifyIfUnreadsCalls(oldCalls, currentCalls);
-		} catch (Exception e) {
+			notifyIfUnreadsCalls(apiClient.getCalls());
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		Log.v(TAG, "refreshCallEvents() -> finish");
 	}
 
 	/**
-	 * 
-	 * @param oldList
-	 * @param newList
-	 * @since 1.0
+	 * @author graef
+	 * @param Vector with voiceMailDataDBObjects
+	 * @since 1.1
 	 */
-	private void notifyIfUnreadsVoicemails(List<Event> oldList, List<Event> newList) {
-
-		Log.d(TAG, "notifyIfUnreadVoicemails");
+	
+	private void notifyIfUnreadsVoiceMails(Vector<VoiceMailDataDBObject> voiceMailDataDBObjects) 
+	{
+		Log.d(TAG, "notifyIfUnreadVoiceMails");
 		
-		if (oldList == null || !oldList.equals(newList)) {
-			Log.d(TAG, "notifyIfUnreadVoicemails, oldlist equals newlist not: " + onNewVoicemailsTriggers.size());
-			for (PendingIntent pInt: onNewVoicemailsTriggers){
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		
+		oldVoiceMailDataDBObject = null;
+		
+		unreadCounter = 0;
 				
-				try {
-					Log.d(TAG, "notifying unread voicemails to activity");
-					pInt.send();
-				} catch (CanceledException e) {
-					e.printStackTrace();
-				}			
+		for (VoiceMailDataDBObject currentVoiceMailDataDBObject : voiceMailDataDBObjects) {
+			oldVoiceMailDataDBObject = sipgateDBAdapter.getVoiceMailDataDBObjectById(currentVoiceMailDataDBObject.getId());
+
+			if (oldVoiceMailDataDBObject != null)
+			{
+				currentVoiceMailDataDBObject.setLocalFileUrl(oldVoiceMailDataDBObject.getLocalFileUrl());
 			}
-		} else {
-			Log.d(TAG, "notifyIfUnreadVoicemails, oldlist equals newlist");
+			
+			if (!currentVoiceMailDataDBObject.isRead())
+			{
+				unreadCounter++;
+			}
+			
+			oldVoiceMailDataDBObject = null;
 		}
+		
+		sipgateDBAdapter.deleteAllVoiceMailDBObjects();
 
-		Boolean hasUnreadEvents = false;
-
-		int unreadCounter = 0;
-		if (newList != null) {
-			for (Event e: newList){
-				if (! e.isRead()) {
-					if (e.getCreateOnAsDate().after(youngestVoicemail)){
-						updateYoungestVoicemaildate(e.getCreateOnAsDate());
-						hasUnreadEvents = true;
-					}
-					if (e.getCreateOnAsDate().after(getFirstLaunchDate())) {
-						unreadCounter++;
-					}
-
-				}
-			}
+		sipgateDBAdapter.insertAllVoiceMailDBObjects(voiceMailDataDBObjects);
+		
+		sipgateDBAdapter.close();
+		
+		if (unreadCounter > 0) 
+		{
+			createNewVoiceMailNotification(unreadCounter);
+		
+			Log.d(TAG, "new unread voicemails: " + unreadCounter);
 		}
-		if (unreadCounter <= 0) {
-			notifyClient.deleteNotification(NotificationClient.NotificationType.VOICEMAIL);
-		} else {
-			if (hasUnreadEvents) {
-				createNewVoicemailNotification(unreadCounter);
-			}
+		else
+		{
+			removeNewVoiceMailNotification();
+		}
+		
+		for (PendingIntent pendingIntent: onNewVoiceMailsTriggers){
+			try {
+				Log.d(TAG, "notifying refresh voice mails to activity");
+				pendingIntent.send();
+			} catch (CanceledException e) {
+				e.printStackTrace();
+			}			
 		}
 	}
 	
 	/**
-	 * 
-	 * @param oldList
-	 * @param newList
+	 * @author graef
+	 * @param Vector with callDataDBObjects
 	 * @since 1.1
 	 */
-	private void notifyIfUnreadsCalls(List<SipgateCallData> oldList, List<SipgateCallData> newList) {
-
+	
+	private void notifyIfUnreadsCalls(Vector<CallDataDBObject> callDataDBObjects) 
+	{
 		Log.d(TAG, "notifyIfUnreadCalls");
 		
-		if (oldList == null || !oldList.equals(newList)) {
-			Log.d(TAG, "notifyIfUnreadCalls, oldlist equals newlist not: " + onNewCallsTriggers.size());
-			for (PendingIntent pInt: onNewCallsTriggers){
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		
+		oldCallDataDBObject = null;
+		
+		unreadCounter = 0;
 				
-				try {
-					Log.d(TAG, "notifying unread calls to activity");
-					pInt.send();
-				} catch (CanceledException e) {
-					e.printStackTrace();
-				}			
-			}
-		} else {
-			Log.d(TAG, "notifyIfUnreadCalls, oldlist equals newlist");
-		}
-
-		Boolean hasUnreadEvents = false;
-
-		int unreadCounter = 0;
-		if (newList != null) {
-			for (SipgateCallData call: newList){
-				if (! call.getCallRead()) {
-					if (call.getCallTime().after(youngestCall) && call.getCallMissed() == true){
-						updateYoungestCalldate(call.getCallTime());
-						hasUnreadEvents = true;
-						unreadCounter++;
-					}
+		for (CallDataDBObject currentDataDBObject : callDataDBObjects) {
+			oldCallDataDBObject = sipgateDBAdapter.getCallDataDBObjectById(currentDataDBObject.getId());
+			
+			if (currentDataDBObject.getRead() == -1)
+			{
+				if (oldCallDataDBObject == null)
+				{
+					currentDataDBObject.setRead(false);
+				}
+				else
+				{
+					currentDataDBObject.setRead(oldCallDataDBObject.isRead());
 				}
 			}
-		}
-		if (unreadCounter > 0) {
-			createNewCallNotification(unreadCounter);
-		}
-	}
-
-	/**
-	 * 
-	 * @param d
-	 * @since 1.0
-	 */
-	private void updateYoungestVoicemaildate(Date d) {
-		youngestVoicemail = d;
-		
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		Editor editor = pref.edit();
-		editor.putLong(PREF_YOUNGESTVOICEMAILDATE, youngestVoicemail.getTime());
-		editor.commit();
-	}
-	
-	/**
-	 * 
-	 * @param d
-	 * @since 1.1
-	 */
-	private void updateYoungestCalldate(Date d) {
-		youngestCall = d;
-		
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		Editor editor = pref.edit();
-		editor.putLong(PREF_YOUNGESTCALLDATE, youngestCall.getTime());
-		editor.commit();
-	}
-	
-	/**
-	 * 
-	 * @return
-	 * @since 1.0
-	 */
-	private Date getFirstLaunchDate() {
-		if (firstLaunch != null) {
-			return firstLaunch;
-		}
-		
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		
-		firstLaunch = new Date(pref.getLong(PREF_FIRSTLAUNCHDATE, 0));
-		
-		if (firstLaunch.equals(new Date(0))) {
-			firstLaunch = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); // yesterday
 			
-			Editor editor = pref.edit();
-			editor.putLong(PREF_FIRSTLAUNCHDATE, firstLaunch.getTime());
+			if (oldCallDataDBObject == null && !currentDataDBObject.isRead())
+			{
+				unreadCounter++;
+			}
+			
+			oldCallDataDBObject = null;
 		}
-		return firstLaunch;
-	}
-	
-	/**
-	 * 
-	 * @since 1.0
-	 */
-	private void fetchYoungestVoicemaildate() {
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		youngestVoicemail = new Date(pref.getLong(PREF_YOUNGESTVOICEMAILDATE, 0));
-	}
-	
-	/**
-	 * 
-	 * @since 1.1
-	 */
-	private void fetchYoungestCalldate() {
-		SharedPreferences pref = getSharedPreferences(SettingsClient.sharedPrefsFile, Context.MODE_PRIVATE);
-		youngestCall = new Date(pref.getLong(PREF_YOUNGESTCALLDATE, 0));
-	}
+		
+		sipgateDBAdapter.deleteAllCallDBObjects();
 
+		sipgateDBAdapter.insertAllCallDBObjects(callDataDBObjects);
+		
+		sipgateDBAdapter.close();
+		
+		if (unreadCounter > 0) 
+		{
+			createNewCallNotification(unreadCounter);
+			
+			Log.d(TAG, "new unread calls: " + unreadCounter);
+		}
+		else
+		{
+			removeNewCallNotification();
+		}
+		
+		for (PendingIntent pendingIntent: onNewCallsTriggers){
+			try {
+				Log.d(TAG, "notifying refresh calls to activity");
+				pendingIntent.send();
+			} catch (CanceledException e) {
+				e.printStackTrace();
+			}			
+		}
+	}
+		
 	/**
 	 * 
 	 * @param unreadCounter
 	 * @since 1.0
 	 */
-	private void createNewVoicemailNotification(int unreadCounter) {
+	private void createNewVoiceMailNotification(int unreadCounter) 
+	{
 		notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.statusbar_voicemai_48, buildVoicemailNotificationString(unreadCounter));
 	}
 	
@@ -351,8 +327,30 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @param unreadCounter
 	 * @since 1.1
 	 */
-	private void createNewCallNotification(int unreadCounter) {
+	private void createNewCallNotification(int unreadCounter) 
+	{
 		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
+	}
+	
+	
+	/**
+	 * 
+	 * @param unreadCounter
+	 * @since 1.1
+	 */
+	private void removeNewCallNotification() 
+	{
+		notifyClient.deleteNotification(NotificationClient.NotificationType.CALL);
+	}
+	
+	/**
+	 * 
+	 * @param unreadCounter
+	 * @since 1.1
+	 */
+	private void removeNewVoiceMailNotification() 
+	{
+		notifyClient.deleteNotification(NotificationClient.NotificationType.VOICEMAIL);
 	}
 	
 	/**
@@ -361,7 +359,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @return
 	 * @since 1.0
 	 */
-	private String buildVoicemailNotificationString(int unreadCounter) {
+	private String buildVoicemailNotificationString(int unreadCounter) 
+	{
 		if(unreadCounter == 1) {
 			return String.format((String) getResources().getText(R.string.sipgate_a_new_voicemail), Integer.valueOf(unreadCounter));
 		} else {
@@ -375,7 +374,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @return
 	 * @since 1.1
 	 */
-	private String buildCallNotificationString(int unreadCounter) {
+	private String buildCallNotificationString(int unreadCounter) 
+	{
 		if(unreadCounter == 1 ) {
 			return String.format((String) getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(unreadCounter));
 		} else {
@@ -387,8 +387,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * 
 	 * @since 1.0
 	 */
-	public IBinder asBinder() {
-		// TODO Auto-generated method stub
+	public IBinder asBinder() 
+	{
 		return null;
 	}
 
@@ -396,54 +396,40 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * 
 	 * @since 1.0
 	 */
-	public List<Event> getVoicemails() throws RemoteException {
-		return voicemails;
-	}
-	
-	/**
-	 * 
-	 * @since 1.1
-	 */
-	public List<SipgateCallData> getCalls() throws RemoteException {
-		return calls;
+	public void registerOnVoiceMailsIntent(PendingIntent i) throws RemoteException 
+	{
+		Log.d(TAG, "registering on voice events intent");
+		onNewVoiceMailsTriggers.add(i);
 	}
 
 	/**
 	 * 
 	 * @since 1.0
 	 */
-	public void registerOnVoicemailsIntent(PendingIntent i)
-	throws RemoteException {
-		Log.d(TAG, "registering on events intent");
-		onNewVoicemailsTriggers.add(i);
-	}
-
-	/**
-	 * 
-	 * @since 1.0
-	 */
-	public void unregisterOnVoicemailsIntent(PendingIntent i)
-	throws RemoteException {
-		onNewVoicemailsTriggers.remove(i);
+	public void unregisterOnVoiceMailsIntent(PendingIntent i) throws RemoteException 
+	{
+		Log.d(TAG, "unregistering on voice events intent");
+		onNewVoiceMailsTriggers.remove(i);
 	}
 	
 	/**
 	 * 
 	 * @since 1.1
 	 */
-	public void registerOnCallsIntent(PendingIntent i)
-	throws RemoteException {
-		Log.d(TAG, "registering on events intent");
-		onNewVoicemailsTriggers.add(i);
+	public void registerOnCallsIntent(PendingIntent i) throws RemoteException 
+	{
+		Log.d(TAG, "registering on call events intent");
+		onNewCallsTriggers.add(i);
 	}
 
 	/**
 	 * 
 	 * @since 1.1
 	 */
-	public void unregisterOnCallsIntent(PendingIntent i)
-	throws RemoteException {
-		onNewVoicemailsTriggers.remove(i);
+	public void unregisterOnCallsIntent(PendingIntent i) throws RemoteException 
+	{
+		Log.d(TAG, "unregistering on call events intent");
+		onNewCallsTriggers.remove(i);
 	}
 
 	/**
@@ -451,39 +437,41 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.0
 	 */
 	@Override
-	public IBinder onBind(Intent arg0) {
+	public IBinder onBind(Intent arg0) 
+	{
 		final EventService service = this;
 
 		/**
 		 * 
 		 * @since 1.0
 		 */
-		return new Stub() {
+		return new Stub() 
+		{
 
 			/**
 			 * 
 			 * @since 1.0
 			 */
-			public void unregisterOnVoicemailsIntent(PendingIntent i)
-			throws RemoteException {
-				service.unregisterOnVoicemailsIntent(i);
+			public void unregisterOnVoiceMailsIntent(PendingIntent i) throws RemoteException 
+			{
+				service.unregisterOnVoiceMailsIntent(i);
 			}
 
 			/**
 			 * 
 			 * @since 1.0
 			 */
-			public void registerOnVoicemailsIntent(PendingIntent i)
-			throws RemoteException {
-				service.registerOnVoicemailsIntent(i);
+			public void registerOnVoiceMailsIntent(PendingIntent i)	throws RemoteException 
+			{
+				service.registerOnVoiceMailsIntent(i);
 			}
 			
 			/**
 			 * 
 			 * @since 1.1
 			 */
-			public void unregisterOnCallsIntent(PendingIntent i)
-			throws RemoteException {
+			public void unregisterOnCallsIntent(PendingIntent i) throws RemoteException 
+			{
 				service.unregisterOnCallsIntent(i);
 			}
 
@@ -491,33 +479,18 @@ public class SipgateBackgroundService extends Service implements EventService {
 			 * 
 			 * @since 1.1
 			 */
-			public void registerOnCallsIntent(PendingIntent i)
-			throws RemoteException {
+			public void registerOnCallsIntent(PendingIntent i) throws RemoteException 
+			{
 				service.registerOnCallsIntent(i);
-			}
-
-			/**
-			 * 
-			 * @since 1.0
-			 */
-			public List<Event> getVoicemails() throws RemoteException {
-				return service.getVoicemails();
 			}
 			
 			/**
 			 * 
 			 * @since 1.0
 			 */
-			public List<SipgateCallData> getCalls() throws RemoteException {
-				return service.getCalls();
-			}
-
-			/**
-			 * 
-			 * @since 1.0
-			 */
 			@Override
-			public void refreshVoicemails() throws RemoteException {
+			public void refreshVoicemails() throws RemoteException 
+			{
 				service.refreshVoicemails();
 			}
 			
@@ -526,7 +499,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 			 * @since 1.0
 			 */
 			@Override
-			public void refreshCalls() throws RemoteException {
+			public void refreshCalls() throws RemoteException 
+			{
 				service.refreshCalls();
 			}
 		};
@@ -536,7 +510,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * 
 	 * @since 1.0
 	 */
-	public void refreshVoicemails() throws RemoteException {
+	public void refreshVoicemails() throws RemoteException
+	{
 		refreshVoicemailEvents();
 	}
 	
@@ -544,7 +519,8 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * 
 	 * @since 1.1
 	 */
-	public void refreshCalls() throws RemoteException {
+	public void refreshCalls() throws RemoteException 
+	{
 		refreshCallEvents();
 	}
 	
@@ -553,15 +529,14 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @return
 	 * @since 1.1
 	 */
-	private boolean hasVmListFeature() {
-		boolean hasVmListFeature = false;
+	private boolean hasVmListFeature() 
+	{
 		try {
-			hasVmListFeature = ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
+			return ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
 		} catch (Exception e) {
 			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
 		}
 		
-		return hasVmListFeature;
+		return false;
 	}
-
 }

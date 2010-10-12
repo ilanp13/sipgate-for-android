@@ -12,7 +12,7 @@ import com.sipgate.ui.SipgateFrames;
  * @version 1.0
  *
  */
-public class SipgateFramesVoicemails extends Activity  {
+public class SipgateFramesVoiceMails extends Activity  {
 	
 	/**
 	 * Overwritten onCreate procedure

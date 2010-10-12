@@ -12,8 +12,8 @@
 	-->
 	<ListView android:id="@+id/EventListView"
 		android:layout_height="fill_parent" android:layout_width="fill_parent"
-		android:background="#000000" android:choiceMode="singleChoice">
-</ListView>
+		android:choiceMode="singleChoice">
+	</ListView>
 	<TextView android:text="@string/sipgate_empty_eventlist"
 		android:id="@+id/EmptyEventListTextView" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:gravity="center"

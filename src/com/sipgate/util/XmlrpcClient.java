@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.text.ParsePosition;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 import org.xmlrpc.android.XMLRPCClient;
 import org.xmlrpc.android.XMLRPCException;
@@ -20,15 +19,15 @@ import org.zoolu.sip.address.SipURL;
 
 import android.util.Log;
 
-import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.SipgateOwnUri;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
@@ -45,12 +44,21 @@ import com.sipgate.util.ApiServiceProvider.API_FEATURE;
  */
 
 public class XmlrpcClient implements ApiClientInterface {
-	private static final String TAG = XmlrpcClient.class.getSimpleName();
+	private static final String TAG = "XmlrpcClient";
+	
 	private static final String VERSION = "0.1";
 	private static final String VENDOR = "sipgate GmbH";
 	private static final String NAME = "Sipdroid4sipgate";
+	
 	private XMLRPCClient client = null;
-
+	
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
+	
+	private HashMap<String, Object> parameters = null;
+	private HashMap<String, Object> apiResult = null;
+	
 	public XmlrpcClient(String ApiUser, String ApiPassword) throws ApiException {
 		super();
 
@@ -64,33 +72,19 @@ public class XmlrpcClient implements ApiClientInterface {
 
 	private void init(String ApiUrl, String ApiUser, String ApiPassword) throws XMLRPCException {
 		Log.d(TAG, "init()");
-		this.client = new XMLRPCClient(ApiUrl);
 
-		this.client.setBasicAuthentication(ApiUser, ApiPassword);
-	}
-
-	private Date getDate(String createOn) {
-		try {
-			if (createOn == null) {
-				return new Date(0);
-			}
-			SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-			Log.d(TAG, "starting date parsing");
-			Date ret = dateformatterIso.parse(createOn, new ParsePosition(0));
-			Log.d(TAG, "finished date parsing");
-			return ret;
-		} catch (IllegalArgumentException e) {
-			Log.e(TAG,"badly formated date");
-			
-		}
-		return new Date(0);
+		client = new XMLRPCClient(ApiUrl);
+		client.setBasicAuthentication(ApiUser, ApiPassword);
+		
+		parameters = new HashMap<String, Object>();
+		apiResult = new HashMap<String, Object>();
 	}
 	
 	@SuppressWarnings("unchecked")
 	private HashMap<String, Object> doXmlrpcCall(String method, Object param) throws XMLRPCException, NetworkProblemException {
-		HashMap<String, Object> res = null;
+		apiResult.clear();
 		try {
-			res = (HashMap<String, Object>) this.client.call(method, param);
+			apiResult = (HashMap<String, Object>) this.client.call(method, param);
 		} catch (XMLRPCException e) {
 			Log.e(TAG, "XMLRPCExceptin in clientIdentify(): " + e.getLocalizedMessage());
 			Throwable cause = e.getCause();
@@ -100,111 +94,133 @@ public class XmlrpcClient implements ApiClientInterface {
 				throw e;
 			}
 		}
-		return res;
+		return apiResult;
 	}
 
 	private void clientIdentify() throws XMLRPCException, NetworkProblemException {
-		Hashtable<String, String> ident = new Hashtable<String, String>();
-		ident.put("ClientName", NAME);
-		ident.put("ClientVersion", VERSION);
-		ident.put("ClientVendor", VENDOR);
-		HashMap<String, Object> apiResponse = this.doXmlrpcCall("samurai.ClientIdentify", ident);
-		Log.d(TAG, apiResponse.toString());
+		
+		parameters.clear();
+		
+		parameters.put("ClientName", NAME);
+		parameters.put("ClientVersion", VERSION);
+		parameters.put("ClientVendor", VENDOR);
+		
+		apiResult = this.doXmlrpcCall("samurai.ClientIdentify", parameters);
+		Log.d(TAG, apiResult.toString());
 	}
 
 	private SipgateServerData serverDataGet() throws XMLRPCException, NetworkProblemException {
-		SipgateServerData res = new SipgateServerData();
+		SipgateServerData sipgateServerData = new SipgateServerData();
 
-		Hashtable<String, Object> params = new Hashtable<String, Object>();
-		HashMap<String, Object> apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.ServerdataGet", params);
+		parameters.clear();
+		
+		apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.ServerdataGet", parameters);
 
-		res.setSipRegistrar((String) apiResponse.get("SipRegistrar"));
-		res.setSipOutboundProxy((String) apiResponse.get("SipOutboundProxy"));
+		sipgateServerData.setSipRegistrar((String) apiResult.get("SipRegistrar"));
+		sipgateServerData.setSipOutboundProxy((String) apiResult.get("SipOutboundProxy"));
 
-		return res;
+		return sipgateServerData;
 	}
 
 	@SuppressWarnings("unchecked")
 	private ArrayList<SipgateUserdataSip> userdataSipGet(ArrayList<String> requestedUris) throws XMLRPCException, NetworkProblemException {
-		ArrayList<SipgateUserdataSip> res = new ArrayList<SipgateUserdataSip>();
+		ArrayList<SipgateUserdataSip> result = new ArrayList<SipgateUserdataSip>();
 
-		Hashtable<String, Object> params = new Hashtable<String, Object>();
-		params.put("LocalUriList", requestedUris);
+		parameters.clear();
+		
+		parameters.put("LocalUriList", requestedUris);
 
-		HashMap<String, Object> apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.UserdataSipGet", params);
-		Object[] sipDataListObject = (Object[]) apiResponse.get("SipDataList");
+		apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.UserdataSipGet", parameters);
+		
+		Object[] sipDataListObject = (Object[]) apiResult.get("SipDataList");
 
+		HashMap<String, Object> sipDataSet = null;
+		SipgateUserdataSip userData = null;
+		
 		for (Object sipDataSetObject : sipDataListObject) {
-			HashMap<String, Object> sipDataSet = (HashMap<String, Object>) sipDataSetObject;
-			SipgateUserdataSip userData = new SipgateUserdataSip();
+			sipDataSet = (HashMap<String, Object>) sipDataSetObject;
+			userData = new SipgateUserdataSip();
 
 			userData.setLocalUri((String) sipDataSet.get("LocalUri"));
 			userData.setSipUserID((String) sipDataSet.get("SipUserID"));
 			userData.setSipPassword((String) sipDataSet.get("SipPassword"));
-
-			res.add(userData);
+			
+			result.add(userData);
 		}
 
-		return res;
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
 	private ArrayList<SipgateOwnUri> ownUriListGet() throws XMLRPCException, NetworkProblemException {
-		ArrayList<SipgateOwnUri> res = new ArrayList<SipgateOwnUri>();
+		ArrayList<SipgateOwnUri> result = new ArrayList<SipgateOwnUri>();
 
-		Hashtable<String, Object> params = new Hashtable<String, Object>();
-		HashMap<String, Object> apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.OwnUriListGet", params);
+		parameters.clear();
+		
+		apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.OwnUriListGet", parameters);
 
-		Object[] ownUriList = (Object[]) apiResponse.get("OwnUriList");
+		Object[] ownUriList = (Object[]) apiResult.get("OwnUriList");
 
-		for (Object ownUriSetObject : ownUriList) {
-			HashMap<String, Object> ownUriSet = (HashMap<String, Object>) ownUriSetObject;
-			SipgateOwnUri ownUriDataTmp = new SipgateOwnUri();
+		HashMap<String, Object> ownUriSet = null;
+		SipgateOwnUri ownUriDataTmp = null;
+		
+		ArrayList<String> inList = new ArrayList<String>();
+		ArrayList<String> tosList = new ArrayList<String>();
+		
+		for (Object ownUriSetObject : ownUriList) 
+		{
+			ownUriSet = (HashMap<String, Object>) ownUriSetObject;
+			ownUriDataTmp = new SipgateOwnUri();
 
 			ownUriDataTmp.setSipUri((String) ownUriSet.get("SipUri"));
 			ownUriDataTmp.setE164Out((String) ownUriSet.get("E164Out"));
 
 			Object[] inListObject = (Object[]) ownUriSet.get("E164In");
-			ArrayList<String> inList = new ArrayList<String>();
+			
+			inList.clear();
+			
 			for (Object inObject : inListObject) {
 				inList.add((String) inObject);
 			}
+			
 			ownUriDataTmp.setE164In(inList);
 
 			Object[] tosListObject = (Object[]) ownUriSet.get("TOS");
-			ArrayList<String> tosList = new ArrayList<String>();
+			
+			tosList.clear();
+			
 			for (Object tosObject : tosListObject) {
 				tosList.add((String) tosObject);
 			}
+			
 			ownUriDataTmp.setTos(tosList);
 
 			ownUriDataTmp.setDefaultUri((Boolean) ownUriSet.get("DefaultUri"));
 			ownUriDataTmp.setUriAlias((String) ownUriSet.get("UriAlias"));
 
-			res.add(ownUriDataTmp);
+			result.add(ownUriDataTmp);
 		}
 
-		return res;
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
 	public SipgateBalanceData getBillingBalance() throws ApiException, FeatureNotAvailableException, NetworkProblemException {
 		SipgateBalanceData balance = null;
 
-		Hashtable<String, Object> params = new Hashtable<String, Object>();
+		parameters.clear();
+		
 		try {
-			HashMap<String, Object> apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.BalanceGet", params);
+			apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.BalanceGet", parameters);
 			balance = new SipgateBalanceData();
 
-			HashMap<String, Object> currentBalance = (HashMap<String, Object>) apiResponse.get("CurrentBalance");
+			HashMap<String, Object> currentBalance = (HashMap<String, Object>) apiResult.get("CurrentBalance");
 
-			// set total
 			Float totalIncludingVat = new Float((Double) currentBalance.get("TotalIncludingVat"));
+		
 			balance.setTotal(totalIncludingVat.toString());
-
 			balance.setCurreny((String) currentBalance.get("Currency"));
 
-			// set vat-percent
 			if (currentBalance.containsKey("VatPercent")) {
 				Float vatPercent = new Float((Double) currentBalance.get("VatPercent"));
 				balance.setVatPercent(vatPercent.toString());
@@ -220,115 +236,132 @@ public class XmlrpcClient implements ApiClientInterface {
 
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList<SipgateCallData> getCalls() throws ApiException {
+	public Vector<CallDataDBObject> getCalls() throws ApiException {
 		
-		Hashtable<String, String> params = new Hashtable<String, String>();
+		Vector<CallDataDBObject> callDataDBObjects = new Vector<CallDataDBObject>();
 
-		HashMap<String, Object> apiResponse = null;
-		
-		try {
-			apiResponse = (HashMap<String, Object>) this.doXmlrpcCall("samurai.HistoryGetByDate", params);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.e(TAG, "XMLRPC call to 'samurai.HistoryGetByDate' failed with " + e.getLocalizedMessage());
-			throw new ApiException();
-		}
-		
-		if (apiResponse == null) {
-			Log.e(TAG, "wtf, inputstream is null");
-			return null;
-		}
-		
-		ArrayList<SipgateCallData> calls = new ArrayList<SipgateCallData>();
+		parameters.clear();
 
 		try {
-			Object[] HistoryList = (Object[]) apiResponse.get("History");
-			Integer counter = 0;
+			
+			apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.HistoryGetByDate", parameters);
+			
+			Object[] HistoryList = (Object[]) apiResult.get("History");
+			
+			int counter = 0;
+			
+			CallDataDBObject callDataDBObject = null;
+			HashMap<String, Object> historySet = null;
+			
+			String direction = null;
+			
+			String numberLocal = null;
+			String numberRemote = null;
+			
+			String localNumberPretty = null;
+			String localNumberE164 = null;
+			
+			String remoteNumberPretty = null;
+			String rempoteNumberE164 = null;
+			
+			String callID = null;
+			
 			for (Object HistoryObject : HistoryList) {
-				if(counter++ == 50) break;
-				SipgateCallData call = new SipgateCallData();
-				HashMap<String, Object> HistorySet = (HashMap<String, Object>) HistoryObject;
 				
-				if(!HistorySet.get("TOS").equals("voice")) continue;
+				if(counter == 50) break;
+					
+				callDataDBObject = new CallDataDBObject();
 				
-				call.setCallId((String) HistorySet.get("EntryID"));
-				Log.d(TAG, "create new date");
-				Date created = (Date) getDate((String) HistorySet.get("Timestamp"));
-				Log.d(TAG, "finished new date");
-				SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
-				call.setCallTime(dateformatterPretty.format(created));
-
-				String status = (String) HistorySet.get("Status");
-				String direction = "";
-				String missed = "false";
+				historySet = (HashMap<String, Object>) HistoryObject;
 				
-				Log.d("call Status: ", status);
-				if(status.equals("accepted")) {
-					direction = "incoming";
+				if (historySet.containsKey("TOS") && historySet.get("TOS") != null && !historySet.get("TOS").equals("voice")) {
+					continue;
 				}
-				if(status.equals("missed")) {
-					direction = "incoming";
-					missed = "true";
-				}
-				if(status.equals("outgoing")) {
-					direction = "outgoing";
-				}
-
-				call.setCallDirection(direction);
-				call.setCallMissed(missed);
-
-				PhoneNumberFormatter formatter = new PhoneNumberFormatter();
-				Locale locale = Locale.getDefault();
 				
-				String numberLocal = (String) HistorySet.get("LocalUri");
-				String numberRemote = (String) HistorySet.get("RemoteUri");
-
-				String src_number = "";
-				String tgt_number = "";
+				counter++;
 				
-				if(direction.equals("outgoing")) {
-					src_number = numberLocal;
-					tgt_number = numberRemote;
-				}
-				if(direction.equals("incoming")) {
-					tgt_number = numberLocal;
-					src_number = numberRemote;
-				}
-
-				String src_name = "";
-				String src_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(src_number, locale.getCountry());
-				String src_numberE164 = formatter.e164NumberWithPrefix("");
-				call.setCallSource(src_numberE164, src_numberPretty, src_name);
-
-				String tgt_name = "";
-				String tgt_numberPretty = formatter.formattedPhoneNumberFromStringWithCountry(tgt_number, locale.getCountry());
-				String tgt_numberE164 = formatter.e164NumberWithPrefix("");
-				call.setCallTarget(tgt_numberE164, tgt_numberPretty, tgt_name);
+				callID = (String)historySet.get("EntryID");
 				
-				//XMLRPC doesn't provide a read/unread attribute .. so we assume it's a new call
-				call.setCallRead("false");
+				if (callID != null && callID.length() > 0)
+				{
+					if (callID.substring(0,1).equals("C"))
+					{
+						callID = "0" + callID.substring(2, 17);
+					}
+					else if (callID.substring(0,1).equals("O"))
+					{
+						callID = "1" + callID.substring(2, 17);
+					}
+					else
+					{
+						callID = "2" + callID.substring(2, 17);
+					}
+					
+					callDataDBObject.setId(Long.parseLong(callID, 16));
+				}
+				else
+				{
+					// Better use CurrentTimeMillis as id then nothing ;)
+					callDataDBObject.setId(System.currentTimeMillis());
+				}
+								
+				callDataDBObject.setTime(getCallTime((String) historySet.get("Timestamp")));
 
-				calls.add(call);
+				direction = (String) historySet.get("Status");
+				
+				numberLocal = (String) historySet.get("LocalUri");
+				numberRemote = (String) historySet.get("RemoteUri");
+
+				localNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberLocal, locale.getCountry());
+				localNumberE164 = formatter.e164NumberWithPrefix("");
+
+				remoteNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberRemote, locale.getCountry());
+				rempoteNumberE164 = formatter.e164NumberWithPrefix("");
+								
+				if(direction.equals("accepted")){
+					callDataDBObject.setMissed(false);
+					callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+				}
+				else if(direction.equals("missed")){
+					callDataDBObject.setMissed(true);
+					callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+				}
+				else if(direction.equals("outgoing")){
+					callDataDBObject.setMissed(false);
+					callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
+				}
+				
+				callDataDBObject.setRemoteNumberE164(rempoteNumberE164);
+				callDataDBObject.setRemoteNumberPretty(remoteNumberPretty);
+				callDataDBObject.setRemoteName("");
+				callDataDBObject.setLocalNumberE164(localNumberE164);
+				callDataDBObject.setLocalNumberPretty(localNumberPretty);
+				callDataDBObject.setLocalName("");
+		
+				callDataDBObject.setRead(-1);
+				callDataDBObject.setReadModifyUrl("");
+				
+				callDataDBObjects.add(callDataDBObject);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return calls;
-
+		return callDataDBObjects;
 	}
 
-
-	public List<Event> getEvents() throws ApiException, FeatureNotAvailableException {
+	@Override
+	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException
+	{
 		throw new FeatureNotAvailableException();
 	}
-
-
-	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException,
-			AuthenticationErrorException, NetworkProblemException {
+ 
+	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException, AuthenticationErrorException, NetworkProblemException {
+	
 		SipgateServerData serverData = null;
+		
 		try {
-			serverData = this.serverDataGet();
+			serverData = serverDataGet();
 
 		} catch (XMLRPCException e) {
 
@@ -352,7 +385,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		// add extensions
 		ArrayList<SipgateOwnUri> ownUris = null;
 		try {
-			ownUris = this.ownUriListGet();
+			ownUris = ownUriListGet();
 		} catch (XMLRPCException e) {
 			Log.e(TAG, "ownUriListGet() failed with " + e.getLocalizedMessage());
 			throw new ApiException();
@@ -369,6 +402,7 @@ public class XmlrpcClient implements ApiClientInterface {
 				uriToAlias.put(sipgateOwnUri.getSipUri(), sipgateOwnUri.getUriAlias());
 			}
 		}
+		
 		ArrayList<SipgateUserdataSip> sipUserdataList = null;
 		try {
 			sipUserdataList = userdataSipGet(requestedUris);
@@ -377,11 +411,13 @@ public class XmlrpcClient implements ApiClientInterface {
 			throw new ApiException();
 		}
 
+		SipURL extUrl = null;
+		
 		for (SipgateUserdataSip sipUserdata : sipUserdataList) {
 			SipgateProvisioningExtension newExt = new SipgateProvisioningExtension();
 
 			// we only need the user-part of the uri:
-			SipURL extUrl = new SipURL(sipUserdata.getLocalUri());
+			extUrl = new SipURL(sipUserdata.getLocalUri());
 			newExt.setSipid(extUrl.getUserName());
 
 			newExt.setPassword(sipUserdata.getSipPassword());
@@ -394,14 +430,30 @@ public class XmlrpcClient implements ApiClientInterface {
 
 		return prov;
 	}
-
 	
+	private long getCallTime(String dateString) 
+	{
+		long callTime = 0;
+		
+		try {
+			if (dateString != null)
+			{
+				return dateformatterPretty.parse(dateString).getTime();
+			}
+		} 
+		catch (ParseException e) {
+			Log.e(TAG, "getCallTime", e);
+		}
+		
+		return callTime;
+	}
+		
 	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
 	
-	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 	
@@ -410,15 +462,13 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 	
 	public boolean connectivityOk() throws ApiException {
-		boolean ret = true;
-
 		try {
 			this.clientIdentify();
 		} catch (Exception e) {
-			ret = false;
+			return false;
 		}
 
-		return ret;
+		return true;
 	}
 
 	

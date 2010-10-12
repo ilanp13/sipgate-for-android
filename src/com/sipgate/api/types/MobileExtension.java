@@ -70,8 +70,6 @@ public class MobileExtension {
 		} else {
 			return null;
 		}
-		
-		
 	}
 	
 	protected static String getElement(Element fstElmnt, String name) {

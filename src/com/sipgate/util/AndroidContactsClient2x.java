@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.sipgate.R;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -24,48 +25,34 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 	private Activity activity = null;
 	private Cursor managedCursor = null;
+	private ContentResolver contentResolver;
 
 	public AndroidContactsClient2x(Activity activity) {
 		this.activity = activity;
 		this.managedCursor = getManagedCursorOnContacts();
-	}
-
-	private String getContactSortOrder() {
-		return ContactsContract.Contacts.DISPLAY_NAME + " ASC";
+		this.contentResolver = activity.getContentResolver();
 	}
 
 	private Cursor getManagedCursorOnContacts() {
-		return this.activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
-				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, getContactSortOrder());
+		return activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
+				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, ContactsContract.Contacts.DISPLAY_NAME + " ASC");
+	}
+	
+	public ArrayList<SipgateContact> getContacts() {
+		return getContacts(true);
 	}
 
-	public ArrayList<SipgateContact> getContacts() {
+	public ArrayList<SipgateContact> getContacts(boolean withPicture) {
 		ArrayList<SipgateContact> contactsList = null;
 
 		if (managedCursor.moveToFirst()) {
 			contactsList = new ArrayList<SipgateContact>();
+			int id = 0;
+			SipgateContact contact = null;
 			do {
-				// Get the field values
-				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
-				String lastName = managedCursor.getString(managedCursor
-						.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-				if (lastName == null) {
-					Log.d(TAG, "no name");
-					continue;
-				}
-
-				String firstName = null;
-				String title = null;
-
-				ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
-
-				if (numbers == null)
-					continue;
-
-				Bitmap photo = getPhoto(id);
-
-				contactsList.add(new SipgateContact(id, firstName, lastName, title, numbers, photo));
-
+				id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
+				contact = getContactDetailsById(id, withPicture);
+				contactsList.add(contact);
 			} while (managedCursor.moveToNext());
 		}
 		
@@ -73,26 +60,18 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	}
 
 	public SipgateContact getContactById(Integer id) {
+		return getContactById(id, true);
+	}
+	
+	public SipgateContact getContactById(Integer id, boolean withPicture) {
 		SipgateContact contact = null;
 
 		if (managedCursor.moveToFirst()) {
 			do {
 				Integer tempID = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
-
+				Log.d(TAG, "tempID: " + tempID);
 				if (tempID.equals(id)) {
-					// Get the field values
-					String lastName = managedCursor.getString(managedCursor
-							.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-					if (lastName != null) {
-						String firstName = null;
-						String title = null;
-
-						ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
-
-						Bitmap photo = getPhoto(id);
-
-						contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
-					}
+					contact = getContactDetailsById(id, withPicture);
 					break;
 				}
 			} while (managedCursor.moveToNext());
@@ -101,26 +80,75 @@ public class AndroidContactsClient2x implements ContactsInterface {
 		return contact;
 	}
 
+	private SipgateContact getContactDetailsById(int id) {
+		return getContactDetailsById(id, true);
+	}
+	
+	private SipgateContact getContactDetailsById(int id, boolean withPicture) {
+		SipgateContact contact = null;
+		
+		String nameWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+		String[] nameWhereParams = new String[]{String.valueOf(id), 
+				ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE}; 
+		Cursor nameCur = contentResolver.query(ContactsContract.Data.CONTENT_URI, 
+                null, nameWhere, nameWhereParams, null); 
+		nameCur.moveToFirst();
+		
+		String lastName = nameCur.getString(nameCur
+				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME));
+		
+		String firstName = nameCur.getString(nameCur
+				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME));
+
+		String displayName = nameCur.getString(nameCur
+				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME));
+				
+		nameCur.close();
+
+		ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
+		
+		Bitmap photo = null;
+		
+		if (withPicture)
+		{
+			photo = getPhoto(id);
+		}
+		
+		if (numbers == null || numbers.size() < 1) {
+			Log.d(TAG, "no number");
+			return null; // should not happen. we have querried only for contacts with number
+		}
+		
+		if (lastName == null && firstName == null) {
+			// no detailed name. let's try displayname
+		
+			if (displayName == null && numbers == null || numbers.size() < 1) {
+				Log.d(TAG, "no name");
+				return null; // we dont want contacts without name
+			} else {  
+				// last chance. take a phonenumber as displayname
+				displayName = numbers.get(0).getPhoneNumber();
+			}
+			contact = new SipgateContact(id, displayName, numbers, photo);
+		} else {
+			Log.d(TAG, "firstname: " + firstName + " lastname: " + lastName);
+			contact = new SipgateContact(id, firstName, lastName, null, numbers, photo);
+		}
+		
+		return contact;
+	}
+
 	public SipgateContact getContact(Integer index) {
+		return getContact(index, true);
+	}
+	
+	public SipgateContact getContact(Integer index, boolean withPicture) {
 		SipgateContact contact = null;
 
 		try {
 			if (managedCursor.moveToPosition(index)) {
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(ContactsContract.Contacts._ID));
-
-				// Get the field values
-				String lastName = managedCursor.getString(managedCursor
-						.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-				if (lastName != null) {
-					String firstName = null;
-					String title = null;
-
-					ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
-
-					Bitmap photo = getPhoto(id);
-
-					contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
-				}
+				contact = getContactDetailsById(id);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -132,16 +160,19 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	public String getContactName(String phoneNumber) {
 		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
 		Cursor nameCursor = this.activity
-				.managedQuery(uri, new String[] { PhoneLookup.DISPLAY_NAME }, null, null, null);
+				.managedQuery(uri, new String[] { ContactsContract.PhoneLookup._ID, PhoneLookup.DISPLAY_NAME }, null, null, null);
 
 		if (nameCursor != null && nameCursor.moveToFirst()) {
-			String name = nameCursor.getString(nameCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-			return name;
+			Integer id = nameCursor.getInt(nameCursor.getColumnIndex(ContactsContract.PhoneLookup._ID));
+			SipgateContact contact = getContactDetailsById(id, false);
+			if (contact != null) {
+				return contact.getDisplayName();
+			}
 		}
 
 		nameCursor.close();
 		
-		return phoneNumber;
+		return null;
 	}
 
 	private ArrayList<SipgateContactNumber> getPhoneNumbers(Integer id) {
@@ -255,7 +286,11 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 	@Override
 	public int getCount() {		
-		return managedCursor.getCount();
+		if (managedCursor.isClosed()) {
+			return 0;
+		} else {
+			return managedCursor.getCount();
+		}
 	}
 
 	@Override
@@ -267,5 +302,4 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	public void unregisterDataSetObserver(DataSetObserver observer) {
 		this.managedCursor.registerDataSetObserver(observer);
 	}
-
 }

@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.sipgate.R;
@@ -20,20 +21,38 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	
 	private ContactListAdapter contactListAdapter = null;
 	
+	private ListView elementList = null;
+	private TextView emptyList = null;
+	
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
 		setContentView(R.layout.sipgate_contacts_list);
 		
-		ListView elementList = (ListView) findViewById(R.id.ContactsListView);
-
+		elementList = (ListView) findViewById(R.id.ContactsListView);
+		emptyList = (TextView) findViewById(R.id.EmptyContactListTextView);
+		
         contactListAdapter = new ContactListAdapter(this);
         
         elementList.setAdapter(contactListAdapter);
-        
         elementList.setOnItemClickListener(this);
 	}
 	
+	@Override
+	protected void onResume() {
+		super.onResume();
+	
+		contactListAdapter.notifyDataSetChanged();
+		
+		if (contactListAdapter.isEmpty()) {
+			elementList.setVisibility(View.GONE);
+			emptyList.setVisibility(View.VISIBLE);
+		} else {
+			elementList.setVisibility(View.VISIBLE);
+			emptyList.setVisibility(View.GONE);
+		}	
+	}
+		
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
@@ -52,17 +71,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 
 		return result;
 	}
-	
-	@Override
-	public void onStart() {
-		super.onStart();
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-
+		
 	@Override
 	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) {
 		Log.d(TAG, "onItemClick() position "+position+"; id "+id);

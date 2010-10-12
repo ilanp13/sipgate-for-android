@@ -30,7 +30,7 @@ public class Activity2 extends Activity {
     	Intent startActivity = new Intent();
     	startActivity.setClass(this,InCallScreen.class);
 	    startActivity.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	startActivity(startActivity); 
+    	startActivity(startActivity);
     	finish();
 	}
 }

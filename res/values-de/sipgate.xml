@@ -74,4 +74,6 @@
    	<string name="sipgate_empty_calllist">Keine Einträge in Ihrer Anrufliste.</string>
    	<string name="sipgate_new_calls">%d neue Anrufe</string>
    	<string name="sipgate_a_new_call">Ein neuer Anruf</string>
+   	<string name="sipgate_loading">Lade. Bitte warten...</string>
+   	<string name="sipgate_download_failed">Voice mail konnte nicht heruntergeladen werden.</string>
 </resources>

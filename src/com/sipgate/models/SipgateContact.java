@@ -15,6 +15,7 @@ public class SipgateContact implements Serializable {
 	private String firstName = null;
 	private String lastName = null;
 	private String title = null;
+	private String displayName = null;
 	private ArrayList<SipgateContactNumber> numbers = null;
 	private Bitmap photo = null;
 	
@@ -23,6 +24,13 @@ public class SipgateContact implements Serializable {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.title = title;
+		this.numbers = numbers;
+		this.photo = photo;
+	}
+	
+	public SipgateContact(int id, String displayName, ArrayList<SipgateContactNumber> numbers, Bitmap photo) {
+		this.id = id;
+		this.displayName = displayName;
 		this.numbers = numbers;
 		this.photo = photo;
 	}
@@ -75,4 +83,21 @@ public class SipgateContact implements Serializable {
 		return photo;
 	}
 	
+	public String getDisplayName() {
+		if (displayName != null) {
+			return displayName;
+		} else {
+			String ret = "";
+			if (firstName != null) {
+				ret = firstName;
+				if (lastName != null) {
+					ret += " ";
+				}
+			}
+			if (lastName != null) {
+				ret += lastName;
+			}
+			return ret;
+		}
+	}
 }

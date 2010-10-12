@@ -5,24 +5,21 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import net.oauth.OAuthException;
+import java.util.Vector;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.sipgate.api.types.Event;
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.util.SettingsClient.API_TYPE;
 
@@ -182,11 +179,11 @@ public class ApiServiceProvider {
 	}
 
 	/*
-	 * event list
+	 * voice mail list
 	 */
-	public List<Event> getEvents() throws ApiException, FeatureNotAvailableException {
+	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
-			return apiClient.getEvents();
+			return apiClient.getVoiceMails();
 		}
 	}
 
@@ -202,9 +199,9 @@ public class ApiServiceProvider {
 	/*
 	 * mark specific vm as read
 	 */
-	public void setVoicemailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException {
+	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException {
 		synchronized (this.apiClient) {
-			apiClient.setVoicemailRead(voicemail);
+			apiClient.setVoiceMailRead(voicemail);
 		}
 	}
 	
@@ -217,7 +214,10 @@ public class ApiServiceProvider {
 		}
 	}
 
-	public ArrayList<SipgateCallData> getCalls() throws ApiException, FeatureNotAvailableException {
+	/*
+	 * calls list
+	 */
+	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getCalls();
 		}
@@ -234,14 +234,14 @@ public class ApiServiceProvider {
 		}
 	}
 
-	public List<MobileExtension> getMobileExtensions() throws IOException, OAuthException, URISyntaxException,
-	OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException,
+	FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getMobileExtensions();
 		}
 	}
 
-	public String getBaseProductType() throws IOException, OAuthException, URISyntaxException, OAuthAccessProtectedResourceException, OAuthMissingContextException, FeatureNotAvailableException {
+	public String getBaseProductType() throws IOException, URISyntaxException,  FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getBaseProductType();
 		}

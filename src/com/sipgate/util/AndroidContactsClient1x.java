@@ -39,7 +39,14 @@ public class AndroidContactsClient1x implements ContactsInterface {
 				People.NUMBER+" IS NOT NULL", null, getContactSortOrder());
 	}
 
-	public ArrayList<SipgateContact> getContacts() {
+
+	@Override
+	public ArrayList<SipgateContact> getContacts()
+	{
+		return getContacts(true);
+	}
+
+	public ArrayList<SipgateContact> getContacts(boolean withPicture) {
 		ArrayList<SipgateContact> contactsList = null;
 
 		if (managedCursor.moveToFirst()) {
@@ -47,22 +54,24 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			do {
 				// Get the field values
 				Integer id = managedCursor.getInt(managedCursor.getColumnIndex(People._ID));
-				String lastName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
-				if (lastName == null) {
+				String displayName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
+				if (displayName == null) {
 					Log.d(TAG, "no name");
 					continue;
 				}
-
-				String firstName = null;
-				String title = null;
 
 				ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
 				if (numbers == null)
 					continue;
 
-				Bitmap photo = getPhoto(id);
+				Bitmap photo = null;
+				
+				if (withPicture)
+				{
+					photo = getPhoto(id);
+				}
 
-				contactsList.add(new SipgateContact(id, firstName, lastName, title, numbers, photo));
+				contactsList.add(new SipgateContact(id, displayName, numbers, photo));
 
 			} while (managedCursor.moveToNext());
 		}
@@ -84,10 +93,16 @@ public class AndroidContactsClient1x implements ContactsInterface {
 			return name;
 		}
 		// return the original number if no match was found
-		return phoneNumber;
+		return null;
 	}
 
-	public SipgateContact getContactById(Integer id) {
+	@Override
+	public SipgateContact getContactById(Integer id)
+	{
+		return getContactById(id, true);
+	}
+
+	public SipgateContact getContactById(Integer id, boolean withPicture) {
 		SipgateContact contact = null;
 
 		if (managedCursor.moveToFirst()) {
@@ -102,7 +117,12 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 						ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
 
-						Bitmap photo = getPhoto(id);
+						Bitmap photo = null;
+						
+						if (withPicture)
+						{
+							photo = getPhoto(id);
+						}
 
 						contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
 					}
@@ -114,7 +134,14 @@ public class AndroidContactsClient1x implements ContactsInterface {
 		return contact;
 	}
 
-	public SipgateContact getContact(Integer index) {
+
+	@Override
+	public SipgateContact getContact(Integer index)
+	{
+		return getContact(index, true);
+	}
+	
+	public SipgateContact getContact(Integer index, boolean withPicture) {
 		SipgateContact contact = null;
 
 		try {
@@ -128,7 +155,12 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 					ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
 
-					Bitmap photo = getPhoto(id);
+					Bitmap photo = null;
+					
+					if (withPicture)
+					{
+						photo = getPhoto(id);
+					}
 
 					contact = new SipgateContact(id, firstName, lastName, title, numbers, photo);
 				}
@@ -199,7 +231,11 @@ public class AndroidContactsClient1x implements ContactsInterface {
 
 	@Override
 	public int getCount() {
-		return managedCursor.getCount();
+		if (managedCursor.isClosed()) {
+			return 0;
+		} else {
+			return managedCursor.getCount();
+		}
 	}
 	
 	private String getContactSortOrder() {
@@ -215,5 +251,4 @@ public class AndroidContactsClient1x implements ContactsInterface {
 	public void unregisterDataSetObserver(DataSetObserver observer) {
 		this.managedCursor.unregisterDataSetObserver(observer);
 	}
-
 }

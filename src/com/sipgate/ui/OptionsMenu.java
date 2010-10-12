@@ -1,16 +1,11 @@
 package com.sipgate.ui;
 
-import com.sipgate.service.SipgateBackgroundService;
-import com.sipgate.sipua.ui.Receiver;
-import com.sipgate.sipua.ui.RegisterService;
-import com.sipgate.sipua.ui.Settings;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.preference.PreferenceManager;
@@ -20,6 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.sipgate.R;
+import com.sipgate.service.SipgateBackgroundService;
+import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.sipua.ui.RegisterService;
+import com.sipgate.sipua.ui.Settings;
 
 @SuppressWarnings("deprecation")
 public class OptionsMenu {
@@ -32,7 +31,7 @@ public class OptionsMenu {
 	public static final int ABOUT_MENU_ITEM = FIRST_MENU_ID + 3;
 	public static final int EXIT_MENU_ITEM = FIRST_MENU_ID + 4;
 	public static final int CONTACTS_MENU_ITEM = FIRST_MENU_ID + 5;
-	public static final int EVENTLIST_MENU_ITEM = FIRST_MENU_ID + 6;
+	public static final int VOICE_LIST_MENU_ITEM = FIRST_MENU_ID + 6;
 	public static final int REFRESH_VOICEMAIL_LIST = FIRST_MENU_ID + 7;
 	public static final int REFRESH_CALL_LIST = FIRST_MENU_ID + 8;
 	
@@ -52,18 +51,18 @@ public class OptionsMenu {
 		m.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 		
 		// settings
-		if(caller != "Login"){
+		if(!caller.equals("Login")){
 			m = menu.add(0, CONFIGURE_MENU_ITEM, 0, R.string.menu_settings);
 			m.setIcon(R.drawable.menu_icon_settings_48);
 		}
 		// refresh for voicemail tab only
-		if(caller == "EventList") {
+		if(caller.equals("VoiceMailList")) {
 			m = menu.add(0, REFRESH_VOICEMAIL_LIST, 0, R.string.menu_refresh);
 			m.setIcon(R.drawable.ic_menu_refresh);
 		}
 		
 		// refresh for calllist tab only
-		if(caller == "CallList") {
+		if(caller.equals("CallList")) {
 			m = menu.add(0, REFRESH_CALL_LIST, 0, R.string.menu_refresh);
 			m.setIcon(R.drawable.ic_menu_refresh);
 		}
@@ -147,9 +146,9 @@ public class OptionsMenu {
 			}
 			break;
 		}
-		case EVENTLIST_MENU_ITEM: {
+		case VOICE_LIST_MENU_ITEM: {
 			try {	
-				intent = new Intent(activity, EventListActivity.class);
+				intent = new Intent(activity, VoiceMailListActivity.class);
 				activity.startActivity(intent);
 			} catch (ActivityNotFoundException e) {
 				Log.e(TAG, e.getLocalizedMessage());

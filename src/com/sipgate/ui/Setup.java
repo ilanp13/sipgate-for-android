@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import net.oauth.OAuthException;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -29,8 +28,6 @@ import com.sipgate.R;
 import com.sipgate.R.id;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.exceptions.FeatureNotAvailableException;
-import com.sipgate.exceptions.OAuthAccessProtectedResourceException;
-import com.sipgate.exceptions.OAuthMissingContextException;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
 import com.sipgate.sipua.ui.Receiver;
@@ -195,16 +192,7 @@ public class Setup extends Activity implements OnClickListener {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (OAuthException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OAuthAccessProtectedResourceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OAuthMissingContextException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FeatureNotAvailableException e) {
@@ -224,16 +212,7 @@ public class Setup extends Activity implements OnClickListener {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (OAuthException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OAuthAccessProtectedResourceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OAuthMissingContextException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (FeatureNotAvailableException e) {

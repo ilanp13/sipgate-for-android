@@ -1,186 +1,315 @@
 package com.sipgate.adapters;
 
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Vector;
 
-import android.content.Context;
-import android.content.Intent;
-import android.database.DataSetObserver;
-import android.net.Uri;
+import android.app.Activity;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.sipgate.models.SipgateCallData;
 import com.sipgate.R;
+import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.db.CallDataDBObject;
+import com.sipgate.models.holder.CallViewHolder;
+import com.sipgate.util.AndroidContactsClient;
+import com.sipgate.util.ApiServiceProvider;
 
-public class CallListAdapter implements ListAdapter {
-	public static final Integer VIEW_TYPE = 1;
-	private ArrayList<SipgateCallData> inboxData = null;
-	private LayoutInflater mInflater;
-	private final Context context;
+public class CallListAdapter extends BaseAdapter
+{
+	@SuppressWarnings("unused")
+	private final static String TAG = "CallListAdapter";
 
-	public CallListAdapter(Context context, ArrayList<SipgateCallData> inboxData) {
-		super();
-
-		this.inboxData = inboxData;
+	private LayoutInflater mInflater = null;
+	
+	private ApiServiceProvider apiClient = null;
+	private AndroidContactsClient contactsClient = null;
+	
+	private SipgateDBAdapter sipgateDBAdapter = null;
+	
+	private Vector<CallDataDBObject> callDataDBObjects = null;
+	private HashMap<String, String> contactNameCache = null; 	
+	
+	private String unknownCallerString = null;
+	private String noNumberString = null;
+	
+	private CallViewHolder holder = null;
+	
+	private CallDataDBObject currentCallDataDBObject = null;
+	private CallDataDBObject lastCallDataDBObject = null;
+	private CallDataDBObject nextCallDataDBObject = null;
+	
+	private String remoteName = null;
+	private String remoteNumberPretty = null;
+	private String remoteNumber = null;
+	
+	private Calendar currentDayCalendar = null;
+	private Calendar lastDayCalendar = null;
+	private Calendar nextDayCalendar = null;
+	
+	private SimpleDateFormat timeFormatter = null;
+	private SimpleDateFormat dateFormatter = null;
 		
-		this.context = context;
-
-		// Cache the LayoutInflate to avoid asking for a new one each time.
-		mInflater = LayoutInflater.from(this.context);
-	}
-
+	private long callDirection = 0;
+	private boolean isMissed = false;
+	private boolean isRead = false;
 	
-	public boolean areAllItemsEnabled() {
-		return false;
-	}
-
+	private Drawable incomingIcon = null;
+	private Drawable missedIcon = null;
+	private Drawable outgoingIcon = null;
 	
-	public boolean isEnabled(int position) {
-		return false; // TODO what does this do?
-	}
-
+	private Activity activity = null;
 	
-	public int getCount() {
-		// TODO Auto-generated method stub
-		return inboxData.size();
+	public CallListAdapter(Activity activity) 
+	{
+		this.activity = activity;
+		
+		mInflater = activity.getLayoutInflater();
+		
+		contactsClient = new AndroidContactsClient(activity);
+		apiClient = ApiServiceProvider.getInstance(activity);
+		
+		sipgateDBAdapter = new SipgateDBAdapter(activity);
+		callDataDBObjects = sipgateDBAdapter.getAllCallData();
+		sipgateDBAdapter.close();
+		
+		contactNameCache = new HashMap<String, String>();
+				
+		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
+		noNumberString = activity.getResources().getString(R.string.sipgate_no_number);		
+		
+		incomingIcon = activity.getResources().getDrawable(R.drawable.icon_incoming);
+		missedIcon = activity.getResources().getDrawable(R.drawable.icon_missed);
+		outgoingIcon = activity.getResources().getDrawable(R.drawable.icon_outgoing);
+		
+		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
+		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
+		
+		currentDayCalendar = Calendar.getInstance();
+		lastDayCalendar = Calendar.getInstance();
+		nextDayCalendar = Calendar.getInstance();
 	}
-
+		
+	public boolean areAllItemsEnabled() 
+	{
+		return true;
+	}
 	
-	public Object getItem(int position) {
+	public boolean isEnabled(int position) 
+	{
+		return true;
+	}
+		
+	public Object getItem(int position) 
+	{
+		if (getCount() > position)
+		{
+			return callDataDBObjects.elementAt(position);
+		}
+	
 		return null;
 	}
-
 	
-	public long getItemId(int position) {
-		return position;
+	public long getItemId(int position) 
+	{
+		if (getCount() > position)
+		{
+			return callDataDBObjects.elementAt(position).getId();
+		}
+		
+		return 0;
 	}
-
 	
-	public int getItemViewType(int position) {
-		return VIEW_TYPE;
+	@Override
+	public int getItemViewType(int position) 
+	{
+		return 0;
 	}
-
-	static class ViewHolder {
-		public Context context;
-		public ImageView callButton;
-		public TextView callerName;
-		public TextView callerNumberPretty;
-		public TextView dateTime;
-		public int position;
-		public String callerNumberE164;
-	}
-
 	
-	public View getView(int position, View convertView, ViewGroup parent) {
-		// A ViewHolder keeps references to children views to avoid unneccessary
-		// calls to findViewById() on each row.
-		ViewHolder holder;
-
-		// When convertView is not null, we can reuse it directly, there is no
-		// need to reinflate it. We only inflate a new View when the convertView
-		// supplied by ListView is null.
-		if (convertView == null) {
+	public View getView(int position, View convertView, ViewGroup parent) 
+	{
+		if (convertView == null) 
+		{
 			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
-
-			// Creates a ViewHolder and store references to the two children
-			// views
-			// we want to bind data to.
-			holder = new ViewHolder();
-			holder.callerName = (TextView) convertView.findViewById(R.id.CallerNameTextView);
-			holder.callerNumberPretty = (TextView) convertView.findViewById(R.id.CallerNumberTextView);
-			holder.dateTime = (TextView) convertView.findViewById(R.id.DateTimeTextView);
-			holder.callButton = (ImageView) convertView.findViewById(R.id.CallImageButton);
-
-			// convertView.setLongClickable(true);
-			// convertView.setOnLongClickListener(new
-			// RecordListLongClickListener(this));
-
+			holder = new CallViewHolder();
+			holder.callerNameView = (TextView) convertView.findViewById(R.id.CallerNameTextView);
+			holder.callerNumberView = (TextView) convertView.findViewById(R.id.CallerNumberTextView);
+			holder.callTimeView = (TextView) convertView.findViewById(R.id.DateTimeTextView);
+			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.CallTypeImage);
+			holder.callButtonView = (ImageView) convertView.findViewById(R.id.CallImageButton);
+			holder.categoryTextView = (TextView) convertView.findViewById(R.id.CategoryTextView);
+			holder.separator = (View) convertView.findViewById(R.id.CallSeparator);
 			convertView.setTag(holder);
-		} else {
-			// Get the ViewHolder back to get fast access to the TextView
-			// and the ImageView.
-			holder = (ViewHolder) convertView.getTag();
+		} 
+		else 
+		{
+			holder = (CallViewHolder) convertView.getTag();
+		}
+		
+		currentCallDataDBObject = (CallDataDBObject) getItem(position);
+
+		callDirection = currentCallDataDBObject.getDirection();
+		isMissed = currentCallDataDBObject.isMissed();
+		isRead = currentCallDataDBObject.isRead();
+		
+		if(callDirection == CallDataDBObject.INCOMING && !isMissed) 
+		{
+			holder.callTypeIconView.setImageDrawable(incomingIcon);
+		}
+		else if(callDirection == CallDataDBObject.INCOMING && isMissed) 
+		{
+			holder.callTypeIconView.setImageDrawable(missedIcon);
+		}
+		else 
+		{
+			holder.callTypeIconView.setImageDrawable(outgoingIcon);
 		}
 
-		// Bind the data efficiently with the holder.
-		SipgateCallData inboxItem = this.inboxData.get(position);
-
-		if (inboxItem.getCallSourceNumberE164() != null && inboxItem.getCallSourceNumberE164().length() > 0) {
-			holder.callButton.setImageResource(R.drawable.button_call);
-			holder.callButton.setClickable(true);
-		} else {
-			holder.callButton.setClickable(false);
-		}
-
-		holder.callerNumberPretty.setText(inboxItem.getCallSourceNumberPretty());
-		holder.callerNumberE164 = inboxItem.getCallSourceNumberE164();
-
-		//holder.dateTime.setText(this.dateIsoToPretty(inboxItem.getCallTime()));
-
-		String name = inboxItem.getCallSourceName();
-		if (name != null && name.length() > 0) {
-			holder.callerName.setText(name);
-		} else {
-			holder.callerName.setText(holder.callerNumberPretty.getText());
-		}
-
-		holder.position = position;
-
-		// "remember" reference to data via holder
-		holder.callButton.setTag(holder);
-
-		// register "call" event
-		holder.callButton.setClickable(true);
-		holder.callButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				ViewHolder holder = (ViewHolder) v.getTag();
-				String uri = holder.callerNumberE164;
-				Intent intent = new Intent(Intent.ACTION_CALL);
-				intent.setData(Uri.parse(uri));
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				v.getContext().startActivity(intent);
+		remoteName = null;
+		remoteNumberPretty = currentCallDataDBObject.getRemoteNumberPretty();
+		
+		if(remoteNumberPretty.length() > 0) 
+		{
+			if (!contactNameCache.containsKey(remoteNumberPretty))
+			{
+				contactNameCache.put(remoteNumberPretty, contactsClient.getContactName(remoteNumberPretty));
 			}
-		});
+						
+			remoteName = contactNameCache.get(remoteNumberPretty);
+		}
+		
+		if (remoteName == null) 
+		{
+			remoteName = currentCallDataDBObject.getRemoteName();
+			
+			if (remoteName == null || remoteName.length() == 0 || remoteName.equals(remoteNumberPretty))
+			{
+				remoteName = unknownCallerString;
+			}
+		}
+		
+		remoteNumber = currentCallDataDBObject.getRemoteNumberPretty();
+	
+		if(remoteNumber == null || remoteNumber.length() == 0 || remoteNumber.equals("+anonymous")) 
+		{
+			remoteNumber = noNumberString;
+		}
+		
+		if (isRead) 
+		{
+			holder.callerNameView.setTypeface(Typeface.DEFAULT);
+			holder.callerNumberView.setTypeface(Typeface.DEFAULT);
+		} 
+		else 
+		{
+			holder.callerNameView.setTypeface(Typeface.DEFAULT_BOLD);
+			holder.callerNumberView.setTypeface(Typeface.DEFAULT_BOLD);
+		}
+		
+		holder.callerNameView.setText(remoteName);
+		holder.callerNumberView.setText(remoteNumber);
 
+		currentDayCalendar.setTimeInMillis(currentCallDataDBObject.getTime());
+		
+		holder.callTimeView.setText(timeFormatter.format(currentDayCalendar.getTime()));
+		holder.categoryTextView.setText(dateFormatter.format(currentDayCalendar.getTime()));
+		holder.categoryTextView.setVisibility(View.VISIBLE);
+
+		if (position > 0) 
+		{
+			lastCallDataDBObject = (CallDataDBObject)getItem(position - 1);
+		
+			lastDayCalendar.setTimeInMillis(lastCallDataDBObject.getTime());
+						
+			if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) == currentDayCalendar.get(Calendar.DAY_OF_YEAR) &&
+				lastDayCalendar.get(Calendar.YEAR) == currentDayCalendar.get(Calendar.YEAR)) 
+			{
+				holder.categoryTextView.setVisibility(View.GONE);
+			} 
+			else 
+			{
+				holder.categoryTextView.setVisibility(View.VISIBLE);
+			}
+		}
+		
+		if (position < (getCount() - 1))
+		{
+			nextCallDataDBObject = (CallDataDBObject)getItem(position + 1);
+			
+			nextDayCalendar.setTimeInMillis(nextCallDataDBObject.getTime());
+			
+			if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) != currentDayCalendar.get(Calendar.DAY_OF_YEAR) ||
+				lastDayCalendar.get(Calendar.YEAR) != currentDayCalendar.get(Calendar.YEAR))
+			{
+				holder.separator.setVisibility(View.GONE);
+			}
+			else
+			{
+				holder.separator.setVisibility(View.VISIBLE);
+			}
+		}
+		
+		markAsRead(currentCallDataDBObject); 
+		
 		return convertView;
 	}
-
-	@SuppressWarnings("unused")
-	private CharSequence dateIsoToPretty(String dateTimeIso) {
-		SimpleDateFormat dateformatterPretty = new SimpleDateFormat(context.getResources().getString(R.string.dateTimeFormat));
-		SimpleDateFormat dateformatterIso = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss"); // TODO fixme!
-		Date d = dateformatterIso.parse(dateTimeIso, new ParsePosition(0));
-		return dateformatterPretty.format(d);
-	}
-
-	public int getViewTypeCount() {
-		return 1 + this.getCount();
-	}
-
 	
-	public boolean hasStableIds() {
-		return false;
-	}
+	private void markAsRead(final CallDataDBObject callDataDBObject) {
+		if (!callDataDBObject.isRead()) {
+			Thread markThread = new Thread(){
+				public void run()
+				{
+					sipgateDBAdapter = new SipgateDBAdapter(activity);
+					
+					callDataDBObject.setRead(true);
+					sipgateDBAdapter.update(callDataDBObject);
 
+					sipgateDBAdapter.close();
+					
+					try {
+						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+					} 
+					catch (Exception e) {
+						e.printStackTrace();
+					} 
+				}
+			};
+			
+			markThread.start();
+		}
+	}
 	
-	public boolean isEmpty() {
-		return this.inboxData.isEmpty();
+	public boolean hasStableIds() 
+	{
+		return true;
 	}
 
+	@Override
+	public boolean isEmpty()
+	{
+		return (callDataDBObjects.size() == 0);
+	}
+
+	@Override
+	public int getCount()
+	{
+		return callDataDBObjects.size();
+	}
 	
-	public void registerDataSetObserver(DataSetObserver observer) {
+	@Override
+	public void notifyDataSetChanged() {
+		
+		sipgateDBAdapter = new SipgateDBAdapter(activity);
+		callDataDBObjects = sipgateDBAdapter.getAllCallData();
+		sipgateDBAdapter.close();
+		
+		super.notifyDataSetChanged();
 	}
-
-	
-	public void unregisterDataSetObserver(DataSetObserver observer) {
-	}
-
 }
