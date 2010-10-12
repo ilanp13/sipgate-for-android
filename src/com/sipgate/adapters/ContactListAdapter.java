@@ -129,10 +129,20 @@ public class ContactListAdapter extends BaseAdapter
 
 		if (position < getCount() - 1) {
 			nextSipgateContact = (SipgateContact) getItem(position + 1);
-			nextFirstLetter = nextSipgateContact.getDisplayName().substring(0, 1);
-			if (!nextFirstLetter.equalsIgnoreCase(currentFirstLetter)) {
-				holder.separator.setVisibility(View.GONE);
-			} else {
+			
+			// TODO fix contacts!!!
+			
+			if (nextSipgateContact != null)
+			{
+				nextFirstLetter = nextSipgateContact.getDisplayName().substring(0, 1);
+				if (!nextFirstLetter.equalsIgnoreCase(currentFirstLetter)) {
+					holder.separator.setVisibility(View.GONE);
+				} else {
+					holder.separator.setVisibility(View.VISIBLE);
+				}
+			}
+			else
+			{
 				holder.separator.setVisibility(View.VISIBLE);
 			}
 		}
