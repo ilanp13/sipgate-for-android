@@ -209,9 +209,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 			if (oldVoiceMailDataDBObject != null)
 			{
 				currentVoiceMailDataDBObject.setLocalFileUrl(oldVoiceMailDataDBObject.getLocalFileUrl());
+				currentVoiceMailDataDBObject.setSeen(oldVoiceMailDataDBObject.getSeen());
 			}
 			
-			if (!currentVoiceMailDataDBObject.isRead())
+			if (!currentVoiceMailDataDBObject.isRead() && !currentVoiceMailDataDBObject.isSeen())
 			{
 				unreadCounter++;
 			}

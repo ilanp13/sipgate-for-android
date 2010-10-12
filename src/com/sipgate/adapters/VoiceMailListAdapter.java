@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
+import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.models.holder.VoiceMailViewHolder;
@@ -221,7 +222,27 @@ public class VoiceMailListAdapter extends BaseAdapter
 			}
 		}
 		
+		markAsSeen(currentVoiceMailDataDBObject); 
+		
 		return convertView;
+	}
+	
+	private void markAsSeen(final VoiceMailDataDBObject voiceMailDataDBObject) {
+		if (!voiceMailDataDBObject.isSeen()) {
+			Thread markThread = new Thread(){
+				public void run()
+				{
+					sipgateDBAdapter = new SipgateDBAdapter(activity);
+					
+					voiceMailDataDBObject.setSeen(true);
+					sipgateDBAdapter.update(voiceMailDataDBObject);
+
+					sipgateDBAdapter.close();
+				}
+			};
+			
+			markThread.start();
+		}
 	}
 	
 	public boolean hasStableIds() 

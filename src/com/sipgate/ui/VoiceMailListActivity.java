@@ -312,14 +312,18 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				}
 				finally {
 					try {
-						fileOutputStream.close();
+						if (fileOutputStream != null) {
+							fileOutputStream.close();
+						}
 					}
 					catch (IOException e) {
 						Log.e(TAG, e.getLocalizedMessage(), e);
 					}
 					
 					try {
-						inputStream.close();
+						if (inputStream != null) {
+							inputStream.close();
+						}
 					}
 					catch (IOException e) {
 						Log.e(TAG, e.getLocalizedMessage(), e);
