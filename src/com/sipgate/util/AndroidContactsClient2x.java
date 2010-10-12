@@ -29,13 +29,12 @@ public class AndroidContactsClient2x implements ContactsInterface {
 
 	public AndroidContactsClient2x(Activity activity) {
 		this.activity = activity;
-		this.managedCursor = getManagedCursorOnContacts();
 		this.contentResolver = activity.getContentResolver();
+		this.managedCursor = getManagedCursorOnContacts();
 	}
 
 	private Cursor getManagedCursorOnContacts() {
-		return activity.managedQuery(ContactsContract.Contacts.CONTENT_URI, null,
-				ContactsContract.Contacts.HAS_PHONE_NUMBER + " = 1", null, ContactsContract.Contacts.DISPLAY_NAME + " ASC");
+		return contentResolver.query(ContactsContract.Contacts.CONTENT_URI, new String[]{ContactsContract.Contacts._ID}, ContactsContract.Contacts.HAS_PHONE_NUMBER + " = ?", new String[]{String.valueOf(1)}, ContactsContract.Contacts.DISPLAY_NAME + " ASC"); 
 	}
 	
 	public ArrayList<SipgateContact> getContacts() {
@@ -87,22 +86,16 @@ public class AndroidContactsClient2x implements ContactsInterface {
 	private SipgateContact getContactDetailsById(int id, boolean withPicture) {
 		SipgateContact contact = null;
 		
-		String nameWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
-		String[] nameWhereParams = new String[]{String.valueOf(id), 
-				ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE}; 
-		Cursor nameCur = contentResolver.query(ContactsContract.Data.CONTENT_URI, 
+		String nameWhere = ContactsContract.Contacts._ID + " = ?";
+		String[] nameWhereParams = new String[]{String.valueOf(id)}; 
+		Cursor nameCur = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, 
                 null, nameWhere, nameWhereParams, null); 
 		nameCur.moveToFirst();
 		
-		String lastName = nameCur.getString(nameCur
-				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME));
+		//String lastName = nameCur.getString(nameCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME));
+		//String firstName = nameCur.getString(nameCur.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME));
+		String displayName = nameCur.getString(nameCur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 		
-		String firstName = nameCur.getString(nameCur
-				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME));
-
-		String displayName = nameCur.getString(nameCur
-				.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME));
-				
 		nameCur.close();
 
 		ArrayList<SipgateContactNumber> numbers = getPhoneNumbers(id);
@@ -114,26 +107,37 @@ public class AndroidContactsClient2x implements ContactsInterface {
 			photo = getPhoto(id);
 		}
 		
+		/*
+		*
+		*	TODO fix the problem if contact is a facebook/3rd party account!
+		*
+		*
 		if (numbers == null || numbers.size() < 1) {
 			Log.d(TAG, "no number");
 			return null; // should not happen. we have querried only for contacts with number
 		}
+		*/
 		
-		if (lastName == null && firstName == null) {
+		//if (lastName == null && firstName == null) {
 			// no detailed name. let's try displayname
 		
-			if (displayName == null && numbers == null || numbers.size() < 1) {
-				Log.d(TAG, "no name");
-				return null; // we dont want contacts without name
-			} else {  
-				// last chance. take a phonenumber as displayname
-				displayName = numbers.get(0).getPhoneNumber();
+			if (displayName != null) {
+				contact = new SipgateContact(id, displayName, numbers, photo);
 			}
-			contact = new SipgateContact(id, displayName, numbers, photo);
-		} else {
-			Log.d(TAG, "firstname: " + firstName + " lastname: " + lastName);
-			contact = new SipgateContact(id, firstName, lastName, null, numbers, photo);
-		}
+			else {
+				if (numbers == null || numbers.size() < 1) {
+					Log.d(TAG, "no name");
+					return null; // we dont want contacts without name
+				} else {  
+					// last chance. take a phonenumber as displayname
+					contact = new SipgateContact(id, numbers.get(0).getPhoneNumber(), numbers, photo);
+				}	
+			}
+		
+		//} else {
+		//	Log.d(TAG, "firstname: " + firstName + " lastname: " + lastName);
+		//	contact = new SipgateContact(id, firstName, lastName, null, numbers, photo);
+		//}
 		
 		return contact;
 	}

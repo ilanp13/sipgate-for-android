@@ -175,13 +175,16 @@ public class ContactListAdapter extends BaseAdapter
 	
 	private SipgateContact getContact(int position) {
 		currentContact = contactsCacheMap.get(position);
+		
 		if (currentContact == null) {
 			currentContact = contactsClient.getContact(position);
 			contactsCacheMap.put(position, currentContact);
 		}
+		
 		if (currentContact == null) {
 			Log.w(TAG, "getContact returning null. contactsmap has " + contactsCacheMap.size() + " items. adapter has " + getCount() + " items");
 		}
+		
 		return currentContact;
 	}
 }
