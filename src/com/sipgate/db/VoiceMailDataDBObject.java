@@ -11,6 +11,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 	private long id = 0;
 	
 	private long read = 0;
+	private long seen = 0;
 	private long time = 0;
 	private long duration = 0;	
 	
@@ -37,6 +38,28 @@ public class VoiceMailDataDBObject extends BaseDBObject
 	{
 		statement.bindLong(1, id);
 		statement.bindLong(2, read);
+		statement.bindLong(3, seen);
+		statement.bindLong(4, time);
+		statement.bindLong(5, duration);
+				
+		statement.bindString(6, localNumberE164);	
+		statement.bindString(7, localNumberPretty);
+		statement.bindString(8, localName);
+		
+		statement.bindString(9, remoteNumberE164);
+		statement.bindString(10, remoteNumberPretty);
+		statement.bindString(11, remoteName);
+		
+		statement.bindString(12, transcription);
+		statement.bindString(13, contentUrl);
+		statement.bindString(14, localFileUrl);
+		statement.bindString(15, readModifyUrl);
+	}
+
+	public void bindUpdate(SQLiteStatement statement)
+	{
+		statement.bindLong(1, read);
+		statement.bindLong(2, seen);
 		statement.bindLong(3, time);
 		statement.bindLong(4, duration);
 				
@@ -52,33 +75,13 @@ public class VoiceMailDataDBObject extends BaseDBObject
 		statement.bindString(12, contentUrl);
 		statement.bindString(13, localFileUrl);
 		statement.bindString(14, readModifyUrl);
-	}
-
-	public void bindUpdate(SQLiteStatement statement)
-	{
-		statement.bindLong(1, read);
-		statement.bindLong(2, time);
-		statement.bindLong(3, duration);
-				
-		statement.bindString(4, localNumberE164);	
-		statement.bindString(5, localNumberPretty);
-		statement.bindString(6, localName);
 		
-		statement.bindString(7, remoteNumberE164);
-		statement.bindString(8, remoteNumberPretty);
-		statement.bindString(9, remoteName);
-		
-		statement.bindString(10, transcription);
-		statement.bindString(11, contentUrl);
-		statement.bindString(12, localFileUrl);
-		statement.bindString(13, readModifyUrl);
-		
-		statement.bindLong(14, id);
+		statement.bindLong(15, id);
 	}
 
 	public String getCreateStatement()
 	{
-		return "CREATE TABLE VoiceMailData (id INTEGER PRIMARY KEY NOT NULL, read INTEGER, time INTEGER, duration INTEGER, localNumberE164 VARCHAR, localNumberPretty VARCHAR, localName VARCHAR, remoteNumberE164 VARCHAR, remoteNumberPretty VARCHAR, remoteName VARCHAR, transcription VARCHAR, contentUrl VARCHAR, localFileUrl VARCHAR, readModifyUrl VARCHAR)";
+		return "CREATE TABLE VoiceMailData (id INTEGER PRIMARY KEY NOT NULL, read INTEGER, seen INTEGER, time INTEGER, duration INTEGER, localNumberE164 VARCHAR, localNumberPretty VARCHAR, localName VARCHAR, remoteNumberE164 VARCHAR, remoteNumberPretty VARCHAR, remoteName VARCHAR, transcription VARCHAR, contentUrl VARCHAR, localFileUrl VARCHAR, readModifyUrl VARCHAR)";
 	}
 
 	public String getDeleteStatement()
@@ -88,7 +91,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO VoiceMailData (id, read, time, duration, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, transcription, contentUrl, localFileUrl, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return "INSERT INTO VoiceMailData (id, read, seen, time, duration, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, transcription, contentUrl, localFileUrl, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
@@ -98,7 +101,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 
 	public String getUpdateStatement()
 	{
-		return "UPDATE VoiceMailData SET read = ?, time = ?, duration = ?, localNumberE164 = ?, localNumberPretty = ?, localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, transcription = ?, contentUrl = ?, localFileUrl = ?, readModifyUrl = ? WHERE id = ?";
+		return "UPDATE VoiceMailData SET read = ?, seen = ?, time = ?, duration = ?, localNumberE164 = ?, localNumberPretty = ?, localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, transcription = ?, contentUrl = ?, localFileUrl = ?, readModifyUrl = ? WHERE id = ?";
 	}
 
 	public long getId()
@@ -134,6 +137,31 @@ public class VoiceMailDataDBObject extends BaseDBObject
 	public void setRead(boolean read)
 	{
 		this.read = (read ? 1 : 0);
+	}
+	
+	public boolean isSeen()
+	{
+		return (seen > 0);
+	}
+
+	public long getSeen()
+	{
+		return seen;
+	}
+	
+	public void setSeen(long seen)
+	{
+		this.seen = seen;
+	}
+
+	public void setSeen(String seen)
+	{
+		this.seen = (seen.equals("true") ? 1 : 0);
+	}
+	
+	public void setSeen(boolean seen)
+	{
+		this.seen = (seen ? 1 : 0);
 	}
 	
 	public long getTime()
