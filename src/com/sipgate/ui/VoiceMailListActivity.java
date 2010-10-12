@@ -359,7 +359,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				mediaConnector.setMp3(voiceMailDataDBObject.getLocalFileUrl());
 				mediaConnector.start();
 				mediaController.show(0);
-				
+							
 				markAsRead(voiceMailDataDBObject);
 			}
 			else
