@@ -110,18 +110,19 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			
 			voiceMail.setId(cursor.getLong(0));
 			voiceMail.setRead(cursor.getLong(1));
-			voiceMail.setTime(cursor.getLong(2));
-			voiceMail.setDuration(cursor.getLong(3));
-			voiceMail.setLocalNumberE164(cursor.getString(4));
-			voiceMail.setLocalNumberPretty(cursor.getString(5));
-			voiceMail.setLocalName(cursor.getString(6));
-			voiceMail.setRemoteNumberE164(cursor.getString(7));
-			voiceMail.setRemoteNumberPretty(cursor.getString(8));
-			voiceMail.setRemoteName(cursor.getString(9));
-			voiceMail.setTranscription(cursor.getString(10));
-			voiceMail.setContentUrl(cursor.getString(11));
-			voiceMail.setLocalFileUrl(cursor.getString(12));
-			voiceMail.setReadModifyUrl(cursor.getString(13));
+			voiceMail.setSeen(cursor.getLong(2));
+			voiceMail.setTime(cursor.getLong(3));
+			voiceMail.setDuration(cursor.getLong(4));
+			voiceMail.setLocalNumberE164(cursor.getString(5));
+			voiceMail.setLocalNumberPretty(cursor.getString(6));
+			voiceMail.setLocalName(cursor.getString(7));
+			voiceMail.setRemoteNumberE164(cursor.getString(8));
+			voiceMail.setRemoteNumberPretty(cursor.getString(9));
+			voiceMail.setRemoteName(cursor.getString(10));
+			voiceMail.setTranscription(cursor.getString(11));
+			voiceMail.setContentUrl(cursor.getString(12));
+			voiceMail.setLocalFileUrl(cursor.getString(13));
+			voiceMail.setReadModifyUrl(cursor.getString(14));
 			
 			voiceMailData.add(voiceMail);
 		}
@@ -212,18 +213,19 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			
 			voiceMail.setId(cursor.getLong(0));
 			voiceMail.setRead(cursor.getLong(1));
-			voiceMail.setTime(cursor.getLong(2));
-			voiceMail.setDuration(cursor.getLong(3));
-			voiceMail.setLocalNumberE164(cursor.getString(4));
-			voiceMail.setLocalNumberPretty(cursor.getString(5));
-			voiceMail.setLocalName(cursor.getString(6));
-			voiceMail.setRemoteNumberE164(cursor.getString(7));
-			voiceMail.setRemoteNumberPretty(cursor.getString(8));
-			voiceMail.setRemoteName(cursor.getString(9));
-			voiceMail.setTranscription(cursor.getString(10));
-			voiceMail.setContentUrl(cursor.getString(11));
-			voiceMail.setLocalFileUrl(cursor.getString(12));
-			voiceMail.setReadModifyUrl(cursor.getString(13));
+			voiceMail.setSeen(cursor.getLong(2));
+			voiceMail.setTime(cursor.getLong(3));
+			voiceMail.setDuration(cursor.getLong(4));
+			voiceMail.setLocalNumberE164(cursor.getString(5));
+			voiceMail.setLocalNumberPretty(cursor.getString(6));
+			voiceMail.setLocalName(cursor.getString(7));
+			voiceMail.setRemoteNumberE164(cursor.getString(8));
+			voiceMail.setRemoteNumberPretty(cursor.getString(9));
+			voiceMail.setRemoteName(cursor.getString(10));
+			voiceMail.setTranscription(cursor.getString(11));
+			voiceMail.setContentUrl(cursor.getString(12));
+			voiceMail.setLocalFileUrl(cursor.getString(13));
+			voiceMail.setReadModifyUrl(cursor.getString(14));
 		}
 			
 		cursor.close();
