@@ -278,7 +278,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 				}
 			}
 			
-			if (oldCallDataDBObject == null && !currentDataDBObject.isRead())
+			if (oldCallDataDBObject == null && !currentDataDBObject.isRead() && currentDataDBObject.getDirection() == CallDataDBObject.INCOMING)
 			{
 				unreadCounter++;
 			}
