@@ -15,19 +15,19 @@ public class VoiceMailDataDBObject extends BaseDBObject
 	private long time = 0;
 	private long duration = 0;	
 	
-	private String localNumberE164 = null;
-	private String localNumberPretty = null;
-	private String localName = null;
+	private String localNumberE164 = "";
+	private String localNumberPretty = "";
+	private String localName = "";
 
-	private String remoteNumberE164 = null;
-	private String remoteNumberPretty = null;
-	private String remoteName = null;
+	private String remoteNumberE164 = "";
+	private String remoteNumberPretty = "";
+	private String remoteName = "";
 	
-	private String transcription = null;
+	private String transcription = "";
 	
-	private String contentUrl = null;
-	private String localFileUrl = null;
-	private String readModifyUrl = null;
+	private String contentUrl = "";
+	private String localFileUrl = "";
+	private String readModifyUrl = "";
 	
 	public void bindDelete(SQLiteStatement statement)
 	{
