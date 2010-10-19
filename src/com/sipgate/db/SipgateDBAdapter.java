@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.sipgate.db.base.BaseDBAdapter;
 import com.sipgate.db.base.BaseDBObject;
@@ -65,27 +66,42 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		
 		CallDataDBObject call = null;
 		
-		while (cursor.moveToNext())
+		try
 		{
-			call = new CallDataDBObject();
-			
-			call.setId(cursor.getLong(0));
-			call.setDirection(cursor.getLong(1));
-			call.setMissed(cursor.getLong(2));
-			call.setRead(cursor.getLong(3));
-			call.setTime(cursor.getLong(4));
-			call.setLocalNumberE164(cursor.getString(5));
-			call.setLocalNumberPretty(cursor.getString(6));
-			call.setLocalName(cursor.getString(7));
-			call.setRemoteNumberE164(cursor.getString(8));
-			call.setRemoteNumberPretty(cursor.getString(9));
-			call.setRemoteName(cursor.getString(10));
-			call.setReadModifyUrl(cursor.getString(11));
-			
-			callData.add(call);
+			if (cursor != null)
+			{
+				while (cursor.moveToNext())
+				{
+					call = new CallDataDBObject();
+					
+					call.setId(cursor.getLong(0));
+					call.setDirection(cursor.getLong(1));
+					call.setMissed(cursor.getLong(2));
+					call.setRead(cursor.getLong(3));
+					call.setTime(cursor.getLong(4));
+					call.setLocalNumberE164(cursor.getString(5));
+					call.setLocalNumberPretty(cursor.getString(6));
+					call.setLocalName(cursor.getString(7));
+					call.setRemoteNumberE164(cursor.getString(8));
+					call.setRemoteNumberPretty(cursor.getString(9));
+					call.setRemoteName(cursor.getString(10));
+					call.setReadModifyUrl(cursor.getString(11));
+					
+					callData.add(call);
+				}
+			}
 		}
-		
-		cursor.close();
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getAllCallData() -> inputstream is null");
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
 		
 		return callData;
 	}
@@ -104,30 +120,45 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		
 		VoiceMailDataDBObject voiceMail = null;
 		
-		while (cursor.moveToNext())
+		try
 		{
-			voiceMail = new VoiceMailDataDBObject();
-			
-			voiceMail.setId(cursor.getLong(0));
-			voiceMail.setRead(cursor.getLong(1));
-			voiceMail.setSeen(cursor.getLong(2));
-			voiceMail.setTime(cursor.getLong(3));
-			voiceMail.setDuration(cursor.getLong(4));
-			voiceMail.setLocalNumberE164(cursor.getString(5));
-			voiceMail.setLocalNumberPretty(cursor.getString(6));
-			voiceMail.setLocalName(cursor.getString(7));
-			voiceMail.setRemoteNumberE164(cursor.getString(8));
-			voiceMail.setRemoteNumberPretty(cursor.getString(9));
-			voiceMail.setRemoteName(cursor.getString(10));
-			voiceMail.setTranscription(cursor.getString(11));
-			voiceMail.setContentUrl(cursor.getString(12));
-			voiceMail.setLocalFileUrl(cursor.getString(13));
-			voiceMail.setReadModifyUrl(cursor.getString(14));
-			
-			voiceMailData.add(voiceMail);
+			if (cursor != null)
+			{
+				while (cursor.moveToNext())
+				{
+					voiceMail = new VoiceMailDataDBObject();
+					
+					voiceMail.setId(cursor.getLong(0));
+					voiceMail.setRead(cursor.getLong(1));
+					voiceMail.setSeen(cursor.getLong(2));
+					voiceMail.setTime(cursor.getLong(3));
+					voiceMail.setDuration(cursor.getLong(4));
+					voiceMail.setLocalNumberE164(cursor.getString(5));
+					voiceMail.setLocalNumberPretty(cursor.getString(6));
+					voiceMail.setLocalName(cursor.getString(7));
+					voiceMail.setRemoteNumberE164(cursor.getString(8));
+					voiceMail.setRemoteNumberPretty(cursor.getString(9));
+					voiceMail.setRemoteName(cursor.getString(10));
+					voiceMail.setTranscription(cursor.getString(11));
+					voiceMail.setContentUrl(cursor.getString(12));
+					voiceMail.setLocalFileUrl(cursor.getString(13));
+					voiceMail.setReadModifyUrl(cursor.getString(14));
+					
+					voiceMailData.add(voiceMail);
+				}
+			}
 		}
-		
-		cursor.close();
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getAllVoiceMailData() -> inputstream is null");
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
 		
 		return voiceMailData;
 	}
@@ -165,29 +196,40 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 */
 	public CallDataDBObject getCallDataDBObjectById(long id)
 	{
-		Cursor cursor = getCallDataCursorById(id);
-		
 		CallDataDBObject call = null;
 		
-		if (cursor.moveToNext())
+		Cursor cursor = getCallDataCursorById(id);
+		
+		try
 		{
-			call = new CallDataDBObject();
-			
-			call.setId(cursor.getLong(0));
-			call.setDirection(cursor.getLong(1));
-			call.setMissed(cursor.getLong(2));
-			call.setRead(cursor.getLong(3));
-			call.setTime(cursor.getLong(4));
-			call.setLocalNumberE164(cursor.getString(5));
-			call.setLocalNumberPretty(cursor.getString(6));
-			call.setLocalName(cursor.getString(7));
-			call.setRemoteNumberE164(cursor.getString(8));
-			call.setRemoteNumberPretty(cursor.getString(9));
-			call.setRemoteName(cursor.getString(10));
-			call.setReadModifyUrl(cursor.getString(11));
+			if (cursor != null && cursor.moveToNext())
+			{
+				call = new CallDataDBObject();
+				call.setId(cursor.getLong(0));
+				call.setDirection(cursor.getLong(1));
+				call.setMissed(cursor.getLong(2));
+				call.setRead(cursor.getLong(3));
+				call.setTime(cursor.getLong(4));
+				call.setLocalNumberE164(cursor.getString(5));
+				call.setLocalNumberPretty(cursor.getString(6));
+				call.setLocalName(cursor.getString(7));
+				call.setRemoteNumberE164(cursor.getString(8));
+				call.setRemoteNumberPretty(cursor.getString(9));
+				call.setRemoteName(cursor.getString(10));
+				call.setReadModifyUrl(cursor.getString(11));
+			}
 		}
-			
-		cursor.close();
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getCallDataDBObjectById() -> inputstream is null");
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
 	
 		return call;
 	}
@@ -201,34 +243,46 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 */
 	public VoiceMailDataDBObject getVoiceMailDataDBObjectById(long id)
 	{
-		Cursor cursor = getVoiceMailDataCursorById(id);
-		
 		VoiceMailDataDBObject voiceMail = null;
 		
-		if (cursor.moveToNext())
+		Cursor cursor = getVoiceMailDataCursorById(id);
+		
+		try
 		{
-			voiceMail = new VoiceMailDataDBObject();
-			
-			voiceMail = new VoiceMailDataDBObject();
-			
-			voiceMail.setId(cursor.getLong(0));
-			voiceMail.setRead(cursor.getLong(1));
-			voiceMail.setSeen(cursor.getLong(2));
-			voiceMail.setTime(cursor.getLong(3));
-			voiceMail.setDuration(cursor.getLong(4));
-			voiceMail.setLocalNumberE164(cursor.getString(5));
-			voiceMail.setLocalNumberPretty(cursor.getString(6));
-			voiceMail.setLocalName(cursor.getString(7));
-			voiceMail.setRemoteNumberE164(cursor.getString(8));
-			voiceMail.setRemoteNumberPretty(cursor.getString(9));
-			voiceMail.setRemoteName(cursor.getString(10));
-			voiceMail.setTranscription(cursor.getString(11));
-			voiceMail.setContentUrl(cursor.getString(12));
-			voiceMail.setLocalFileUrl(cursor.getString(13));
-			voiceMail.setReadModifyUrl(cursor.getString(14));
+			if (cursor != null && cursor.moveToNext())
+			{
+				voiceMail = new VoiceMailDataDBObject();
+				
+				voiceMail = new VoiceMailDataDBObject();
+				
+				voiceMail.setId(cursor.getLong(0));
+				voiceMail.setRead(cursor.getLong(1));
+				voiceMail.setSeen(cursor.getLong(2));
+				voiceMail.setTime(cursor.getLong(3));
+				voiceMail.setDuration(cursor.getLong(4));
+				voiceMail.setLocalNumberE164(cursor.getString(5));
+				voiceMail.setLocalNumberPretty(cursor.getString(6));
+				voiceMail.setLocalName(cursor.getString(7));
+				voiceMail.setRemoteNumberE164(cursor.getString(8));
+				voiceMail.setRemoteNumberPretty(cursor.getString(9));
+				voiceMail.setRemoteName(cursor.getString(10));
+				voiceMail.setTranscription(cursor.getString(11));
+				voiceMail.setContentUrl(cursor.getString(12));
+				voiceMail.setLocalFileUrl(cursor.getString(13));
+				voiceMail.setReadModifyUrl(cursor.getString(14));
+			}
 		}
-			
-		cursor.close();
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getVoiceMailDataDBObjectById() -> inputstream is null");
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
 	
 		return voiceMail;
 	}

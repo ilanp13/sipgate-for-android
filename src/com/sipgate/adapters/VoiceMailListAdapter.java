@@ -8,6 +8,7 @@ import java.util.Vector;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
-import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.models.holder.VoiceMailViewHolder;
@@ -144,100 +144,119 @@ public class VoiceMailListAdapter extends BaseAdapter
 		
 		currentVoiceMailDataDBObject = (VoiceMailDataDBObject) getItem(position);
 
-		isRead = currentVoiceMailDataDBObject.isRead();
-				
-		if(isRead) 
+		if (currentVoiceMailDataDBObject != null)
 		{
-			holder.iconVM.setImageDrawable(readIcon);
-			holder.nameView.setTypeface(Typeface.DEFAULT);
-		}
-		else 
-		{
-			holder.iconVM.setImageDrawable(unreadIcon);
-			holder.nameView.setTypeface(Typeface.DEFAULT_BOLD);
-		}
-
-		remoteName = null;
-		remoteNumberPretty = currentVoiceMailDataDBObject.getRemoteNumberPretty();
-		
-		if(remoteNumberPretty.length() > 0) 
-		{
-			if (!contactNameCache.containsKey(remoteNumberPretty))
+			isRead = currentVoiceMailDataDBObject.isRead();
+					
+			if(isRead) 
 			{
-				contactNameCache.put(remoteNumberPretty, contactsClient.getContactName(remoteNumberPretty));
+				holder.iconVM.setImageDrawable(readIcon);
+				holder.nameView.setTypeface(Typeface.DEFAULT);
 			}
-						
-			remoteName = contactNameCache.get(remoteNumberPretty);
-		}
-		
-		if (remoteName == null) 
-		{
-			remoteName = currentVoiceMailDataDBObject.getRemoteName();
-		
-			if (remoteName == null || remoteName.length() == 0)
-			{
-				remoteName = remoteNumberPretty;
-				
-				if (remoteName == null || remoteName.length() == 0)
-				{
-					remoteName = unknownCallerString;
-				}
-			}
-		}
-		
-		holder.nameView.setText(remoteName);
-				
-		currentDayCalendar.setTimeInMillis(currentVoiceMailDataDBObject.getTime());
-		
-		holder.categoryView.setText(dateFormatter.format(currentDayCalendar.getTime()));
-		holder.timeView.setText(timeFormatter.format(currentDayCalendar.getTime()));
-		
-		transcription = currentVoiceMailDataDBObject.getTranscription();
-		
-		if (transcription.length() == 0) 
-		{
-			holder.transcriptionView.setText(currentVoiceMailDataDBObject.getDuration() + " " + secondsText);
-		}
-		else 
-		{
-			holder.transcriptionView.setText(transcription);
-		}
-		
-		holder.categoryView.setVisibility(View.VISIBLE);
-
-		if (position > 0) 
-		{
-			lastVoiceMailDataDBObject = (VoiceMailDataDBObject)getItem(position - 1);
-		
-			lastDayCalendar.setTimeInMillis(lastVoiceMailDataDBObject.getTime());
-						
-			if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) == currentDayCalendar.get(Calendar.DAY_OF_YEAR) &&
-				lastDayCalendar.get(Calendar.YEAR) == currentDayCalendar.get(Calendar.YEAR)) 
-			{
-				holder.categoryView.setVisibility(View.GONE);
-			} 
 			else 
 			{
-				holder.categoryView.setVisibility(View.VISIBLE);
+				holder.iconVM.setImageDrawable(unreadIcon);
+				holder.nameView.setTypeface(Typeface.DEFAULT_BOLD);
 			}
+	
+			remoteName = null;
+			remoteNumberPretty = currentVoiceMailDataDBObject.getRemoteNumberPretty();
+			
+			if(remoteNumberPretty.length() > 0) 
+			{
+				if (!contactNameCache.containsKey(remoteNumberPretty))
+				{
+					contactNameCache.put(remoteNumberPretty, contactsClient.getContactName(remoteNumberPretty));
+				}
+							
+				remoteName = contactNameCache.get(remoteNumberPretty);
+			}
+			
+			if (remoteName == null) 
+			{
+				remoteName = currentVoiceMailDataDBObject.getRemoteName();
+			
+				if (remoteName == null || remoteName.length() == 0)
+				{
+					remoteName = remoteNumberPretty;
+					
+					if (remoteName == null || remoteName.length() == 0)
+					{
+						remoteName = unknownCallerString;
+					}
+				}
+			}
+			
+			holder.nameView.setText(remoteName);
+					
+			currentDayCalendar.setTimeInMillis(currentVoiceMailDataDBObject.getTime());
+			
+			holder.categoryView.setText(dateFormatter.format(currentDayCalendar.getTime()));
+			holder.timeView.setText(timeFormatter.format(currentDayCalendar.getTime()));
+			
+			transcription = currentVoiceMailDataDBObject.getTranscription();
+			
+			if (transcription.length() == 0) 
+			{
+				holder.transcriptionView.setText(currentVoiceMailDataDBObject.getDuration() + " " + secondsText);
+			}
+			else 
+			{
+				holder.transcriptionView.setText(transcription);
+			}
+			
+			holder.categoryView.setVisibility(View.VISIBLE);
+	
+			if (position > 0) 
+			{
+				lastVoiceMailDataDBObject = (VoiceMailDataDBObject)getItem(position - 1);
+			
+				lastDayCalendar.setTimeInMillis(lastVoiceMailDataDBObject.getTime());
+							
+				if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) == currentDayCalendar.get(Calendar.DAY_OF_YEAR) &&
+					lastDayCalendar.get(Calendar.YEAR) == currentDayCalendar.get(Calendar.YEAR)) 
+				{
+					holder.categoryView.setVisibility(View.GONE);
+				} 
+				else 
+				{
+					holder.categoryView.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			markAsSeen(currentVoiceMailDataDBObject); 
 		}
-		
-		markAsSeen(currentVoiceMailDataDBObject); 
 		
 		return convertView;
 	}
 	
-	private void markAsSeen(final VoiceMailDataDBObject voiceMailDataDBObject) {
-		if (!voiceMailDataDBObject.isSeen()) {
-			Thread markThread = new Thread(){
+	private void markAsSeen(final VoiceMailDataDBObject voiceMailDataDBObject) 
+	{
+		if (!voiceMailDataDBObject.isSeen()) 
+		{
+			Thread markThread = new Thread()
+			{
 				public void run()
 				{
-					sipgateDBAdapter = new SipgateDBAdapter(activity);
+					try 
+					{
+						sipgateDBAdapter = new SipgateDBAdapter(activity);
 					
-					voiceMailDataDBObject.setSeen(true);
-					sipgateDBAdapter.update(voiceMailDataDBObject);
-
-					sipgateDBAdapter.close();
+						voiceMailDataDBObject.setSeen(true);
+						
+						sipgateDBAdapter.update(voiceMailDataDBObject);
+					} 
+					catch (Exception e)
+					{
+						Log.e(TAG, "markAsSeen()", e);
+					}
+					finally
+					{
+						if (sipgateDBAdapter != null)
+						{
+							sipgateDBAdapter.close();
+						}						
+					}
 				}
 			};
 			
@@ -263,11 +282,24 @@ public class VoiceMailListAdapter extends BaseAdapter
 	}
 	
 	@Override
-	public void notifyDataSetChanged() {
-		
-		sipgateDBAdapter = new SipgateDBAdapter(activity);
-		voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
-		sipgateDBAdapter.close();
+	public void notifyDataSetChanged() 
+	{
+		try
+		{
+			sipgateDBAdapter = new SipgateDBAdapter(activity);
+			voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
+		}
+		catch (Exception e) 
+		{
+			Log.e(TAG, "notifyDataSetChanged()", e);
+		}
+		finally
+		{
+			if (sipgateDBAdapter != null)
+			{
+				sipgateDBAdapter.close();
+			}
+		}
 		
 		super.notifyDataSetChanged();
 	}

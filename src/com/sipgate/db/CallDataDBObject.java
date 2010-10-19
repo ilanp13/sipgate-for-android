@@ -17,15 +17,15 @@ public class CallDataDBObject extends BaseDBObject
 	private long read = 0;
 	private long time = 0;
 		
-	private String localNumberE164 = null;
-	private String localNumberPretty = null;
-	private String localName = null;
+	private String localNumberE164 = "";
+	private String localNumberPretty = "";
+	private String localName = "";
 
-	private String remoteNumberE164 = null;
-	private String remoteNumberPretty = null;
-	private String remoteName = null;
+	private String remoteNumberE164 = "";
+	private String remoteNumberPretty = "";
+	private String remoteName = "";
 	
-	private String readModifyUrl = null;
+	private String readModifyUrl = "";
 	
 	public void bindDelete(SQLiteStatement statement)
 	{

@@ -39,7 +39,7 @@ public abstract class Constants {
 	public static final String API_BASEURL =  "https://api.sipgate.net";
 	public static final String API_10_HOSTNAME = "samurai.sipgate.net";
 	public static final String API_10_BASEURL =  "https://" + API_10_HOSTNAME;
-	public static final String API_20_HOSTNAME = "api.dev.sipgate.net";
+	public static final String API_20_HOSTNAME = "api.dev..sipgate.net";
 	public static final String API_20_BASEURL =  "http://" + API_20_HOSTNAME;
 	
 	public static final String OAUTH_REQUEST_URL = API_20_BASEURL + "/oauth/request_token";
@@ -51,7 +51,7 @@ public abstract class Constants {
 	public static final String EVENT_URL = XML_BASEURL + "/events/?complexity=full";
 	public static final String VOICEMAILREAD_URL = XML_BASEURL + "/events/voicemails/%s/read";
 	public static final String EXTENSION_URL = XML_BASEURL + "/settings/extensions/";
-	//public static final String XML_URL = "http://samurai01.dev.sipgate.net:8080/my/events/voicemails/?complexity=full";
+//  public static final String XML_URL = "http://samurai01.dev.sipgate.net:8080/my/events/voicemails/?complexity=full";
 
 //	public static final String OAUTH_POSSIBLE_AUTHORIZATION_URL_COM = "https://secure.dev.sipgate.com/oauth/authorize/";
 //	public static final String OAUTH_POSSIBLE_AUTHORIZATION_URL_DE = "https://secure.dev.sipgate.de/oauth/authorize/";
