@@ -18,6 +18,7 @@ public abstract class Constants {
 	public static final String API_BASEURL =  "https://api.sipgate.net";
 	public static final String API_10_HOSTNAME = "samurai.sipgate.net";
 	public static final String API_10_BASEURL =  "https://" + API_10_HOSTNAME;
+
 	public static final String API_20_HOSTNAME = "api.sipgate.net";
 	public static final String API_20_BASEURL =  "https://" + API_20_HOSTNAME;
 	

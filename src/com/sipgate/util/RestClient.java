@@ -11,11 +11,16 @@ import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import android.util.Log;
 
@@ -31,6 +36,8 @@ import com.sipgate.interfaces.RestAuthenticationInterface;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
+import com.sipgate.parser.CallParser;
+import com.sipgate.parser.VoiceMailParser;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
 public class RestClient implements ApiClientInterface {
@@ -56,12 +63,35 @@ public class RestClient implements ApiClientInterface {
 	private int length = 0;
 	private int subLength = 0;
 	
+	private SAXParser saxParser = null;
+	private CallParser callParser = null;
+	private VoiceMailParser voiceMailParser = null;
+	
 	public RestClient(String username, String password) 
 	{
 		super();
 		
 		dbf = DocumentBuilderFactory.newInstance();
 		authenticationInterface = new BasicAuthenticationClient(username, password);
+		
+		try 
+		{
+			saxParser = SAXParserFactory.newInstance().newSAXParser();
+			callParser = new CallParser();
+			voiceMailParser = new VoiceMailParser();
+		}
+		catch (ParserConfigurationException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (SAXException e) 
+		{
+			e.printStackTrace();
+		}
+		catch (FactoryConfigurationError e) 
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public SipgateBalanceData getBillingBalance() throws ApiException 
@@ -166,129 +196,42 @@ public class RestClient implements ApiClientInterface {
 
 	public Vector<CallDataDBObject> getCalls() throws ApiException
 	{
-		try {
+		try 
+		{
 			inputStream = authenticationInterface.getCalls();
 		}
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
-		if (inputStream == null) {
+		if (inputStream == null) 
+		{
 			Log.e(TAG, "getCalls() -> inputstream is null");
 			return null;
 		}
-		
-		Vector<CallDataDBObject> callDataDBObjects = new Vector<CallDataDBObject>();
-		
-		// process stream from API
-		try {
-			db = dbf.newDocumentBuilder();
-			doc = db.parse(inputStream);
-			doc.getDocumentElement().normalize();
-			
-			nodeList = doc.getElementsByTagName("call");
-			
-			CallDataDBObject callDataDBObject = null;
-			
-			Element sourceEndpoint = null;
-			String sourceName = null;
-			String sourceNumberPretty = null;
-			String sourceNumberE164 = null;
-			
-			Element targetEndpoint = null;
-			String targetName = null;
-			String targetNumberPretty = null;
-			String targetNumberE164 = null;
-			
-			String direction = null;
-			
-			Element readStatus = null;
-			
-			length = nodeList.getLength();
-			
-			for (int s = 0; s < length && s < 50; s++) {
-				node = nodeList.item(s);
-				if (node.getNodeType() == Node.ELEMENT_NODE) {
-					element = (Element) node;
-					
-					callDataDBObject = new CallDataDBObject();
-					
-					sourceEndpoint = getNodeById(getNodeById(element, "sources"), "endpoint");
-					sourceName = getElementById(sourceEndpoint, "contactFN");
-					sourceName = (sourceName != null) ? sourceName : "";
-					sourceNumberPretty = getElementById(sourceEndpoint, "numberPretty");
-					sourceNumberPretty = (sourceNumberPretty != null) ? sourceNumberPretty : "";
-					sourceNumberE164 = getElementById(sourceEndpoint, "numberE164");
-					sourceNumberE164 = (sourceNumberE164 != null) ? sourceNumberE164 : "";
-					
-					targetEndpoint = getNodeById(getNodeById(element, "targets"), "endpoint");
-					targetName = getElementById(targetEndpoint, "contactFN");
-					targetName = (targetName != null) ? targetName : "";
-					targetNumberPretty = getElementById(targetEndpoint, "numberPretty");
-					targetNumberPretty = (targetNumberPretty != null) ? targetNumberPretty : "";
-					targetNumberE164 = getElementById(targetEndpoint, "numberE164");
-					targetNumberE164 = (targetNumberE164 != null) ? targetNumberE164 : "";
-					
-					callDataDBObject.setId(Long.parseLong(getElementById(element, "id")));
-					
-					direction = getElementById(element, "direction");
 
-					if(direction.equals("incoming")){
-						callDataDBObject.setMissed(false);
-						callDataDBObject.setDirection(CallDataDBObject.INCOMING);
-						callDataDBObject.setLocalNumberE164(targetNumberE164);
-						callDataDBObject.setLocalNumberPretty(targetNumberPretty);
-						callDataDBObject.setLocalName(targetName);
-						callDataDBObject.setRemoteNumberE164(sourceNumberE164);
-						callDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
-						callDataDBObject.setRemoteName(sourceName);
-					}
-					else if(direction.equals("missed_incoming")){
-						callDataDBObject.setMissed(true);
-						callDataDBObject.setDirection(CallDataDBObject.INCOMING);
-						callDataDBObject.setLocalNumberE164(targetNumberE164);
-						callDataDBObject.setLocalNumberPretty(targetNumberPretty);
-						callDataDBObject.setLocalName(targetName);
-						callDataDBObject.setRemoteNumberE164(sourceNumberE164);
-						callDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
-						callDataDBObject.setRemoteName(sourceName);
-					}
-					else if(direction.equals("outgoing")){
-						callDataDBObject.setMissed(false);
-						callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
-						callDataDBObject.setRemoteNumberE164(targetNumberE164);
-						callDataDBObject.setRemoteNumberPretty(targetNumberPretty);
-						callDataDBObject.setRemoteName(targetName);
-						callDataDBObject.setLocalNumberE164(sourceNumberE164);
-						
-						callDataDBObject.setLocalNumberPretty(sourceNumberPretty);
-						callDataDBObject.setLocalName(sourceName);
-					}
-					else if(direction.equals("missed_outgoing")){
-						callDataDBObject.setMissed(true);
-						callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
-						callDataDBObject.setRemoteNumberE164(targetNumberE164);
-						callDataDBObject.setRemoteNumberPretty(targetNumberPretty);
-						callDataDBObject.setRemoteName(targetName);
-						callDataDBObject.setLocalNumberE164(sourceNumberE164);
-						callDataDBObject.setLocalNumberPretty(sourceNumberPretty);
-						callDataDBObject.setLocalName(sourceName);
-					}
-					
-					callDataDBObject.setTime(getCallTime(getElementById(element, "created")));
-					
-					readStatus = getNodeById(element, "read");
-					callDataDBObject.setRead(getElementById(readStatus, "value"));
-					callDataDBObject.setReadModifyUrl(getElementById(readStatus, "modify"));
-					
-					callDataDBObjects.add(callDataDBObject);
-				}
+		if (callParser != null && saxParser != null)
+		{
+			callParser.init();
+			
+			try 
+			{
+				saxParser.parse(inputStream, callParser);
+				return callParser.getCallDataDBObjects();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			catch (SAXException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
 		}
 		
-		return callDataDBObjects;
+		Log.e(TAG, "getCalls() -> saxParser or callParser is null");
+		return null;
 	}
 	
 	public String getBaseProductType() throws IOException, URISyntaxException
@@ -426,7 +369,6 @@ public class RestClient implements ApiClientInterface {
 			node = nodeList.item(0);
 			
 			nodeList = node.getChildNodes();
-			
 
 			length = nodeList.getLength();
 			
@@ -458,102 +400,42 @@ public class RestClient implements ApiClientInterface {
 
 	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException
 	{
-		try {
+		try 
+		{
 			inputStream = authenticationInterface.getVoiceMails();
-		} catch (Exception e) {
+		}
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
-		if (inputStream == null) {
+		if (inputStream == null) 
+		{
 			Log.e(TAG, "getVoiceMails() -> inputstream is null");
 			return null;
 		}
-		
-		Vector<VoiceMailDataDBObject> voiceMailDataDBObjects = new Vector<VoiceMailDataDBObject>();
-		
-		// process stream from API
-		try {
-			db = dbf.newDocumentBuilder();
-			doc = db.parse(inputStream);
-			doc.getDocumentElement().normalize();
+	
+		if (voiceMailParser != null && saxParser != null)
+		{
+			voiceMailParser.init();
 			
-			nodeList = doc.getElementsByTagName("voicemail");
-			
-			VoiceMailDataDBObject voiceMailDataDBObject = null;
-			
-			Element sourceEndpoint = null;
-			String sourceName = null;
-			String sourceNumberPretty = null;
-			String sourceNumberE164 = null;
-			
-			Element targetEndpoint = null;
-			String targetName = null;
-			String targetNumberPretty = null;
-			String targetNumberE164 = null;
-			
-			String transcription = null;
-			
-			Element readStatus = null;
-			Element content = null;
-			
-			length = nodeList.getLength();
-			
-			for (int s = 0; s < length && s < 50; s++) {
-				node = nodeList.item(s);
-				if (node.getNodeType() == Node.ELEMENT_NODE) {
-					element = (Element) node;
-					
-					voiceMailDataDBObject = new VoiceMailDataDBObject();
-					
-					sourceEndpoint = getNodeById(getNodeById(element, "sources"), "endpoint");
-					sourceName = getElementById(sourceEndpoint, "contactFN");
-					sourceName = (sourceName != null) ? sourceName : "";
-					sourceNumberPretty = getElementById(sourceEndpoint, "numberPretty");
-					sourceNumberPretty = (sourceNumberPretty != null) ? sourceNumberPretty : "";
-					sourceNumberE164 = getElementById(sourceEndpoint, "numberE164");
-					sourceNumberE164 = (sourceNumberE164 != null) ? sourceNumberE164 : "";
-					
-					targetEndpoint = getNodeById(getNodeById(element, "targets"), "endpoint");
-					targetName = getElementById(targetEndpoint, "contactFN");
-					targetName = (targetName != null) ? targetName : "";
-					targetNumberPretty = getElementById(targetEndpoint, "numberPretty");
-					targetNumberPretty = (targetNumberPretty != null) ? targetNumberPretty : "";
-					targetNumberE164 = getElementById(targetEndpoint, "numberE164");
-					targetNumberE164 = (targetNumberE164 != null) ? targetNumberE164 : "";
-					
-					readStatus = getNodeById(element, "read");
-					content = getNodeById(element, "content");
-										
-					voiceMailDataDBObject.setId(Long.parseLong(getElementById(element, "id")));
-		
-					voiceMailDataDBObject.setRead(getElementById(readStatus, "value"));
-					voiceMailDataDBObject.setTime(getCallTime(getElementById(element, "created")));
-					voiceMailDataDBObject.setDuration(Long.parseLong(getElementById(element, "duration")));
-														
-					voiceMailDataDBObject.setLocalNumberE164(targetNumberE164);
-					voiceMailDataDBObject.setLocalNumberPretty(targetNumberPretty);
-					voiceMailDataDBObject.setLocalName(targetName);
-					
-					voiceMailDataDBObject.setRemoteNumberE164(sourceNumberE164);
-					voiceMailDataDBObject.setRemoteNumberPretty(sourceNumberPretty);
-					voiceMailDataDBObject.setRemoteName(sourceName);
-				
-					transcription = getElementById(element, "transcription");
-					transcription = (transcription != null) ? transcription : "";
-					voiceMailDataDBObject.setTranscription(transcription);
-										
-					voiceMailDataDBObject.setContentUrl(getElementById(content, "get"));
-					voiceMailDataDBObject.setLocalFileUrl("");
-					voiceMailDataDBObject.setReadModifyUrl(getElementById(readStatus, "modify"));
-					
-					voiceMailDataDBObjects.add(voiceMailDataDBObject);
-				}
+			try 
+			{
+				saxParser.parse(inputStream, voiceMailParser);
+				return voiceMailParser.getVoiceMailDataDBObjects();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			catch (SAXException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
 		}
 		
-		return voiceMailDataDBObjects;
+		Log.e(TAG, "getVoiceMails() -> saxParser or voiceMails is null");
+		return null;
 	}
 	
 	public boolean connectivityOk() throws ApiException, NetworkProblemException 

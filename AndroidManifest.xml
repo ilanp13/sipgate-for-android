@@ -19,7 +19,7 @@
 		/////////////////////////////////////////////////////////////////////
 	-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.sipgate" android:versionCode="161" android:versionName="1.6 beta 1">
+	package="com.sipgate" android:versionCode="162" android:versionName="1.6 beta 2">
 	<uses-sdk android:minSdkVersion="3" />
 <!-- 
 	<supports-screens 
