@@ -61,7 +61,7 @@
 <string name="auto_disabled">Auto-Answer off</string>
 <string name="hint">Called Party Address</string>
 <string name="empty">Please enter a phone number</string>
-<string name="notfast">No suitable data network available</string>
+<string name="notfast">No SIP network available, would you like to initiate a direct call?</string>
 
 <string name="settings_account">SIP Account Settings</string>
 <string name="settings_username">Authorization Username</string>
@@ -152,19 +152,6 @@
 <string name="yes">Yes</string>
 <string name="no">No</string>
 <string name="dontask">Don\'t ask me again</string>
-
-<string name="settings_pref">Preferred Call Type</string>
-<string name="settings_pref2">Override by adding \'+\' behind a number in Dialer, or by selecting \'text to\' in Contacts</string>
-    <string-array name="pref_display_values">
-        <item>sipgate only</item>
-        <item>sipgate, when available</item>
-        <item>Phone</item>
-    </string-array>
-    <string-array name="pref_values">
-        <item>SIPONLY</item>
-        <item>SIP</item>
-        <item>PSTN</item>
-    </string-array>
 <string name="settings_compression">Voice Compression</string>
     <string-array name="compression_display_values">
         <item>Only over WLAN</item>

@@ -164,9 +164,6 @@ public class XmlrpcClient implements ApiClientInterface {
 		HashMap<String, Object> ownUriSet = null;
 		SipgateOwnUri ownUriDataTmp = null;
 		
-		ArrayList<String> inList = new ArrayList<String>();
-		ArrayList<String> tosList = new ArrayList<String>();
-		
 		for (Object ownUriSetObject : ownUriList) 
 		{
 			ownUriSet = (HashMap<String, Object>) ownUriSetObject;
@@ -177,9 +174,10 @@ public class XmlrpcClient implements ApiClientInterface {
 
 			Object[] inListObject = (Object[]) ownUriSet.get("E164In");
 			
-			inList.clear();
+			ArrayList<String> inList = new ArrayList<String>();
 			
-			for (Object inObject : inListObject) {
+			for (Object inObject : inListObject) 
+			{
 				inList.add((String) inObject);
 			}
 			
@@ -187,9 +185,10 @@ public class XmlrpcClient implements ApiClientInterface {
 
 			Object[] tosListObject = (Object[]) ownUriSet.get("TOS");
 			
-			tosList.clear();
+			ArrayList<String> tosList = new ArrayList<String>();
 			
-			for (Object tosObject : tosListObject) {
+			for (Object tosObject : tosListObject) 
+			{
 				tosList.add((String) tosObject);
 			}
 			
@@ -394,6 +393,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		// request credentials for all sip-uris
 		ArrayList<String> requestedUris = new ArrayList<String>();
 		HashMap<String, String> uriToAlias = new HashMap<String, String>();
+		
 		for (SipgateOwnUri sipgateOwnUri : ownUris) {
 			if (sipgateOwnUri.getTos().contains("voice")) {
 				requestedUris.add(sipgateOwnUri.getSipUri());

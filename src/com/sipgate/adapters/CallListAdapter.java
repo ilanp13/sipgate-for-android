@@ -20,6 +20,9 @@ import android.widget.TextView;
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.exceptions.ApiException;
+import com.sipgate.exceptions.FeatureNotAvailableException;
+import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;
@@ -138,7 +141,7 @@ public class CallListAdapter extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent) 
 	{
 		if (convertView == null) 
-		{
+		{sipgateDBAdapter = new SipgateDBAdapter(activity);
 			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 			holder = new CallViewHolder();
 			holder.callerNameView = (TextView) convertView.findViewById(R.id.CallerNameTextView);
@@ -276,13 +279,13 @@ public class CallListAdapter extends BaseAdapter
 				{
 					try 
 					{
+						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+						
 						sipgateDBAdapter = new SipgateDBAdapter(activity);
 					
 						callDataDBObject.setRead(true);
 						
 						sipgateDBAdapter.update(callDataDBObject);
-					
-						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
 					} 
 					catch (Exception e)
 					{

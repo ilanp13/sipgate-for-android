@@ -16,7 +16,7 @@
 	<string name="simple_settings_balance">Guthaben</string>
 	<string name="simple_settings_wlan">VoIP via WLAN</string>
 	<string name="simple_settings_3g">VoIP via 3G</string>
-	<string name="simple_settings_advanced">Profi-Einstellungen</string>
+	<string name="simple_settings_advanced">Experten-Einstellungen</string>
 	<string name="dateTimeFormatForDay">dd.MM.yyyy</string>
    	<string name="dateTimeFormatForTime">HH:mm</string>
    	<string name="refresh">aktualisieren</string>

@@ -221,19 +221,27 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			Thread markThread = new Thread(){
 				public void run()
 				{
-					sipgateDBAdapter = new SipgateDBAdapter(activity);
-					
-					voiceMailDataDBObject.setRead(true);
-					sipgateDBAdapter.update(voiceMailDataDBObject);
-
-					sipgateDBAdapter.close();
-					
-					try {
+					try 
+					{
 						apiClient.setVoiceMailRead(voiceMailDataDBObject.getReadModifyUrl());
+						
+						sipgateDBAdapter = new SipgateDBAdapter(activity);
+					
+						voiceMailDataDBObject.setRead(true);
+						
+						sipgateDBAdapter.update(voiceMailDataDBObject);
 					} 
-					catch (Exception e) {
-						e.printStackTrace();
-					} 
+					catch (Exception e)
+					{
+						Log.e(TAG, "markAsRead()", e);
+					}
+					finally
+					{
+						if (sipgateDBAdapter != null)
+						{
+							sipgateDBAdapter.close();
+						}						
+					}
 				}
 			};
 			

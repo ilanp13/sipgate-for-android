@@ -34,6 +34,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -236,6 +237,8 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		this.vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 		final Context mContext = this;
+
+		/*
 		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Settings.PREF_MESSAGE, Settings.DEFAULT_MESSAGE)) {
 			
 		} else if (PreferenceManager.getDefaultSharedPreferences(this).getString(Settings.PREF_PREF, Settings.DEFAULT_PREF).equals(Settings.VAL_PREF_PSTN) &&
@@ -262,29 +265,53 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	                    }
 	                })
 				.show();
+				
+		*/
 	}
 	
 	void call_menu()
 	{
-		String target = this.numberToDial;
+		final String target = this.numberToDial;
+		
 		if (m_AlertDlg != null) 
 		{
 			m_AlertDlg.cancel();
 		}
+		
 		if (target.length() == 0)
+		{
 			m_AlertDlg = new AlertDialog.Builder(this)
-				.setMessage(R.string.empty)
-				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
-				.setCancelable(true)
-				.show();
+			.setMessage(R.string.empty)
+			.setTitle(R.string.app_name)
+			.setIcon(R.drawable.icon22)
+			.setCancelable(true)
+			.show();
+		}
 		else if (!Receiver.engine(this).call(target))
+		{
 			m_AlertDlg = new AlertDialog.Builder(this)
-				.setMessage(R.string.notfast)
-				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
-				.setCancelable(true)
-				.show();
+							.setMessage(R.string.notfast)
+							.setTitle(R.string.app_name)
+							.setIcon(R.drawable.icon22)
+							.setCancelable(false)
+					        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() 
+					        {
+					           public void onClick(DialogInterface dialog, int id) 
+					           {
+					        		Intent intent = new Intent(Intent.ACTION_CALL, Uri.fromParts("tel", Uri.decode(target), null));
+						   		    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						   		    startActivity(intent);
+					           }
+					        })
+					        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() 
+					        {
+					           public void onClick(DialogInterface dialog, int id) 
+					           {
+					                dialog.cancel();
+					           }
+					        })
+							.show();
+		}			
 	}
 
 	public static boolean on(Context context) {
@@ -469,25 +496,25 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		
 		float size = 0;
 		float height = 0;
+	
+		/*
+		 * TODO FIXME! I am realy buggy!!!
+		 *
 		do {
 			size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
 			if(size>(this.txtCallee.getWidth()-100)) {
-				this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) .99));
-				//this.txtCallee.scrollTo((int)size-this.txtCallee.getWidth()+100,0);
+				this.txtCallee.setTextSize((float)(this.txtCallee.getTextSize() * ((float) .99)));
 			}
 		} while (size>(this.txtCallee.getWidth()-100));
-		if (!numberToDial.equals("")) {
-			do {
-				size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
-				height = this.txtCallee.getTextSize();
-				if(size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize) {
-					this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) 1.01));
-					//this.txtCallee.scrollTo(0,0);
-				}
-			} while (size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize); 
-		} else {
-			this.txtCallee.setTextSize(this.txtSize);
-		}
+		
+		do {
+			size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
+			height = this.txtCallee.getTextSize();
+			if(size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize) {
+				this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) 1.01));
+			}
+		} while (size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize); 
+		*/
 	}
 	
 	private void crackButtons() {

@@ -22,6 +22,8 @@ package com.sipgate.sipua.ui;
 
 import org.sipdroid.media.RtpStreamReceiver;
 
+import com.sipgate.ui.CallListActivity;
+
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -31,7 +33,6 @@ import android.os.IBinder;
 
 public class RegisterService extends Service {
 	Receiver m_receiver;
-	Caller m_caller;
 	
     public void onDestroy() {
 		super.onDestroy();
@@ -40,7 +41,7 @@ public class RegisterService extends Service {
 			m_receiver = null;
 		}
 		Receiver.alarm(0, OneShotAlarm2.class);
-	}
+    }
     
     @Override
     public void onCreate() {

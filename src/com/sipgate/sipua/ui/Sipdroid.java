@@ -194,6 +194,7 @@ public class Sipdroid extends Activity {
 		setAccountString();
 
 		final Context mContext = this;
+		/*
 		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Settings.PREF_MESSAGE, Settings.DEFAULT_MESSAGE)) {
 //			new AlertDialog.Builder(this)
 //				.setMessage(R.string.dialog_message)
@@ -218,6 +219,7 @@ public class Sipdroid extends Activity {
 //	                    }
 //	                })
 //				.show();
+				/*
 		} else if (PreferenceManager.getDefaultSharedPreferences(this).getString(Settings.PREF_PREF, Settings.DEFAULT_PREF).equals(Settings.VAL_PREF_PSTN) &&
 				!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Settings.PREF_NODEFAULT, Settings.DEFAULT_NODEFAULT))
 			new AlertDialog.Builder(this)
@@ -242,6 +244,7 @@ public class Sipdroid extends Activity {
 	                    }
 	                })
 				.show();
+				*/
 	}
 
 	protected void setAccountString() {

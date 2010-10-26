@@ -21,6 +21,7 @@ public class VoiceMailParser extends DefaultHandler
 
 	private StringBuffer currentValue = null;
 	private String parent = null;
+	private String location = null;
 	
 	public VoiceMailParser()
 	{
@@ -33,6 +34,7 @@ public class VoiceMailParser extends DefaultHandler
 		voiceMailDataDBObjects.clear();
 		currentValue.setLength(0);
 		parent = null;
+		location = null;
 	}
 	
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
@@ -55,7 +57,10 @@ public class VoiceMailParser extends DefaultHandler
 	{
 		if ("voicemail".equalsIgnoreCase(localName))
 		{
-			voiceMailDataDBObjects.add(voiceMailDataDBObject);
+			if (!location.equalsIgnoreCase("trash"))
+			{
+				voiceMailDataDBObjects.add(voiceMailDataDBObject);
+			}
 		}
 		else if ("id".equalsIgnoreCase(localName))
 		{
@@ -81,6 +86,10 @@ public class VoiceMailParser extends DefaultHandler
 			{
 				voiceMailDataDBObject.setReadModifyUrl(currentValue.toString());
 			}
+		}
+		else if ("location".equalsIgnoreCase(localName))
+		{
+			location = currentValue.toString();
 		}
 		else if ("numberE164".equalsIgnoreCase(localName))
 		{

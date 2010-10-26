@@ -35,6 +35,8 @@ import com.sipgate.sipua.phone.Call;
 import com.sipgate.sipua.phone.CallCard;
 import com.sipgate.sipua.phone.Phone;
 import com.sipgate.sipua.phone.SlidingCardManager;
+import com.sipgate.ui.CallListActivity;
+import com.sipgate.ui.SipgateFrames;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -136,11 +138,18 @@ public class InCallScreen extends CallScreen implements View.OnClickListener {
 	}
 	
 	void moveBack() {
+		/*
+		* FIXED 4 STORY 23.9
+		*/
+		
+		/*
 		if (Receiver.ccConn != null && !Receiver.ccConn.isIncoming()) {
 			// after an outgoing call don't fall back to the contact
 			// or call log because it is too easy to dial accidentally from there
-	        startActivity(Receiver.createHomeIntent());
+			startActivity(Receiver.createHomeIntent());
 		}
+		*/
+		
 		onStop();
 	}
 	

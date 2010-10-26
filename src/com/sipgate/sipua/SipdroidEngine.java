@@ -320,7 +320,7 @@ public class SipdroidEngine implements RegisterAgentListener {
 		Log.d("Calling",target_url);
 		if (!isRegistered() || !Receiver.isFast()) {
 			if (PreferenceManager.getDefaultSharedPreferences(getUIContext()).getBoolean(Settings.PREF_CALLBACK, Settings.DEFAULT_CALLBACK) &&
-					PreferenceManager.getDefaultSharedPreferences(getUIContext()).getString(Settings.PREF_POSURL, Settings.DEFAULT_POSURL).length() > 0) {
+				PreferenceManager.getDefaultSharedPreferences(getUIContext()).getString(Settings.PREF_POSURL, Settings.DEFAULT_POSURL).length() > 0) {
 				Receiver.url("n="+Uri.decode(target_url));
 				return true;
 			}

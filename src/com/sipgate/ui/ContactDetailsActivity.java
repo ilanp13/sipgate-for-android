@@ -14,7 +14,9 @@ import com.sipgate.util.PhoneNumberFormatter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -237,18 +239,43 @@ public class ContactDetailsActivity extends Activity implements
 		call_menu(dialnumber);
 	}
 
-	void call_menu(String target) {
-		if (m_AlertDlg != null) {
+	void call_menu(final String target) 
+	{
+		if (m_AlertDlg != null) 
+		{
 			m_AlertDlg.cancel();
 		}
+		
 		if (target.length() == 0)
-			m_AlertDlg = new AlertDialog.Builder(this).setMessage(
+		{	m_AlertDlg = new AlertDialog.Builder(this).setMessage(
 					R.string.empty).setTitle(R.string.app_name).setIcon(
 					R.drawable.icon22).setCancelable(true).show();
+		}
 		else if (!Receiver.engine(this).call(target))
-			m_AlertDlg = new AlertDialog.Builder(this).setMessage(
-					R.string.notfast).setTitle(R.string.app_name).setIcon(
-					R.drawable.icon22).setCancelable(true).show();
+		{
+			m_AlertDlg = new AlertDialog.Builder(this)
+			.setMessage(R.string.notfast)
+			.setTitle(R.string.app_name)
+			.setIcon(R.drawable.icon22)
+			.setCancelable(false)
+	        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() 
+	        {
+	           public void onClick(DialogInterface dialog, int id) 
+	           {
+	        		Intent intent = new Intent(Intent.ACTION_CALL, Uri.fromParts("tel", Uri.decode(target), null));
+		   		    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		   		    startActivity(intent);
+	           }
+	        })
+	        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() 
+	        {
+	           public void onClick(DialogInterface dialog, int id) 
+	           {
+	                dialog.cancel();
+	           }
+	        })
+			.show();
+		}
 	}
 
 }

@@ -5,19 +5,22 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.sipgate.R;
 import com.sipgate.adapters.CallListAdapter;
@@ -58,8 +61,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
         
         elementList.setAdapter(callListAdapter);
         elementList.setOnItemClickListener(this);
-               
-	}
+    }
 	
 	@Override
 	protected void onResume() {
@@ -182,7 +184,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		return result;
 	}
 	
-	private void call_menu(String target)
+	private void call_menu(final String target)
 	{
 		if (m_AlertDlg != null) 
 		{
@@ -202,11 +204,27 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		else if (!Receiver.engine(this).call(target))
 		{
 			m_AlertDlg = new AlertDialog.Builder(this)
-				.setMessage(R.string.notfast)
-				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
-				.setCancelable(true)
-				.show();
+			.setMessage(R.string.notfast)
+			.setTitle(R.string.app_name)
+			.setIcon(R.drawable.icon22)
+			.setCancelable(false)
+	        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() 
+	        {
+	           public void onClick(DialogInterface dialog, int id) 
+	           {
+	        		Intent intent = new Intent(Intent.ACTION_CALL, Uri.fromParts("tel", Uri.decode(target), null));
+		   		    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		   		    startActivity(intent);
+	           }
+	        })
+	        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() 
+	        {
+	           public void onClick(DialogInterface dialog, int id) 
+	           {
+	                dialog.cancel();
+	           }
+	        })
+			.show();		
 		}
 	}	
 	
