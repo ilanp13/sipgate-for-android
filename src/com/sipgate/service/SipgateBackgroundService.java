@@ -9,6 +9,7 @@ import java.util.Vector;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,7 +38,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 	public static final int REQUEST_NEWEVENTS = 0;
 
 	private static final long CALLLIST_REFRESH_INTERVAL = 60000;
-	private static final long VOICEMAIL_REFRESH_INTERVAL = 60000*3;
+	private static final long VOICEMAIL_REFRESH_INTERVAL = 60000;
 		
 	private static final String TAG = "SipgateBackgroundService";
 	
@@ -53,6 +54,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 	private ApiServiceProvider apiClient = null;
 	
 	private SipgateDBAdapter sipgateDBAdapter = null;
+	
 	private CallDataDBObject oldCallDataDBObject = null;
 	private VoiceMailDataDBObject oldVoiceMailDataDBObject = null;
 	
@@ -119,7 +121,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 		if (voiceMailRefreshTimer != null){
 			Log.d(TAG,"voiceMailRefreshTimer.cancel");
 			voiceMailRefreshTimer.cancel();
-		}		
+		}			
 		
 		if (callListRefreshTimer != null){
 			Log.d(TAG,"callListRefreshTimer.cancel");
@@ -150,7 +152,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 		Log.v(TAG, "refreshVoicemailEvents() -> start");
 		
 		try {
-			notifyIfUnreadsVoiceMails(apiClient.getVoiceMails());
+			notifyIfUnreadsVoiceMails(apiClient.getVoiceMails(), this);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -183,11 +185,11 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.1
 	 */
 	
-	private void notifyIfUnreadsVoiceMails(Vector<VoiceMailDataDBObject> voiceMailDataDBObjects) 
+	public void notifyIfUnreadsVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context ctx) 
 	{
 		Log.d(TAG, "notifyIfUnreadVoiceMails");
 		
-		if (voiceMailDataDBObjects == null)
+		if (newVoiceMailDataDBObjects == null)
 		{
 			Log.i(TAG, "notifyIfUnreadVoiceMails() -> voiceMailDataDBObjects is null");
 			return;
@@ -197,34 +199,56 @@ public class SipgateBackgroundService extends Service implements EventService {
 		
 		try
 		{
-			sipgateDBAdapter = new SipgateDBAdapter(this);
-
-			oldVoiceMailDataDBObject = null;
-					
-			for (VoiceMailDataDBObject currentVoiceMailDataDBObject : voiceMailDataDBObjects) 
+			sipgateDBAdapter = new SipgateDBAdapter(ctx);
+			
+			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
+			
+			sipgateDBAdapter.startTransaction();
+			
+			for (VoiceMailDataDBObject oldVoiceMailDataDBObject : oldVoiceMailDataDBObjects) 
 			{
-				oldVoiceMailDataDBObject = sipgateDBAdapter.getVoiceMailDataDBObjectById(currentVoiceMailDataDBObject.getId());
-	
-				if (oldVoiceMailDataDBObject != null)
+				if (!newVoiceMailDataDBObjects.contains(oldVoiceMailDataDBObject))
 				{
-					currentVoiceMailDataDBObject.setLocalFileUrl(oldVoiceMailDataDBObject.getLocalFileUrl());
-					currentVoiceMailDataDBObject.setSeen(oldVoiceMailDataDBObject.getSeen());
+					sipgateDBAdapter.delete(oldVoiceMailDataDBObject);
 				}
-				
-				if (!currentVoiceMailDataDBObject.isRead() && !currentVoiceMailDataDBObject.isSeen())
+			}
+					
+			for (VoiceMailDataDBObject newVoiceMailDataDBObject : newVoiceMailDataDBObjects) 
+			{
+				if (oldVoiceMailDataDBObjects.contains(newVoiceMailDataDBObject))
+				{	
+					oldVoiceMailDataDBObject = oldVoiceMailDataDBObjects.elementAt(oldVoiceMailDataDBObjects.indexOf(newVoiceMailDataDBObject));
+										
+					newVoiceMailDataDBObject.setSeen(oldVoiceMailDataDBObject.getSeen());
+					
+					sipgateDBAdapter.update(newVoiceMailDataDBObject);
+
+					if (!newVoiceMailDataDBObject.isRead() && !newVoiceMailDataDBObject.isSeen())
+					{
+						unreadCounter++;
+					}
+				}
+				else
 				{
-					unreadCounter++;
+					sipgateDBAdapter.insert(newVoiceMailDataDBObject);
+					
+					if (!newVoiceMailDataDBObject.isRead())
+					{
+						unreadCounter++;
+					}
 				}
-				
-				oldVoiceMailDataDBObject = null;
 			}
 			
-			sipgateDBAdapter.deleteAllVoiceMailDBObjects();
-			sipgateDBAdapter.insertAllVoiceMailDBObjects(voiceMailDataDBObjects);
+			sipgateDBAdapter.commitTransaction();
 		}
 		catch (Exception e)
 		{
 			Log.e(TAG, "notifyIfUnreadsVoiceMails()", e);
+			
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction())
+			{
+				sipgateDBAdapter.rollbackTransaction();
+			}
 		}
 		finally
 		{
@@ -265,7 +289,7 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 * @since 1.1
 	 */
 	
-	private void notifyIfUnreadsCalls(Vector<CallDataDBObject> callDataDBObjects) 
+	public void notifyIfUnreadsCalls(Vector<CallDataDBObject> callDataDBObjects) 
 	{
 		Log.d(TAG, "notifyIfUnreadCalls");
 		
@@ -354,7 +378,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 */
 	private void createNewVoiceMailNotification(int unreadCounter) 
 	{
-		notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.statusbar_voicemai_48, buildVoicemailNotificationString(unreadCounter));
+		if (notifyClient != null)
+		{
+			notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.statusbar_voicemai_48, buildVoicemailNotificationString(unreadCounter));
+		}
 	}
 	
 	/**
@@ -364,9 +391,11 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 */
 	private void createNewCallNotification(int unreadCounter) 
 	{
-		notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
+		if (notifyClient != null)
+		{
+			notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
+		}
 	}
-	
 	
 	/**
 	 * 
@@ -375,7 +404,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 */
 	private void removeNewCallNotification() 
 	{
-		notifyClient.deleteNotification(NotificationClient.NotificationType.CALL);
+		if (notifyClient != null)
+		{
+			notifyClient.deleteNotification(NotificationClient.NotificationType.CALL);
+		}
 	}
 	
 	/**
@@ -385,7 +417,10 @@ public class SipgateBackgroundService extends Service implements EventService {
 	 */
 	private void removeNewVoiceMailNotification() 
 	{
-		notifyClient.deleteNotification(NotificationClient.NotificationType.VOICEMAIL);
+		if (notifyClient != null)
+		{
+			notifyClient.deleteNotification(NotificationClient.NotificationType.VOICEMAIL);
+		}
 	}
 	
 	/**

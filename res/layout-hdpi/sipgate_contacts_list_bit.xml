@@ -16,7 +16,7 @@
 			android:orientation="horizontal" android:layout_height="wrap_content"
 			android:layout_width="fill_parent" android:padding="5dp">
 			<ImageView android:id="@+id/contactPhoto" android:src="@drawable/ic_contact_picture"
-				android:layout_height="82dp" android:layout_width="82dp"
+				android:layout_height="54dp" android:layout_width="54dp"
 				android:scaleType="fitXY" />
 			<TextView android:id="@+id/contactName" android:text="Vorname Nachname"
 				android:textColor="#FFFFFF" android:layout_width="wrap_content"

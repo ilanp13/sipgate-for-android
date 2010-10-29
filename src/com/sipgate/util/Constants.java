@@ -34,13 +34,13 @@ public abstract class Constants {
 	public static String ACCESS_TOKEN = "";
 	public static String OAUTH_TOKEN_SECRET = "";
 
-	public static final String API_VERSION_SUFFIX = "version=2.17";  // TODO FIXME
+	public static final String API_VERSION_SUFFIX = "version=2.18";  // TODO FIXME
 
 	public static final String API_BASEURL =  "https://api.sipgate.net";
 	public static final String API_10_HOSTNAME = "samurai.sipgate.net";
 	public static final String API_10_BASEURL =  "https://" + API_10_HOSTNAME;
-	public static final String API_20_HOSTNAME = "api.dev..sipgate.net";
-	public static final String API_20_BASEURL =  "http://" + API_20_HOSTNAME;
+	public static final String API_20_HOSTNAME = "api.sipgate.net";
+	public static final String API_20_BASEURL =  "https://" + API_20_HOSTNAME;
 	
 	public static final String OAUTH_REQUEST_URL = API_20_BASEURL + "/oauth/request_token";
 	public static final String OAUTH_ACCESS_URL = API_20_BASEURL + "/oauth/access_token";

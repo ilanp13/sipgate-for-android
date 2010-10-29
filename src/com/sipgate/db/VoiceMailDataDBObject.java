@@ -1,4 +1,4 @@
-package com.sipgate.db;
+	package com.sipgate.db;
 
 import java.util.Date;
 
@@ -26,7 +26,6 @@ public class VoiceMailDataDBObject extends BaseDBObject
 	private String transcription = "";
 	
 	private String contentUrl = "";
-	private String localFileUrl = "";
 	private String readModifyUrl = "";
 	
 	public void bindDelete(SQLiteStatement statement)
@@ -52,8 +51,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 		
 		statement.bindString(12, transcription);
 		statement.bindString(13, contentUrl);
-		statement.bindString(14, localFileUrl);
-		statement.bindString(15, readModifyUrl);
+		statement.bindString(14, readModifyUrl);
 	}
 
 	public void bindUpdate(SQLiteStatement statement)
@@ -73,15 +71,19 @@ public class VoiceMailDataDBObject extends BaseDBObject
 		
 		statement.bindString(11, transcription);
 		statement.bindString(12, contentUrl);
-		statement.bindString(13, localFileUrl);
-		statement.bindString(14, readModifyUrl);
+		statement.bindString(13, readModifyUrl);
 		
-		statement.bindLong(15, id);
+		statement.bindLong(14, id);
 	}
 
 	public String getCreateStatement()
 	{
-		return "CREATE TABLE VoiceMailData (id INTEGER PRIMARY KEY NOT NULL, read INTEGER, seen INTEGER, time INTEGER, duration INTEGER, localNumberE164 VARCHAR, localNumberPretty VARCHAR, localName VARCHAR, remoteNumberE164 VARCHAR, remoteNumberPretty VARCHAR, remoteName VARCHAR, transcription VARCHAR, contentUrl VARCHAR, localFileUrl VARCHAR, readModifyUrl VARCHAR)";
+		return "CREATE TABLE VoiceMailData (id INTEGER PRIMARY KEY NOT NULL, read INTEGER, seen INTEGER, time INTEGER, duration INTEGER, localNumberE164 VARCHAR, localNumberPretty VARCHAR, localName VARCHAR, remoteNumberE164 VARCHAR, remoteNumberPretty VARCHAR, remoteName VARCHAR, transcription VARCHAR, contentUrl VARCHAR, readModifyUrl VARCHAR)";
+	}
+	
+	public String getCreateTriggerStatement()
+	{
+		return "CREATE TRIGGER fkdc_VoiceMailData_id_VoiceMailFile_id BEFORE DELETE ON VoiceMailData FOR EACH ROW BEGIN DELETE FROM VoiceMailFile WHERE VoiceMailFile.id = OLD.id; END";
 	}
 
 	public String getDeleteStatement()
@@ -91,7 +93,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO VoiceMailData (id, read, seen, time, duration, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, transcription, contentUrl, localFileUrl, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return "INSERT INTO VoiceMailData (id, read, seen, time, duration, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, transcription, contentUrl, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
@@ -101,7 +103,7 @@ public class VoiceMailDataDBObject extends BaseDBObject
 
 	public String getUpdateStatement()
 	{
-		return "UPDATE VoiceMailData SET read = ?, seen = ?, time = ?, duration = ?, localNumberE164 = ?, localNumberPretty = ?, localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, transcription = ?, contentUrl = ?, localFileUrl = ?, readModifyUrl = ? WHERE id = ?";
+		return "UPDATE VoiceMailData SET read = ?, seen = ?, time = ?, duration = ?, localNumberE164 = ?, localNumberPretty = ?, localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, transcription = ?, contentUrl = ?, readModifyUrl = ? WHERE id = ?";
 	}
 
 	public long getId()
@@ -278,14 +280,17 @@ public class VoiceMailDataDBObject extends BaseDBObject
 	{
 		this.contentUrl = contentUrl;
 	}
-
-	public String getLocalFileUrl()
+	
+	@Override
+	public boolean equals(Object obj)
 	{
-		return localFileUrl;
-	}
-
-	public void setLocalFileUrl(String localFileUrl)
-	{
-		this.localFileUrl = localFileUrl;
+		if (obj instanceof VoiceMailDataDBObject)
+		{
+			return ((VoiceMailDataDBObject)obj).getId() == id;
+		}
+		else
+		{	
+			return super.equals(obj);
+		}
 	}
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.database.sqlite.SQLiteTransactionListener;
 import android.util.Log;
 
 public abstract class BaseDBAdapter extends SQLiteOpenHelper
@@ -69,6 +70,37 @@ public abstract class BaseDBAdapter extends SQLiteOpenHelper
 		
 		dropTables(database);
 		createTables(database);
+	}
+	
+	public void startTransaction()
+	{
+		database.beginTransaction();
+	}
+	
+	public void createTransaction(SQLiteTransactionListener transactionListener)
+	{
+		database.beginTransactionWithListener(transactionListener);
+	}
+	
+	public void commitTransaction()
+	{
+		database.setTransactionSuccessful();
+		database.endTransaction();
+	}
+	
+	public void rollbackTransaction()
+	{
+		database.endTransaction();
+	}
+	
+	public boolean inTransaction()
+	{
+		return database.inTransaction();
+	}
+	
+	public SQLiteDatabase getDatabase()
+	{
+		return database;
 	}
 	
 	public abstract void createTables(SQLiteDatabase database);

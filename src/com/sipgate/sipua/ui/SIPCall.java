@@ -20,11 +20,8 @@ package com.sipgate.sipua.ui;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-import java.util.Locale;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -42,11 +39,10 @@ public class SIPCall extends Activity {
 	{
 		if (uri.indexOf(":") >= 0) {
 			target = uri.substring(uri.indexOf(":")+1);
-			
+				
 			PhoneNumberFormatter formatter = new PhoneNumberFormatter();
-			Locale locale = Locale.getDefault();
-			target = formatter.formattedPhoneNumberFromStringWithCountry(target, locale.getCountry());
-						
+			target = formatter.unformattedPhoneNumberFromString(target);
+			
 			if (m_AlertDlg != null) 
 			{
 				m_AlertDlg.cancel();
@@ -108,7 +104,7 @@ public class SIPCall extends Activity {
 		
 		if ((intent = getIntent()) != null && (uri = intent.getData()) != null)
 		{
-			callSIP(uri.toString());
+			callSIP(Uri.decode(uri.toString()));
 		}
 	}
 }

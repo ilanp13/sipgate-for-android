@@ -141,7 +141,7 @@ public class CallListAdapter extends BaseAdapter
 	public View getView(int position, View convertView, ViewGroup parent) 
 	{
 		if (convertView == null) 
-		{sipgateDBAdapter = new SipgateDBAdapter(activity);
+		{
 			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 			holder = new CallViewHolder();
 			holder.callerNameView = (TextView) convertView.findViewById(R.id.CallerNameTextView);

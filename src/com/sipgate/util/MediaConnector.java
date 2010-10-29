@@ -1,5 +1,7 @@
 package com.sipgate.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.media.MediaPlayer;
@@ -37,15 +39,21 @@ public class MediaConnector implements MediaPlayerControl
 		mediaPlayer.seekTo(pos);
 	}
 
-	public void setMp3(String location) {
+	public void setMp3(File cacheDir, byte[] data) {
+		
 		mediaPlayer.stop();
-		// TODO: find out, why this new instance is needed; seems not to
-		// work with
-		// existing MediaPlayer instance
 		mediaPlayer = new MediaPlayer();
+		
 		try {
-			mediaPlayer.setDataSource(location);
+			File temp = File.createTempFile("data", null);
+			FileOutputStream out = new FileOutputStream(temp);
+			
+			out.write(data);
+			out.close();
+			
+			mediaPlayer.setDataSource(temp.getAbsolutePath());
 			mediaPlayer.prepare();
+			
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalStateException e) {

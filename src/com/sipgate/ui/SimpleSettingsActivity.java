@@ -145,8 +145,8 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
             		
 							SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(context);
 							
-							sipgateDBAdapter.deleteAllCallDBObjects();
-							sipgateDBAdapter.deleteAllVoiceMailDBObjects();
+							sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
+							sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
 							
 							sipgateDBAdapter.close();
 							
