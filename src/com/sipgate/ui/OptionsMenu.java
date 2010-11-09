@@ -136,9 +136,42 @@ public class OptionsMenu {
 		}
 		case REFRESH_VOICEMAIL_LIST: {
 			try {
-				intent = new Intent(activity, SipgateFrames.class);
-				intent.putExtra("view", SipgateFrames.SipgateTab.VM);
-				activity.startActivity(intent);
+				intent = new Intent(activity, SipgateBackgroundService.class);
+				Context appContext = context.getApplicationContext();
+				appContext.startService(intent);
+
+				if (serviceConnection == null) {
+					Log.d(TAG, "service connection is null -> create new");
+					serviceConnection = new ServiceConnection() {
+	
+						public void onServiceConnected(ComponentName name,
+								IBinder binder) {
+							Log.v(TAG, "service " + name + " connected -> bind");
+							try {
+								serviceBinding = (EventService) binder;
+								try {
+									Log.d(TAG, "service binding -> registerOnVoicemailIntent");
+									serviceBinding.initVoicemailRefreshTimer();
+								} catch (RemoteException e) {
+									e.printStackTrace();
+								}
+							} catch (ClassCastException e) {
+								e.printStackTrace();
+							}
+							
+						}
+	
+						public void onServiceDisconnected(ComponentName name) {
+							Log.d(TAG, "service " + name + " disconnected -> clear binding");
+							serviceBinding = null;
+						}
+						
+					};
+				}
+				
+				boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+				Log.v(TAG, "bind service -> " + bindret);
+				
 			} catch (ActivityNotFoundException e) {
 				Log.e(TAG, e.getLocalizedMessage());
 			}
@@ -161,7 +194,7 @@ public class OptionsMenu {
 								serviceBinding = (EventService) binder;
 								try {
 									Log.d(TAG, "service binding -> registerOnCallsIntent");
-									serviceBinding.refreshCalls();
+									serviceBinding.initCallRefreshTimer();
 								} catch (RemoteException e) {
 									e.printStackTrace();
 								}
