@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.Contacts.People;
 import android.util.Log;
@@ -15,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.sipgate.R;
+import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
@@ -36,11 +41,13 @@ public class OptionsMenu {
 	public static final int REFRESH_CALL_LIST = FIRST_MENU_ID + 8;
 	
 	private static AlertDialog m_AlertDlg;
-
+	
+	private ServiceConnection serviceConnection = null;
+	private EventService serviceBinding = null;
+	
 	private static final String TAG = "optionsMenu";
 	
 	public void createMenu (Menu menu, String caller){ 
-
 
 		// About
 		MenuItem m = menu.add(0, ABOUT_MENU_ITEM, 0, R.string.menu_about);
@@ -78,12 +85,13 @@ public class OptionsMenu {
 		// Contacts
 //		m = menu.add(0, CONTACTS_MENU_ITEM, 0, R.string.menu_contacts);
 //		m.setIcon(R.drawable.menu_icon_contacts_48);
+		
 	}
 	
 	
 	public void selectItem (MenuItem item, Context context, Activity activity){
 		Intent intent = null;
-
+		
 		switch (item.getItemId()) {
 		case ABOUT_MENU_ITEM:
 			if (m_AlertDlg != null) 
@@ -138,9 +146,42 @@ public class OptionsMenu {
 		}
 		case REFRESH_CALL_LIST: {
 			try {
-				intent = new Intent(activity, SipgateFrames.class);
-				intent.putExtra("view", SipgateFrames.SipgateTab.CALLS);
-				activity.startActivity(intent);
+				intent = new Intent(activity, SipgateBackgroundService.class);
+				Context appContext = context.getApplicationContext();
+				appContext.startService(intent);
+
+				if (serviceConnection == null) {
+					Log.d(TAG, "service connection is null -> create new");
+					serviceConnection = new ServiceConnection() {
+	
+						public void onServiceConnected(ComponentName name,
+								IBinder binder) {
+							Log.v(TAG, "service " + name + " connected -> bind");
+							try {
+								serviceBinding = (EventService) binder;
+								try {
+									Log.d(TAG, "service binding -> registerOnCallsIntent");
+									serviceBinding.refreshCalls();
+								} catch (RemoteException e) {
+									e.printStackTrace();
+								}
+							} catch (ClassCastException e) {
+								e.printStackTrace();
+							}
+							
+						}
+	
+						public void onServiceDisconnected(ComponentName name) {
+							Log.d(TAG, "service " + name + " disconnected -> clear binding");
+							serviceBinding = null;
+						}
+						
+					};
+				}
+				
+				boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+				Log.v(TAG, "bind service -> " + bindret);
+				
 			} catch (ActivityNotFoundException e) {
 				Log.e(TAG, e.getLocalizedMessage());
 			}
