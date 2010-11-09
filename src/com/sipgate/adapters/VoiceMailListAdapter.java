@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
+import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.models.holder.VoiceMailViewHolder;
@@ -31,7 +32,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private Vector<VoiceMailDataDBObject> voiceMailDataDBObjects = null;
-	private HashMap<String, String> contactNameCache = null; 	
 	
 	private String unknownCallerString = null;
 	private String secondsText = null;
@@ -40,7 +40,7 @@ public class VoiceMailListAdapter extends BaseAdapter
 	
 	private VoiceMailDataDBObject currentVoiceMailDataDBObject = null;
 	private VoiceMailDataDBObject lastVoiceMailDataDBObject = null;
-	
+		
 	private String remoteName = null;
 	private String remoteNumberPretty = null;
 
@@ -63,8 +63,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
 		
 		voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
-		
-		contactNameCache = new HashMap<String, String>();
 				
 		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
 		secondsText =  activity.getResources().getString(R.string.sipgate_seconds);
@@ -199,6 +197,10 @@ public class VoiceMailListAdapter extends BaseAdapter
 				{
 					holder.categoryView.setVisibility(View.VISIBLE);
 				}
+			}
+			else
+			{
+				holder.categoryView.setVisibility(View.VISIBLE);
 			}
 			
 			markAsSeen(currentVoiceMailDataDBObject); 

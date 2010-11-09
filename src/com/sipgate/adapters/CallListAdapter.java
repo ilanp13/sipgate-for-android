@@ -3,7 +3,6 @@ package com.sipgate.adapters;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Vector;
 
 import android.app.Activity;
@@ -34,8 +33,7 @@ public class CallListAdapter extends BaseAdapter
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private Vector<CallDataDBObject> callDataDBObjects = null;
-	private HashMap<String, String> contactNameCache = null; 	
-	
+
 	private String unknownCallerString = null;
 	private String noNumberString = null;
 	
@@ -73,8 +71,6 @@ public class CallListAdapter extends BaseAdapter
 		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
 		
 		callDataDBObjects = sipgateDBAdapter.getAllCallData();
-		
-		contactNameCache = new HashMap<String, String>();
 				
 		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
 		noNumberString = activity.getResources().getString(R.string.sipgate_no_number);		
@@ -217,6 +213,10 @@ public class CallListAdapter extends BaseAdapter
 					holder.categoryTextView.setVisibility(View.VISIBLE);
 				}
 			}
+			else
+			{
+				holder.categoryTextView.setVisibility(View.VISIBLE);
+			}
 			
 			if (position < getCount() - 1)
 			{
@@ -224,8 +224,8 @@ public class CallListAdapter extends BaseAdapter
 				
 				nextDayCalendar.setTimeInMillis(nextCallDataDBObject.getTime());
 				
-				if (lastDayCalendar.get(Calendar.DAY_OF_YEAR) != currentDayCalendar.get(Calendar.DAY_OF_YEAR) ||
-					lastDayCalendar.get(Calendar.YEAR) != currentDayCalendar.get(Calendar.YEAR))
+				if (nextDayCalendar.get(Calendar.DAY_OF_YEAR) != currentDayCalendar.get(Calendar.DAY_OF_YEAR) ||
+					nextDayCalendar.get(Calendar.YEAR) != currentDayCalendar.get(Calendar.YEAR))
 				{
 					holder.separator.setVisibility(View.GONE);
 				}
@@ -234,6 +234,7 @@ public class CallListAdapter extends BaseAdapter
 					holder.separator.setVisibility(View.VISIBLE);
 				}
 			}
+			
 			
 			markAsRead(currentCallDataDBObject); 
 		}

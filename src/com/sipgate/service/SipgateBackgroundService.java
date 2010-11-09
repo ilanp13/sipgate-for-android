@@ -18,7 +18,6 @@ import android.util.Log;
 import com.sipgate.R;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
-import com.sipgate.db.ContactNumberDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.util.ApiServiceProvider;
@@ -30,6 +29,7 @@ import com.sipgate.util.NotificationClient.NotificationType;
  * 
  * @author Marcus Hunger
  * @author Karsten Knuth
+ * @authos graef
  * @version 1.1
  *
  */
@@ -39,7 +39,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 
-	private static final long CONTACT_REFRESH_INTERVAL = 60000; // every 10mins
+	private static final long CONTACT_REFRESH_INTERVAL = 600000; // every 10mins
 	private static final long CALL_REFRESH_INTERVAL = 60000; // every min
 	private static final long VOICEMAIL_REFRESH_INTERVAL = 60000; // every min
 		
@@ -64,6 +64,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	
 	private	int unreadCounter = 0;
 	
+	private long start = 0;
+	
 	/**
 	 * @since 1.0
 	 */
@@ -71,13 +73,29 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		super.onCreate();
 	
+		start = System.currentTimeMillis();
+		
 		notifyClient = new NotificationClient(this); 
 		
+		Log.d(TAG, "call NotificationClient(): " + (System.currentTimeMillis() - start) + "ms");
+		
+		start = System.currentTimeMillis();
+		
 		apiClient = ApiServiceProvider.getInstance(this);
+			
+		Log.d(TAG, "call  ApiServiceProvider.getInstance(): " + (System.currentTimeMillis() - start) + "ms");
+	
+		start = System.currentTimeMillis();
 		
 		sipgateDBAdapter = SipgateDBAdapter.getInstance(this);
+	
+		Log.d(TAG, "call SipgateDBAdapter.getInstance(): " + (System.currentTimeMillis() - start) + "ms");
+	
+		start = System.currentTimeMillis();
 		
 		startService();
+		
+		Log.d(TAG, "call startService(): " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	/**

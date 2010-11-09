@@ -169,6 +169,10 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 					holder.category.setVisibility(View.VISIBLE);
 				}
 			}
+			else
+			{
+				holder.category.setVisibility(View.VISIBLE);
+			}
 						
 			if (position < getCount() - 1) 
 			{
