@@ -11,4 +11,7 @@ interface EventService {
 	void refreshContacts();
 	void refreshVoicemails();
 	void refreshCalls();
+	void initCallRefreshTimer();
+	void initVoicemailRefreshTimer();
+	void initContactRefreshTimer();
 }

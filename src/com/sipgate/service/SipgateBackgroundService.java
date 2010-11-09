@@ -90,42 +90,13 @@ public class SipgateBackgroundService extends Service implements EventService
 		}
 		
 		serviceEnabled = true;
+	
+		initContactRefreshTimer();
 		
-		contactRefreshTimer = new Timer();  
-		callRefreshTimer = new Timer();
-		voiceMailRefreshTimer = new Timer();  
-		
-		contactRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
-				Log.v(TAG, "contact timertask started");
-				if(serviceEnabled) {
-					refreshContactEvents();
-				}
-			}
-
-		}, 0, CONTACT_REFRESH_INTERVAL);
-		
-		callRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
-				Log.v(TAG, "call timertask started");
-				if(serviceEnabled) {
-					refreshCallEvents();
-				}
-			}
-
-		}, 0, CALL_REFRESH_INTERVAL);
-		
+		initCallRefreshTimer();
+	
 		if (hasVmListFeature()) {
-			voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-				public void run() {
-					Log.v(TAG, "voicemail timertask started");
-					if(serviceEnabled) {
-						Log.d(TAG, "get vms");
-						refreshVoicemailEvents();
-					}
-				}
-			}, 0, VOICEMAIL_REFRESH_INTERVAL);
-			
+			initVoicemailRefreshTimer();
 		}
 	}
 
@@ -649,6 +620,71 @@ public class SipgateBackgroundService extends Service implements EventService
 		refreshVoicemails();
 	}
 	
+	public void initCallRefreshTimer()
+	{
+		if(callRefreshTimer != null) 
+		{
+			callRefreshTimer.cancel();
+			callRefreshTimer.purge();
+		} 
+
+		callRefreshTimer = new Timer();
+		
+		callRefreshTimer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				Log.v(TAG, "call timertask started");
+				if(serviceEnabled) {
+					refreshCallEvents();
+				}
+			}
+
+		}, 0, CALL_REFRESH_INTERVAL);
+	}
+	
+	public void initVoicemailRefreshTimer()
+	{
+		if(voiceMailRefreshTimer != null) 
+		{
+			voiceMailRefreshTimer.cancel();
+			voiceMailRefreshTimer.purge();
+		} 
+
+		voiceMailRefreshTimer = new Timer();
+		
+		voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				Log.v(TAG, "voicemail timertask started");
+				if(serviceEnabled) {
+					Log.d(TAG, "get vms");
+					refreshVoicemailEvents();
+				}
+			}
+		}, 0, VOICEMAIL_REFRESH_INTERVAL);
+	}
+	
+	public void initContactRefreshTimer()
+	{
+		if(contactRefreshTimer != null) 
+		{
+			contactRefreshTimer.cancel();
+			contactRefreshTimer.purge();
+		}
+
+		contactRefreshTimer = new Timer();  
+
+		contactRefreshTimer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				Log.v(TAG, "contact timertask started");
+				if(serviceEnabled) {
+					refreshContactEvents();
+				}
+			}
+
+		}, 0, CONTACT_REFRESH_INTERVAL);
+		
+		
+	}
+	
 	/**
 	 * 
 	 * @since 1.0
@@ -737,6 +773,24 @@ public class SipgateBackgroundService extends Service implements EventService
 			public void refreshContacts() throws RemoteException
 			{
 				service.refreshContacts();
+			}
+
+			@Override
+			public void initCallRefreshTimer() throws RemoteException
+			{
+				service.initCallRefreshTimer();				
+			}
+
+			@Override
+			public void initContactRefreshTimer() throws RemoteException
+			{
+				service.initContactRefreshTimer();				
+			}
+
+			@Override
+			public void initVoicemailRefreshTimer() throws RemoteException
+			{
+				service.initVoicemailRefreshTimer();				
 			}
 		};
 	}
