@@ -28,7 +28,10 @@ public class VoiceMailFileDBObject extends BaseDBObject
 
 	public String getCreateStatement()
 	{
-		return "CREATE TABLE VoiceMailFile (id INTEGER PRIMARY KEY NOT NULL, value BLOB)";
+		return 	"CREATE TABLE VoiceMailFile (" +
+					"id INTEGER PRIMARY KEY NOT NULL, " +
+					"value BLOB);" +
+				"CREATE UNIQUE INDEX uidx_id_VoiceMailFile ON VoiceMailFile (id ASC);";
 	}
 
 	public String getDeleteStatement()
@@ -38,7 +41,9 @@ public class VoiceMailFileDBObject extends BaseDBObject
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO VoiceMailFile (id, value) VALUES (?, ?)";
+		return 	"INSERT INTO VoiceMailFile (" +
+					"id, value) " +
+				"VALUES (?, ?)";
 	}
 
 	public String getTableName()
@@ -48,7 +53,9 @@ public class VoiceMailFileDBObject extends BaseDBObject
 
 	public String getUpdateStatement()
 	{
-		return "UPDATE VoiceMailFile SET value = ? WHERE id = ?";
+		return 	"UPDATE VoiceMailFile " +
+					"SET value = ? " +
+				"WHERE id = ?";
 	}
 
 	public long getId()

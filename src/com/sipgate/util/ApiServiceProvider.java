@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -214,6 +215,15 @@ public class ApiServiceProvider {
 		}
 	}
 
+	/*
+	 * contact list
+	 */
+	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException {
+		synchronized (this.apiClient) {
+			return apiClient.getContacts();
+		}
+	}
+	
 	/*
 	 * calls list
 	 */

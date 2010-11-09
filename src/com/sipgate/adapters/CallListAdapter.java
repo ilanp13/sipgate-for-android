@@ -18,25 +18,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
-import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.CallDataDBObject;
-import com.sipgate.exceptions.ApiException;
-import com.sipgate.exceptions.FeatureNotAvailableException;
-import com.sipgate.exceptions.NetworkProblemException;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.models.holder.CallViewHolder;
-import com.sipgate.util.AndroidContactsClient;
 import com.sipgate.util.ApiServiceProvider;
 
 public class CallListAdapter extends BaseAdapter
 {
-	@SuppressWarnings("unused")
 	private final static String TAG = "CallListAdapter";
 
 	private LayoutInflater mInflater = null;
 	
 	private ApiServiceProvider apiClient = null;
-	private AndroidContactsClient contactsClient = null;
-	
+		
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private Vector<CallDataDBObject> callDataDBObjects = null;
@@ -70,20 +64,15 @@ public class CallListAdapter extends BaseAdapter
 	private Drawable missedIcon = null;
 	private Drawable outgoingIcon = null;
 	
-	private Activity activity = null;
-	
 	public CallListAdapter(Activity activity) 
 	{
-		this.activity = activity;
-		
 		mInflater = activity.getLayoutInflater();
 		
-		contactsClient = new AndroidContactsClient(activity);
 		apiClient = ApiServiceProvider.getInstance(activity);
 		
-		sipgateDBAdapter = new SipgateDBAdapter(activity);
+		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
+		
 		callDataDBObjects = sipgateDBAdapter.getAllCallData();
-		sipgateDBAdapter.close();
 		
 		contactNameCache = new HashMap<String, String>();
 				
@@ -179,31 +168,15 @@ public class CallListAdapter extends BaseAdapter
 				holder.callTypeIconView.setImageDrawable(outgoingIcon);
 			}
 		
-			remoteName = null;
-			remoteNumberPretty = currentCallDataDBObject.getRemoteNumberPretty();
-			
-			if(remoteNumberPretty.length() > 0) 
-			{
-				if (!contactNameCache.containsKey(remoteNumberPretty))
-				{
-					contactNameCache.put(remoteNumberPretty, contactsClient.getContactName(remoteNumberPretty));
-				}
-							
-				remoteName = contactNameCache.get(remoteNumberPretty);
-			}
-			
-			if (remoteName == null) 
-			{
-				remoteName = currentCallDataDBObject.getRemoteName();
-				
-				if (remoteName == null || remoteName.length() == 0 || remoteName.equals(remoteNumberPretty))
-				{
-					remoteName = unknownCallerString;
-				}
-			}
-			
 			remoteNumber = currentCallDataDBObject.getRemoteNumberPretty();
+			remoteNumberPretty = currentCallDataDBObject.getRemoteNumberPretty();
+			remoteName = currentCallDataDBObject.getRemoteName();
 		
+			if (remoteName == null || remoteName.length() == 0 || remoteName.equals(remoteNumberPretty))
+			{
+				remoteName = unknownCallerString;
+			}
+				
 			if(remoteNumber == null || remoteNumber.length() == 0 || remoteNumber.equals("+anonymous")) 
 			{
 				remoteNumber = noNumberString;
@@ -227,8 +200,7 @@ public class CallListAdapter extends BaseAdapter
 			
 			holder.callTimeView.setText(timeFormatter.format(currentDayCalendar.getTime()));
 			holder.categoryTextView.setText(dateFormatter.format(currentDayCalendar.getTime()));
-			holder.categoryTextView.setVisibility(View.VISIBLE);
-		
+			
 			if (position > 0) 
 			{
 				lastCallDataDBObject = (CallDataDBObject)getItem(position - 1);
@@ -246,7 +218,7 @@ public class CallListAdapter extends BaseAdapter
 				}
 			}
 			
-			if (position < (getCount() - 1))
+			if (position < getCount() - 1)
 			{
 				nextCallDataDBObject = (CallDataDBObject)getItem(position + 1);
 				
@@ -280,8 +252,6 @@ public class CallListAdapter extends BaseAdapter
 					try 
 					{
 						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
-						
-						sipgateDBAdapter = new SipgateDBAdapter(activity);
 					
 						callDataDBObject.setRead(true);
 						
@@ -290,13 +260,6 @@ public class CallListAdapter extends BaseAdapter
 					catch (Exception e)
 					{
 						Log.e(TAG, "markAsRead()", e);
-					}
-					finally
-					{
-						if (sipgateDBAdapter != null)
-						{
-							sipgateDBAdapter.close();
-						}						
 					}
 				}
 			};
@@ -327,21 +290,13 @@ public class CallListAdapter extends BaseAdapter
 	{
 		try
 		{
-			sipgateDBAdapter = new SipgateDBAdapter(activity);
 			callDataDBObjects = sipgateDBAdapter.getAllCallData();
 		}
 		catch (Exception e) 
 		{
 			Log.e(TAG, "notifyDataSetChanged()", e);
 		}
-		finally
-		{
-			if (sipgateDBAdapter != null)
-			{
-				sipgateDBAdapter.close();
-			}
-		}
-		
+				
 		super.notifyDataSetChanged();
 	}
 }

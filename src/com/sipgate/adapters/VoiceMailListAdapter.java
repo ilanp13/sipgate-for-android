@@ -20,7 +20,6 @@ import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.models.holder.VoiceMailViewHolder;
-import com.sipgate.util.AndroidContactsClient;
 
 public class VoiceMailListAdapter extends BaseAdapter
 {
@@ -28,8 +27,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 	private final static String TAG = "VoiceMailListAdapter";
 
 	private LayoutInflater mInflater = null;
-	
-	private AndroidContactsClient contactsClient = null;
 	
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
@@ -59,19 +56,13 @@ public class VoiceMailListAdapter extends BaseAdapter
 	private Drawable readIcon = null;
 	private Drawable unreadIcon = null;
 	
-	private Activity activity = null;
-	
 	public VoiceMailListAdapter(Activity activity) 
 	{
-		this.activity = activity;
-		
 		mInflater = activity.getLayoutInflater();
 		
-		contactsClient = new AndroidContactsClient(activity);
+		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
 		
-		sipgateDBAdapter = new SipgateDBAdapter(activity);
 		voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
-		sipgateDBAdapter.close();
 		
 		contactNameCache = new HashMap<String, String>();
 				
@@ -159,31 +150,17 @@ public class VoiceMailListAdapter extends BaseAdapter
 				holder.nameView.setTypeface(Typeface.DEFAULT_BOLD);
 			}
 	
-			remoteName = null;
 			remoteNumberPretty = currentVoiceMailDataDBObject.getRemoteNumberPretty();
 			
-			if(remoteNumberPretty.length() > 0) 
-			{
-				if (!contactNameCache.containsKey(remoteNumberPretty))
-				{
-					contactNameCache.put(remoteNumberPretty, contactsClient.getContactName(remoteNumberPretty));
-				}
-							
-				remoteName = contactNameCache.get(remoteNumberPretty);
-			}
+			remoteName = currentVoiceMailDataDBObject.getRemoteName();
 			
-			if (remoteName == null) 
+			if (remoteName == null || remoteName.length() == 0)
 			{
-				remoteName = currentVoiceMailDataDBObject.getRemoteName();
-			
+				remoteName = remoteNumberPretty;
+				
 				if (remoteName == null || remoteName.length() == 0)
 				{
-					remoteName = remoteNumberPretty;
-					
-					if (remoteName == null || remoteName.length() == 0)
-					{
-						remoteName = unknownCallerString;
-					}
+					remoteName = unknownCallerString;
 				}
 			}
 			
@@ -240,8 +217,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 				{
 					try 
 					{
-						sipgateDBAdapter = new SipgateDBAdapter(activity);
-					
 						voiceMailDataDBObject.setSeen(true);
 						
 						sipgateDBAdapter.update(voiceMailDataDBObject);
@@ -249,13 +224,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 					catch (Exception e)
 					{
 						Log.e(TAG, "markAsSeen()", e);
-					}
-					finally
-					{
-						if (sipgateDBAdapter != null)
-						{
-							sipgateDBAdapter.close();
-						}						
 					}
 				}
 			};
@@ -286,19 +254,11 @@ public class VoiceMailListAdapter extends BaseAdapter
 	{
 		try
 		{
-			sipgateDBAdapter = new SipgateDBAdapter(activity);
 			voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
 		}
 		catch (Exception e) 
 		{
 			Log.e(TAG, "notifyDataSetChanged()", e);
-		}
-		finally
-		{
-			if (sipgateDBAdapter != null)
-			{
-				sipgateDBAdapter.close();
-			}
 		}
 		
 		super.notifyDataSetChanged();

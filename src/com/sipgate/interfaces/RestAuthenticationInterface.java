@@ -11,6 +11,8 @@ public interface RestAuthenticationInterface {
 	
 	public InputStream getProvisioningData() throws AccessProtectedResourceException, NetworkProblemException;
 	
+	public InputStream getContacts() throws AccessProtectedResourceException, NetworkProblemException;
+	
 	public InputStream getCalls() throws AccessProtectedResourceException, NetworkProblemException;
 	
 	public InputStream getVoiceMails() throws AccessProtectedResourceException, NetworkProblemException;

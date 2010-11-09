@@ -29,14 +29,17 @@ public abstract class BaseDBAdapter extends SQLiteOpenHelper
 		database.close();
 	}
 	
-	public void insert(BaseDBObject baseDBObject)
+	public long insert(BaseDBObject baseDBObject)
 	{
 		SQLiteStatement statement = database.compileStatement(baseDBObject.getInsertStatement());     	                    
 		
 		baseDBObject.bindInsert(statement);
 		
-		statement.execute(); 
+		long lastId = statement.executeInsert(); 
+		
 		statement.close(); 
+	
+		return lastId;
 	}
 	
 	public void update(BaseDBObject baseDBObject)

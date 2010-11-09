@@ -21,6 +21,7 @@ import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -247,8 +248,6 @@ public class XmlrpcClient implements ApiClientInterface {
 			
 			Object[] HistoryList = (Object[]) apiResult.get("History");
 			
-			int counter = 0;
-			
 			CallDataDBObject callDataDBObject = null;
 			HashMap<String, Object> historySet = null;
 			
@@ -267,8 +266,6 @@ public class XmlrpcClient implements ApiClientInterface {
 			
 			for (Object HistoryObject : HistoryList) {
 				
-				if(counter == 50) break;
-					
 				callDataDBObject = new CallDataDBObject();
 				
 				historySet = (HashMap<String, Object>) HistoryObject;
@@ -276,8 +273,6 @@ public class XmlrpcClient implements ApiClientInterface {
 				if (historySet.containsKey("TOS") && historySet.get("TOS") != null && !historySet.get("TOS").equals("voice")) {
 					continue;
 				}
-				
-				counter++;
 				
 				callID = (String)historySet.get("EntryID");
 				
@@ -490,5 +485,11 @@ public class XmlrpcClient implements ApiClientInterface {
 	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
+	}
+
+	@Override
+	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
+	{
+		return new Vector<ContactDataDBObject>();
 	}
 }

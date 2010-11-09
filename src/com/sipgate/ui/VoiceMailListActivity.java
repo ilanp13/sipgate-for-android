@@ -70,6 +70,8 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		
 		setContentView(R.layout.sipgate_voicemail_list);
 		
+		sipgateDBAdapter = SipgateDBAdapter.getInstance(this);
+		
 		elementList = (ListView) findViewById(R.id.EventListView);
 		emptyList = (TextView) findViewById(R.id.EmptyEventListTextView);
 
@@ -223,8 +225,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 					try 
 					{
 						apiClient.setVoiceMailRead(voiceMailDataDBObject.getReadModifyUrl());
-						
-						sipgateDBAdapter = new SipgateDBAdapter(activity);
 					
 						voiceMailDataDBObject.setRead(true);
 						
@@ -233,13 +233,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 					catch (Exception e)
 					{
 						Log.e(TAG, "markAsRead()", e);
-					}
-					finally
-					{
-						if (sipgateDBAdapter != null)
-						{
-							sipgateDBAdapter.close();
-						}						
 					}
 				}
 			};
@@ -271,8 +264,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			
 			try 
 			{
-				sipgateDBAdapter = new SipgateDBAdapter(activity);
-				
 				voiceMailFileDBObject = sipgateDBAdapter.getVoiceMailFileDBObjectById(voiceMailDataDBObject.getId());
 				
 				if (voiceMailFileDBObject == null)
@@ -336,11 +327,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				catch (IOException e) 
 				{
 					Log.e(TAG, e.getLocalizedMessage(), e);
-				}
-								
-				if (sipgateDBAdapter != null) 
-				{
-					sipgateDBAdapter.close();
 				}
 			}
 			

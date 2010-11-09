@@ -202,6 +202,10 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	public InputStream getBillingBalance() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/billing/balance/?complexity=full");
 	}
+	
+	public InputStream getContacts() throws AccessProtectedResourceException, NetworkProblemException {
+		return accessProtectedResource(Constants.API_20_BASEURL + "/my/contacts/?complexity=full&limit=0");
+	}
 
 	public InputStream getCalls() throws AccessProtectedResourceException, NetworkProblemException {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/events/calls/?complexity=full");

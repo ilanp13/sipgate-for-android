@@ -7,6 +7,7 @@ public abstract class BaseDBObject
 	public abstract String getTableName();
 	
 	public abstract String getCreateStatement();
+	
 	public String getDropStatement()
 	{
 		return "DROP TABLE " + getTableName();

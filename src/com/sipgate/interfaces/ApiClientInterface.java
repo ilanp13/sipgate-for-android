@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -20,6 +21,7 @@ import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 public interface ApiClientInterface {
 	public SipgateBalanceData getBillingBalance() throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException, AuthenticationErrorException, NetworkProblemException;
+	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException;
 	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException;
 	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException;
 	public boolean connectivityOk() throws ApiException, NetworkProblemException;

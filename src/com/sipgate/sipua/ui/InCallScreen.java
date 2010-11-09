@@ -29,14 +29,6 @@ import org.sipdroid.media.RtpStreamSender;
 import org.sipdroid.net.RtpPacket;
 import org.sipdroid.net.RtpSocket;
 import org.sipdroid.net.SipdroidSocket;
-import com.sipgate.R;
-import com.sipgate.sipua.UserAgent;
-import com.sipgate.sipua.phone.Call;
-import com.sipgate.sipua.phone.CallCard;
-import com.sipgate.sipua.phone.Phone;
-import com.sipgate.sipua.phone.SlidingCardManager;
-import com.sipgate.ui.CallListActivity;
-import com.sipgate.ui.SipgateFrames;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -62,6 +54,13 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.SlidingDrawer;
 import android.widget.TextView;
+
+import com.sipgate.R;
+import com.sipgate.sipua.UserAgent;
+import com.sipgate.sipua.phone.Call;
+import com.sipgate.sipua.phone.CallCard;
+import com.sipgate.sipua.phone.Phone;
+import com.sipgate.sipua.phone.SlidingCardManager;
 
 public class InCallScreen extends CallScreen implements View.OnClickListener {
 
