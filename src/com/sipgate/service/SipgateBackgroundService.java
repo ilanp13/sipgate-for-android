@@ -103,7 +103,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	 */
 	private void startService() 
 	{
-		if (serviceEnabled) {
+		if (serviceEnabled) 
+		{
 			return;
 		}
 		
@@ -113,7 +114,8 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		initCallRefreshTimer();
 	
-		if (hasVmListFeature()) {
+		if (hasVmListFeature()) 
+		{
 			initVoicemailRefreshTimer();
 		}
 	}
@@ -164,10 +166,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.v(TAG, "refreshContactEvents() -> start");
 		
-		try {
+		try 
+		{
 			notifyIfNewContacts(apiClient.getContacts(), this);
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
@@ -182,10 +186,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.v(TAG, "refreshCallEvents() -> start");
 		
-		try {
+		try 
+		{
 			notifyIfNewCalls(apiClient.getCalls(), this);
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
@@ -200,10 +206,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.v(TAG, "refreshVoicemailEvents() -> start");
 		
-		try {
+		try 
+		{
 			notifyIfNewVoiceMails(apiClient.getVoiceMails(), this);
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
@@ -540,9 +548,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	 */
 	private String buildVoicemailNotificationString(int unreadCounter) 
 	{
-		if(unreadCounter == 1) {
+		if(unreadCounter == 1) 
+		{
 			return String.format((String) getResources().getText(R.string.sipgate_a_new_voicemail), Integer.valueOf(unreadCounter));
-		} else {
+		} 
+		else 
+		{
 			return String.format((String) getResources().getText(R.string.sipgate_new_voicemails), Integer.valueOf(unreadCounter));
 		}
 	}
@@ -555,9 +566,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	 */
 	private String buildCallNotificationString(int unreadCounter) 
 	{
-		if(unreadCounter == 1 ) {
+		if(unreadCounter == 1 ) 
+		{
 			return String.format((String) getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(unreadCounter));
-		} else {
+		}
+		else 
+		{
 			return String.format((String) getResources().getText(R.string.sipgate_new_calls), Integer.valueOf(unreadCounter));
 		}
 	}
@@ -831,9 +845,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	 */
 	private boolean hasVmListFeature() 
 	{
-		try {
+		try 
+		{
 			return ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
 		}
 		
