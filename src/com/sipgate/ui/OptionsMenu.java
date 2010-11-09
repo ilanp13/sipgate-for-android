@@ -39,6 +39,7 @@ public class OptionsMenu {
 	public static final int VOICE_LIST_MENU_ITEM = FIRST_MENU_ID + 6;
 	public static final int REFRESH_VOICEMAIL_LIST = FIRST_MENU_ID + 7;
 	public static final int REFRESH_CALL_LIST = FIRST_MENU_ID + 8;
+	public static final int REFRESH_CONTACT_LIST = FIRST_MENU_ID + 9;
 	
 	private static AlertDialog m_AlertDlg;
 	
@@ -71,6 +72,12 @@ public class OptionsMenu {
 		// refresh for calllist tab only
 		if(caller.equals("CallList")) {
 			m = menu.add(0, REFRESH_CALL_LIST, 0, R.string.menu_refresh);
+			m.setIcon(R.drawable.ic_menu_refresh);
+		}
+		
+		// refresh for contacts tab only
+		if(caller.equals("ContactList")) {
+			m = menu.add(0, REFRESH_CONTACT_LIST, 0, R.string.menu_refresh);
 			m.setIcon(R.drawable.ic_menu_refresh);
 		}
 
@@ -220,6 +227,49 @@ public class OptionsMenu {
 			}
 			break;
 		}
+		case REFRESH_CONTACT_LIST: {
+			try {
+				intent = new Intent(activity, SipgateBackgroundService.class);
+				Context appContext = context.getApplicationContext();
+				appContext.startService(intent);
+
+				if (serviceConnection == null) {
+					Log.d(TAG, "service connection is null -> create new");
+					serviceConnection = new ServiceConnection() {
+	
+						public void onServiceConnected(ComponentName name,
+								IBinder binder) {
+							Log.v(TAG, "service " + name + " connected -> bind");
+							try {
+								serviceBinding = (EventService) binder;
+								try {
+									Log.d(TAG, "service binding -> registerOnContactsIntent");
+									serviceBinding.initContactRefreshTimer();
+								} catch (RemoteException e) {
+									e.printStackTrace();
+								}
+							} catch (ClassCastException e) {
+								e.printStackTrace();
+							}
+							
+						}
+	
+						public void onServiceDisconnected(ComponentName name) {
+							Log.d(TAG, "service " + name + " disconnected -> clear binding");
+							serviceBinding = null;
+						}
+						
+					};
+				}
+				
+				boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+				Log.v(TAG, "bind service -> " + bindret);
+				
+			} catch (ActivityNotFoundException e) {
+				Log.e(TAG, e.getLocalizedMessage());
+			}
+			break;
+		}		
 		case VOICE_LIST_MENU_ITEM: {
 			try {	
 				intent = new Intent(activity, VoiceMailListActivity.class);
