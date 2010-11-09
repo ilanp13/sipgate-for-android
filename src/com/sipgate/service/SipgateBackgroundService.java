@@ -648,10 +648,14 @@ public class SipgateBackgroundService extends Service implements EventService
 
 		callRefreshTimer = new Timer();
 		
-		callRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
+		callRefreshTimer.scheduleAtFixedRate(new TimerTask() 
+		{
+			public void run() 
+			{
 				Log.v(TAG, "call timertask started");
-				if(serviceEnabled) {
+			
+				if(serviceEnabled) 
+				{
 					refreshCallEvents();
 				}
 			}
@@ -669,11 +673,14 @@ public class SipgateBackgroundService extends Service implements EventService
 
 		voiceMailRefreshTimer = new Timer();
 		
-		voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
+		voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() 
+		{
+			public void run() 
+			{
 				Log.v(TAG, "voicemail timertask started");
-				if(serviceEnabled) {
-					Log.d(TAG, "get vms");
+				
+				if(serviceEnabled)
+				{
 					refreshVoicemailEvents();
 				}
 			}
@@ -690,10 +697,14 @@ public class SipgateBackgroundService extends Service implements EventService
 
 		contactRefreshTimer = new Timer();  
 
-		contactRefreshTimer.scheduleAtFixedRate(new TimerTask() {
-			public void run() {
+		contactRefreshTimer.scheduleAtFixedRate(new TimerTask() 
+		{
+			public void run() 
+			{
 				Log.v(TAG, "contact timertask started");
-				if(serviceEnabled) {
+			
+				if(serviceEnabled) 
+				{
 					refreshContactEvents();
 				}
 			}
