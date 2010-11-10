@@ -622,6 +622,21 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		return count;
 	}
 	
+	
+	/**
+	 * Deletes all contact data records in the database;
+	 * 
+	 * @since 1.0
+	 */
+	public void deleteAllContactDataDBObjects()
+	{
+		SQLiteStatement statement = database.compileStatement("Delete from ContactData");
+		
+		statement.execute();
+		
+		statement.close();
+	}
+	
 	/**
 	 * Deletes all contact number records in the database by contactId;
 	 * 
@@ -682,9 +697,47 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	}
 	
 	/**
-	 * Inserts several call data objects into the database
+	 * Inserts several contact data objects into the database
 	 * 
-	 * @param contactNumberDBObjects A vector of the call data objects.
+	 * @param contactDataDBObjects A vector of the contact data objects.
+	 * @since 1.0
+	 */
+	public void insertAllContactDataDBObjects(Vector<ContactDataDBObject> contactDataDBObjects)
+	{
+		if (contactDataDBObjects.size() > 0)
+		{
+			try
+			{
+				SQLiteStatement statement = database.compileStatement(contactDataDBObjects.get(0).getInsertStatement());     	                    
+				
+				startTransaction();
+				
+				for (BaseDBObject baseDBObject : contactDataDBObjects) 
+				{
+					baseDBObject.bindInsert(statement);
+					statement.execute(); 
+				}
+		
+				statement.close(); 
+				
+				commitTransaction();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				
+				if(inTransaction())
+				{
+					rollbackTransaction();
+				}
+			}
+		}
+	}
+		
+	/**
+	 * Inserts several contact number objects into the database
+	 * 
+	 * @param contactNumberDBObjects A vector of the contact number objects.
 	 * @since 1.0
 	 */
 	public void insertAllContactNumberDBObjects(Vector<ContactNumberDBObject> contactNumberDBObjects)
@@ -709,6 +762,8 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			}
 			catch (Exception ex)
 			{
+				ex.printStackTrace();
+				
 				if(inTransaction())
 				{
 					rollbackTransaction();
@@ -745,6 +800,8 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			}
 			catch (Exception ex)
 			{
+				ex.printStackTrace();
+				
 				if(inTransaction())
 				{
 					rollbackTransaction();
@@ -781,6 +838,8 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			}
 			catch (Exception ex)
 			{
+				ex.printStackTrace();
+				
 				if(inTransaction())
 				{
 					rollbackTransaction();
@@ -817,6 +876,8 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			}
 			catch (Exception ex)
 			{
+				ex.printStackTrace();
+				
 				if(inTransaction())
 				{
 					rollbackTransaction();

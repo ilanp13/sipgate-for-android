@@ -29,7 +29,7 @@ import com.sipgate.util.NotificationClient.NotificationType;
  * 
  * @author Marcus Hunger
  * @author Karsten Knuth
- * @authos graef
+ * @author graef
  * @version 1.1
  *
  */
@@ -372,9 +372,9 @@ public class SipgateBackgroundService extends Service implements EventService
 				}
 			}
 			
-			Log.d(TAG, "oldContact deleted: " + deleted);
-			Log.d(TAG, "oldContact inserted: " + inserted);
-			Log.d(TAG, "oldContact updated: " + updated);
+			Log.d(TAG, "deleted: " + deleted);
+			Log.d(TAG, "inserted: " + inserted);
+			Log.d(TAG, "updated: " + updated);
 									
 			sipgateDBAdapter.commitTransaction();
 		}
