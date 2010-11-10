@@ -71,22 +71,23 @@ public class CallDataDBObject extends BaseDBObject
 		statement.bindLong(12, id);
 	}
 
-	public String getCreateStatement()
+	public String[] getCreateStatement()
 	{
-		return 	"CREATE TABLE CallData (" +
-					"id INTEGER PRIMARY KEY NOT NULL, " +
-					"direction INTEGER, " +
-					"missed INTEGER, " +
-					"read INTEGER, " +
-					"time INTEGER, " +
-					"localNumberE164 VARCHAR, " +
-					"localNumberPretty VARCHAR, " +
-					"localName VARCHAR, " +
-					"remoteNumberE164 VARCHAR, " +
-					"remoteNumberPretty VARCHAR, " +
-					"remoteName VARCHAR, " +
-					"readModifyUrl VARCHAR);" +
-				"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);";
+		return new String[]	{	"CREATE TABLE CallData (" +
+									"id INTEGER PRIMARY KEY NOT NULL, " +
+									"direction INTEGER, " +
+									"missed INTEGER, " +
+									"read INTEGER, " +
+									"time INTEGER, " +
+									"localNumberE164 VARCHAR, " +
+									"localNumberPretty VARCHAR, " +
+									"localName VARCHAR, " +
+									"remoteNumberE164 VARCHAR, " +
+									"remoteNumberPretty VARCHAR, " +
+									"remoteName VARCHAR, " +
+									"readModifyUrl VARCHAR);",
+								"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);"
+		};
 	}
 
 	public String getDeleteStatement()

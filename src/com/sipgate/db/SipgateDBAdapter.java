@@ -40,7 +40,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 */
 	public Cursor getAllContactDataCursor()
 	{
-		return database.query("ContactData", null, null, null, null, null, "displayName asc");
+		return database.query("ContactData", null, null, null, null, null, "upper(displayName) asc");
 	}
 	
 	/**
@@ -849,19 +849,39 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	public void createTables(SQLiteDatabase database)
 	{
 		ContactNumberDBObject contactNumberDBObject = new ContactNumberDBObject();
-		database.execSQL(contactNumberDBObject.getCreateStatement());
+		
+		for(String statement : contactNumberDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
 		
 		ContactDataDBObject contactDataDBObject = new ContactDataDBObject();
-		database.execSQL(contactDataDBObject.getCreateStatement());
+
+		for(String statement : contactDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
 
 		CallDataDBObject callDataDBObject = new CallDataDBObject();
-		database.execSQL(callDataDBObject.getCreateStatement());
-
+		
+		for(String statement : callDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
+		
 		VoiceMailFileDBObject voiceMailFileDBObject = new VoiceMailFileDBObject();
-		database.execSQL(voiceMailFileDBObject.getCreateStatement());
+
+		for(String statement : voiceMailFileDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
 
 		VoiceMailDataDBObject voiceMailDataDBObject = new VoiceMailDataDBObject();
-		database.execSQL(voiceMailDataDBObject.getCreateStatement());	
+		
+		for(String statement : voiceMailDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
 	}	
 	
 	@Override

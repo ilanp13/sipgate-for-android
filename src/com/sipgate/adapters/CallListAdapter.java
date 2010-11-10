@@ -8,6 +8,7 @@ import java.util.Vector;
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.IBinder.DeathRecipient;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import com.sipgate.R;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.util.ApiServiceProvider;
 
@@ -252,7 +254,14 @@ public class CallListAdapter extends BaseAdapter
 				{
 					try 
 					{
-						apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+						try
+						{
+							apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+						}
+						catch (FeatureNotAvailableException fex)
+						{
+							Log.w(TAG, "markAsRead()", fex);
+						}
 					
 						callDataDBObject.setRead(true);
 						

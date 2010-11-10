@@ -133,7 +133,7 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 				currentDisplayName += currentContactDataDBObject.getLastName();
 			}
 			
-			currentFirstLetter = currentDisplayName.substring(0,1);
+			currentFirstLetter = currentDisplayName.substring(0,1).toUpperCase();
  
 			holder.contactName.setText(currentDisplayName);
 			holder.category.setText(currentFirstLetter);
@@ -158,7 +158,7 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 					lastDisplayName += lastContactDataDBObject.getLastName();
 				}
 				
-				lastFirstLetter = lastDisplayName.substring(0,1);
+				lastFirstLetter = lastDisplayName.substring(0,1).toUpperCase();
 								
 				if (lastFirstLetter.equalsIgnoreCase(currentFirstLetter)) 
 				{
@@ -194,7 +194,7 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 					nextDisplayName += nextContactDataDBObject.getLastName();
 				}
 				
-				nextFirstLetter = nextDisplayName.substring(0, 1);
+				nextFirstLetter = nextDisplayName.substring(0, 1).toUpperCase();
 				
 				if (!nextFirstLetter.equalsIgnoreCase(currentFirstLetter)) 
 				{
@@ -272,7 +272,7 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 				currentDisplayName += contactDataDBObject.getLastName();
 			}
 			
-			currentFirstLetter = currentDisplayName.substring(0,1);
+			currentFirstLetter = currentDisplayName.substring(0,1).toUpperCase();
 			
 	        index.put(currentFirstLetter, i);
         } 

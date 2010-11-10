@@ -26,12 +26,13 @@ public class VoiceMailFileDBObject extends BaseDBObject
 		statement.bindLong(2, id);
 	}
 
-	public String getCreateStatement()
+	public String[] getCreateStatement()
 	{
-		return 	"CREATE TABLE VoiceMailFile (" +
-					"id INTEGER PRIMARY KEY NOT NULL, " +
-					"value BLOB);" +
-				"CREATE UNIQUE INDEX uidx_id_VoiceMailFile ON VoiceMailFile (id ASC);";
+		return new String[]	{	"CREATE TABLE VoiceMailFile (" +
+									"id INTEGER PRIMARY KEY NOT NULL, " +
+									"value BLOB);",
+								"CREATE UNIQUE INDEX uidx_id_VoiceMailFile ON VoiceMailFile (id ASC);"
+		};
 	}
 
 	public String getDeleteStatement()

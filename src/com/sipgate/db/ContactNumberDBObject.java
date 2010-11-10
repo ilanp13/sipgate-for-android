@@ -41,15 +41,17 @@ public class ContactNumberDBObject extends BaseDBObject
 		statement.bindLong(5, id);
 	}
 
-	public String getCreateStatement()
+	public String[] getCreateStatement()
 	{
-		return 	"CREATE TABLE ContactNumber (" + 
-					"id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, " +
-					"type VARCHAR, " +
-					"uuid VARCHAR, " +
-					"numberE164 VARCHAR, " +
-					"numberPretty VARCHAR);" + 
-				"CREATE INDEX idx_uuid_ContactNumber ON ContactNumber (uuid ASC);";
+		return new String[]	{	"CREATE TABLE ContactNumber (" + 
+									"id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE, " +
+									"type VARCHAR, " +
+									"uuid VARCHAR, " +
+									"numberE164 VARCHAR, " +
+									"numberPretty VARCHAR);",
+								"CREATE UNIQUE INDEX uidx_id_ContactNumber ON ContactNumber (id ASC);",
+								"CREATE INDEX idx_uuid_ContactNumber ON ContactNumber (uuid ASC);"
+		};
 	}
 
 	public String getDeleteStatement()

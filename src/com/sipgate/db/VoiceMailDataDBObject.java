@@ -76,26 +76,27 @@ public class VoiceMailDataDBObject extends BaseDBObject
 		statement.bindLong(14, id);
 	}
 
-	public String getCreateStatement()
+	public String[] getCreateStatement()
 	{
-		return	"CREATE TABLE VoiceMailData (" +
-					"id INTEGER PRIMARY KEY NOT NULL, " +
-					"read INTEGER, seen INTEGER, " +
-					"time INTEGER, duration INTEGER, " +
-					"localNumberE164 VARCHAR, " +
-					"localNumberPretty VARCHAR, " +
-					"localName VARCHAR, " +
-					"remoteNumberE164 VARCHAR, " +
-					"remoteNumberPretty VARCHAR, " +
-					"remoteName VARCHAR, " +
-					"transcription VARCHAR, " +
-					"contentUrl VARCHAR, " +
-					"readModifyUrl VARCHAR);" +
-				"CREATE UNIQUE INDEX uidx_id_VoiceMailData ON VoiceMailData (id ASC);" +
-				"CREATE TRIGGER delete_VoiceMailData_id_VoiceMailFile_id BEFORE DELETE ON VoiceMailData " +
-					"FOR EACH ROW BEGIN " +
-						"DELETE FROM VoiceMailFile WHERE VoiceMailFile.id = OLD.id;" +
-					"END;";					
+		return new String[]	{	"CREATE TABLE VoiceMailData (" +
+									"id INTEGER PRIMARY KEY NOT NULL, " +
+									"read INTEGER, seen INTEGER, " +
+									"time INTEGER, duration INTEGER, " +
+									"localNumberE164 VARCHAR, " +
+									"localNumberPretty VARCHAR, " +
+									"localName VARCHAR, " +
+									"remoteNumberE164 VARCHAR, " +
+									"remoteNumberPretty VARCHAR, " +
+									"remoteName VARCHAR, " +
+									"transcription VARCHAR, " +
+									"contentUrl VARCHAR, " +
+									"readModifyUrl VARCHAR);",
+								"CREATE UNIQUE INDEX uidx_id_VoiceMailData ON VoiceMailData (id ASC);",
+								"CREATE TRIGGER delete_VoiceMailData_id_VoiceMailFile_id BEFORE DELETE ON VoiceMailData " +
+									"FOR EACH ROW BEGIN " +
+										"DELETE FROM VoiceMailFile WHERE VoiceMailFile.id = OLD.id;" +
+									"END;"
+		};					
 	}
 	
 	public String getDeleteStatement()

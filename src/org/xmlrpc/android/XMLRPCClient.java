@@ -244,8 +244,7 @@ public class XMLRPCClient {
 			XmlPullParser pullParser = XmlPullParserFactory.newInstance()
 					.newPullParser();
 			entity = response.getEntity();
-			Reader reader = new InputStreamReader(new BufferedInputStream(
-					entity.getContent()));
+			Reader reader = new InputStreamReader(new BufferedInputStream(entity.getContent(), 8192));
 			// for testing purposes only
 			// reader = new StringReader(
 			// "<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>"

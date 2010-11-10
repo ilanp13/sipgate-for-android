@@ -2,6 +2,7 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -22,6 +23,8 @@ import android.util.Log;
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
+import com.sipgate.db.ContactNumberDBObject;
+import com.sipgate.db.ContactNumberDBObject.PhoneType;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -490,6 +493,156 @@ public class XmlrpcClient implements ApiClientInterface {
 	@Override
 	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
 	{
-		return new Vector<ContactDataDBObject>();
+		Vector<ContactDataDBObject> contactDataDBObjects = new Vector<ContactDataDBObject>();
+
+		try 
+		{
+			parameters.clear();
+			apiResult = (HashMap<String, Object>) doXmlrpcCall("samurai.PhonebookListGet", parameters);
+			
+			Object[] phonebookList = (Object[]) apiResult.get("PhonebookList");
+			
+			HashMap<String, Object> objectHashMap = null;
+			
+			ArrayList<String> entryIds = new ArrayList<String>();
+			
+			for (Object phonebookObject : phonebookList) 
+			{
+				objectHashMap = (HashMap<String, Object>) phonebookObject;
+				
+				entryIds.add((String)objectHashMap.get("EntryID"));
+			}
+			
+			parameters.clear();
+			parameters.put("EntryIDList", entryIds);
+			
+			apiResult = (HashMap<String, Object>) doXmlrpcCall("samurai.PhonebookEntryGet", parameters);
+
+			Object[] entryList = (Object[]) apiResult.get("EntryList");
+			
+			for (Object entryObject : entryList) 
+			{
+				objectHashMap = (HashMap<String, Object>) entryObject;
+				
+				contactDataDBObjects.add(getContactDataDBObjectFromVCard((String)objectHashMap.get("EntryID"), (String)objectHashMap.get("Entry")));
+			}
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+		return contactDataDBObjects;
+	}
+	
+	public ContactDataDBObject getContactDataDBObjectFromVCard(String entryId, String vCard)
+	{
+		ContactDataDBObject contactDataDBObject = new ContactDataDBObject();
+		ContactNumberDBObject contactNumberDBObject = null;
+		
+		contactDataDBObject.setUuid(entryId);
+		
+		String[] vCardRows = vCard.split("\n");
+		
+		String value = "";
+		
+		for (String currentRow : vCardRows)
+		{
+			if (currentRow.contains("FN;"))
+			{
+				currentRow = currentRow.substring(currentRow.indexOf(":") + 1);
+				
+				if (contactDataDBObject.getDisplayName().length() == 0)
+				{
+					contactDataDBObject.setDisplayName(decodeQuotedPrintable(currentRow));
+				}
+			}
+			else if (currentRow.contains("TEL;"))
+			{
+				contactNumberDBObject = new ContactNumberDBObject();
+
+				contactNumberDBObject.setUuid(contactDataDBObject.getUuid());
+				
+				currentRow = currentRow.substring(currentRow.indexOf(";") + 1);
+				
+				if (currentRow.indexOf(";") > -1)
+				{
+					value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
+					currentRow = currentRow.substring(currentRow.indexOf(";") + 1);
+				}
+				else
+				{
+					value = currentRow.substring(0, currentRow.indexOf(":")).toUpperCase();
+				}
+								
+				if (value.equals("CELL"))
+				{
+					if (currentRow.indexOf(";") > -1)
+					{
+						value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
+					}
+					
+					contactNumberDBObject.setType(value);
+				} 
+				else if (value.equals("VOICE"))
+				{
+					if (currentRow.indexOf(";") > -1)
+					{
+						value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
+					}
+					else
+					{
+						value = "WORK";
+					}
+					
+					contactNumberDBObject.setType(value);
+				}
+				else
+				{
+					contactNumberDBObject.setType("OTHER");
+				}
+			
+				currentRow = currentRow.substring(currentRow.indexOf(":") + 1);
+				
+				contactNumberDBObject.setNumberE164(currentRow);
+				contactNumberDBObject.setNumberPretty(formatter.formattedPhoneNumberFromStringWithCountry(currentRow, locale.getCountry()));
+			
+				contactDataDBObject.addContactNumberDBObject(contactNumberDBObject);	
+			}
+		}
+				
+		return contactDataDBObject;
+	}
+	
+	public String decodeQuotedPrintable(String inString)
+	{
+		if (inString.contains("=")) 
+		{
+	        StringBuffer builder = new StringBuffer();
+	        
+	        int pos;
+
+	        while (inString.contains("=")) 
+	        {
+	        	pos = inString.indexOf('=');
+	            
+	        	builder.append(inString.substring(0, pos));
+
+	            char chr = (char) (Character.digit(inString.charAt(pos + 1), 16) * 16 + Character.digit(inString.charAt(pos + 2), 16));
+	          
+	            builder.append(chr);
+
+	            inString = inString.substring(pos + 2 + 1);
+	        }
+	        
+	        builder.append(inString);
+	        
+	        return builder.toString();
+	    } 
+		else 
+	    {
+	        return inString;
+	    }
 	}
 }
+

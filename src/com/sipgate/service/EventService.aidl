@@ -7,10 +7,7 @@ interface EventService {
 	void unregisterOnCallsIntent(in PendingIntent i);
 	void registerOnVoiceMailsIntent(in PendingIntent i);
 	void unregisterOnVoiceMailsIntent(in PendingIntent i);
-	
-	void refreshContacts();
-	void refreshVoicemails();
-	void refreshCalls();
+
 	void initCallRefreshTimer();
 	void initVoicemailRefreshTimer();
 	void initContactRefreshTimer();

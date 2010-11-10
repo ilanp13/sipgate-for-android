@@ -97,9 +97,9 @@ public class SipgateFrames extends TabActivity {
 			this.addVmTab();
 		}
 		
-		this.startService(new Intent(this, SipgateBackgroundService.class));
+		startService(new Intent(this, SipgateBackgroundService.class));
+		
 		Log.d(TAG, "calling setcurrenttab from oncreate");
-
 		this.setCurrentTab(bundle);
 	}
 

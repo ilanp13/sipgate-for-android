@@ -39,18 +39,19 @@ public class ContactDataDBObject extends BaseDBObject
 		statement.bindString(4, uuid);
 	}
 
-	public String getCreateStatement()
+	public String[] getCreateStatement()
 	{
-		return 	"CREATE TABLE ContactData (" +
-					"uuid VARCHAR PRIMARY KEY NOT NULL UNIQUE, " +
-					"firstName VARCHAR, " +
-					"lastName VARCHAR, " +
-					"displayName VARCHAR);" + 
-				"CREATE INDEX idx_uuid_ContactData ON ContactData (uuid ASC);" + 
-				"CREATE TRIGGER delete_ContactData_uuid_ContactNumber_uuid BEFORE DELETE ON ContactData " +
-				"FOR EACH ROW BEGIN " +
-					"DELETE FROM ContactNumber WHERE ContactNumber.uuid = OLD.uuid;" +
-				"END;";	
+		return new String[] { 	"CREATE TABLE ContactData (" +
+									"uuid VARCHAR PRIMARY KEY NOT NULL UNIQUE, " +
+									"firstName VARCHAR, " +
+									"lastName VARCHAR, " +
+									"displayName VARCHAR);",  
+								"CREATE INDEX idx_uuid_ContactData ON ContactData (uuid ASC);", 
+								"CREATE TRIGGER delete_ContactData_uuid_ContactNumber_uuid BEFORE DELETE ON ContactData " +
+									"FOR EACH ROW BEGIN " +
+										"DELETE FROM ContactNumber WHERE ContactNumber.uuid = OLD.uuid;" +
+									"END;" 
+		};	
 	}
 	
 	public String getDeleteStatement()
