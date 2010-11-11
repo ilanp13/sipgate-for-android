@@ -271,7 +271,7 @@ public class Setup extends Activity implements OnClickListener {
 
 	private void setupMobileExtension(String phoneNumber) {
 		String model = android.os.Build.MODEL;
-		String vendor = android.os.Build.MANUFACTURER;
+		String vendor = android.os.Build.PRODUCT;
 		String firmware = android.os.Build.VERSION.RELEASE;
 
 		SipgateProvisioningData provisioningData = getProvisioningData();

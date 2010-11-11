@@ -97,6 +97,7 @@ public class ContactParser extends DefaultHandler
 			if ("tel".equalsIgnoreCase(parent))
 			{
 				contactDataDBObject.addContactNumberDBObject(contactNumberDBObject);
+				
 				contactNumberDBObject = new ContactNumberDBObject();
 			}
 			

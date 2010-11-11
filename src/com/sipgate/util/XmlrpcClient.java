@@ -310,10 +310,10 @@ public class XmlrpcClient implements ApiClientInterface {
 				numberRemote = (String) historySet.get("RemoteUri");
 
 				localNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberLocal, locale.getCountry());
-				localNumberE164 = formatter.e164NumberWithPrefix("");
+				localNumberE164 = formatter.e164NumberWithPrefix("+");
 
 				remoteNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberRemote, locale.getCountry());
-				rempoteNumberE164 = formatter.e164NumberWithPrefix("");
+				rempoteNumberE164 = formatter.e164NumberWithPrefix("+");
 								
 				if(direction.equals("accepted")){
 					callDataDBObject.setMissed(false);

@@ -3,12 +3,12 @@ package com.sipgate.adapters;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Vector;
 
 import android.app.Activity;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.IBinder.DeathRecipient;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.sipgate.R;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.models.holder.CallViewHolder;
@@ -64,6 +65,8 @@ public class CallListAdapter extends BaseAdapter
 	private Drawable missedIcon = null;
 	private Drawable outgoingIcon = null;
 	
+	private HashMap<String, String> nameCache = null;
+	
 	public CallListAdapter(Activity activity) 
 	{
 		mInflater = activity.getLayoutInflater();
@@ -87,6 +90,8 @@ public class CallListAdapter extends BaseAdapter
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();
 		nextDayCalendar = Calendar.getInstance();
+		
+		nameCache = new HashMap<String, String>();
 	}
 		
 	public boolean areAllItemsEnabled() 
@@ -166,20 +171,60 @@ public class CallListAdapter extends BaseAdapter
 				holder.callTypeIconView.setImageDrawable(outgoingIcon);
 			}
 		
-			remoteNumber = currentCallDataDBObject.getRemoteNumberPretty();
+			remoteNumber = currentCallDataDBObject.getRemoteNumberE164();
 			remoteNumberPretty = currentCallDataDBObject.getRemoteNumberPretty();
 			remoteName = currentCallDataDBObject.getRemoteName();
-		
-			if (remoteName == null || remoteName.length() == 0 || remoteName.equals(remoteNumberPretty))
-			{
-				remoteName = unknownCallerString;
-			}
-				
+			
 			if(remoteNumber == null || remoteNumber.length() == 0 || remoteNumber.equals("+anonymous")) 
 			{
 				remoteNumber = noNumberString;
+				remoteName = unknownCallerString;
+			}
+			else
+			{
+				if (remoteName == null || remoteName.length() == 0 || remoteName.equals(remoteNumberPretty))
+				{
+					if (nameCache.containsKey(remoteNumber))
+					{
+						remoteName = nameCache.get(remoteNumber);
+					}				
+					else
+					{
+						ContactDataDBObject contactDataDBObject = sipgateDBAdapter.getContactDataDBObjectByNumberE164(remoteNumber);
+						
+						if (contactDataDBObject != null)
+						{
+							if (contactDataDBObject.getDisplayName() != null ||  contactDataDBObject.getDisplayName().length() > 0)
+							{
+								remoteName = contactDataDBObject.getDisplayName();
+							}
+							else
+							{
+								remoteName = contactDataDBObject.getFirstName();
+								
+								if (remoteName.length() > 0)
+								{
+									remoteName += " ";
+								}
+								
+								remoteName += contactDataDBObject.getLastName();
+							}
+						}
+						else
+						{
+							remoteName = unknownCallerString;
+						}
+						
+						nameCache.put(remoteNumber, remoteName);
+					}
+				}
 			}
 			
+			if(remoteNumberPretty == null || remoteNumberPretty.length() == 0 || remoteNumberPretty.equals("+anonymous")) 
+			{
+				remoteNumberPretty = remoteNumber;
+			}
+						
 			if (isRead) 
 			{
 				holder.callerNameView.setTypeface(Typeface.DEFAULT);
@@ -192,7 +237,7 @@ public class CallListAdapter extends BaseAdapter
 			}
 			
 			holder.callerNameView.setText(remoteName);
-			holder.callerNumberView.setText(remoteNumber);
+			holder.callerNumberView.setText(remoteNumberPretty);
 		
 			currentDayCalendar.setTimeInMillis(currentCallDataDBObject.getTime());
 			
@@ -301,6 +346,8 @@ public class CallListAdapter extends BaseAdapter
 		try
 		{
 			callDataDBObjects = sipgateDBAdapter.getAllCallData();
+			
+			nameCache.clear();
 		}
 		catch (Exception e) 
 		{

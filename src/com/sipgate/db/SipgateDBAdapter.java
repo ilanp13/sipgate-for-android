@@ -244,6 +244,18 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	{
 		return database.query("ContactNumber", null, "uuid = ?", new String[]{ uuid }, null, null, null);
 	}
+	
+	/**
+	 * Gets a cursor with all contact numbers of a specific contact uuid record.
+	 * 
+	 * @param uuid The contact uuid
+	 * @return A cursor with all contact numbers the specific contact uuid
+	 * @since 1.0
+	 */
+	public Cursor getContactNumberCursorByNumberE164(String numberE164)
+	{
+		return database.query("ContactNumber", null, "numberE164 = ?", new String[]{ numberE164 }, null, null, null);
+	}
 		
 	/**
 	 * Gets a cursor with a specific call record.
@@ -322,6 +334,47 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	}
 
 	/**
+	 * Gets an object with a specific contact number record.
+	 * 
+	 * @param numberE164 The contact number in E164 format
+	 * @return An object with the specific contact number record without contact numbers
+	 * @since 1.0
+	 */
+	public ContactNumberDBObject getContactNumberDBObjectByNumberE164(String numberE164)
+	{
+		ContactNumberDBObject contactNumber = null;
+		
+		Cursor cursor = getContactNumberCursorByNumberE164(numberE164);
+		
+		try
+		{
+			if (cursor != null && cursor.moveToNext())
+			{
+				contactNumber = new ContactNumberDBObject();
+				
+				contactNumber.setId(cursor.getLong(0));
+				contactNumber.setType(cursor.getString(1));
+				contactNumber.setUuid(cursor.getString(2));
+				contactNumber.setNumberE164(cursor.getString(3));
+				contactNumber.setNumberPretty(cursor.getString(4));
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getContactNumberDBObjectByNumberE164() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+	
+		return contactNumber;
+	}
+	
+	/**
 	 * Gets an object with all contact number records of a specific uuid.
 	 * 
 	 * @param uuid The contact uuid
@@ -392,6 +445,53 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		
 		return contact;
 	}
+	
+	/**
+	 * Gets an object with a specific contact record.
+	 * 
+	 * @param numberE164 a number in e164 format of a contact
+	 * @return An object with the specific contact data record
+	 * @since 1.0
+	 */
+	public ContactDataDBObject getContactDataDBObjectByNumberE164(String numberE164)
+	{
+		ContactDataDBObject contact = null;
+		
+		ContactNumberDBObject contactNumber = getContactNumberDBObjectByNumberE164(numberE164);
+		
+		if (contactNumber != null)
+		{
+			Cursor cursor = getContactDataCursorByUuid(contactNumber.getUuid());
+			
+			try
+			{
+				if (cursor != null && cursor.moveToNext())
+				{
+					contact = new ContactDataDBObject();
+					
+					contact.setUuid(cursor.getString(0));
+					contact.setFirstName(cursor.getString(1));
+					contact.setLastName(cursor.getString(2));
+					contact.setDisplayName(cursor.getString(3));
+				}
+			}
+			catch (Exception e)
+			{
+				Log.e(getClass().getName(), "getContactDataDBObjectByNumberE164() -> " + e.getMessage());
+			}
+			finally
+			{
+				if (!cursor.isClosed() && cursor != null)
+				{
+					cursor.close();
+				}
+			}
+		}
+		
+		return contact;
+	}
+	
+	
 	/**
 	 * Gets an object with a specific call record.
 	 * 

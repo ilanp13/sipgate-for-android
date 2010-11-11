@@ -1,7 +1,6 @@
 package com.sipgate.db;
 
 import android.database.sqlite.SQLiteStatement;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import com.sipgate.db.base.BaseDBObject;
 
@@ -13,7 +12,7 @@ public class ContactNumberDBObject extends BaseDBObject
 	private String uuid = "";
 	private String numberE164 = "";
 	private String numberPretty = "";
-
+	
 	public enum PhoneType 
 	{
 		HOME, CELL, WORK, WORK_FAX, HOME_FAX, PAGER, OTHER, CUSTOM, ASSISTANT, CALLBACK, CAR, COMPANY_MAIN, ISDN, MAIN, MMS, OTHER_FAX, RADIO, TELEX, TTY_TDD, WORK_CELL, WORK_PAGER;
@@ -50,7 +49,8 @@ public class ContactNumberDBObject extends BaseDBObject
 									"numberE164 VARCHAR, " +
 									"numberPretty VARCHAR);",
 								"CREATE UNIQUE INDEX uidx_id_ContactNumber ON ContactNumber (id ASC);",
-								"CREATE INDEX idx_uuid_ContactNumber ON ContactNumber (uuid ASC);"
+								"CREATE INDEX idx_uuid_ContactNumber ON ContactNumber (uuid ASC);",
+								"CREATE INDEX idx_numberE164_ContactNumber ON ContactNumber (numberE164 ASC);"
 		};
 	}
 
@@ -74,7 +74,7 @@ public class ContactNumberDBObject extends BaseDBObject
 	public String getUpdateStatement()
 	{
 		return 	"UPDATE ContactNumber " + 
-					"SET type = ?, deviceType = ?, uuid = ?, numberE164 = ?, numberPretty = ? " + 
+					"SET type = ?, deviceType = ?, uuid = ?, numberE164 = ?, numberPretty = ?" + 
 				"WHERE id = ?";
 	}
 

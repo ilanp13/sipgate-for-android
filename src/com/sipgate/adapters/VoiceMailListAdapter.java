@@ -2,7 +2,6 @@ package com.sipgate.adapters;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Vector;
 
 import android.app.Activity;
@@ -17,14 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
-import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.models.holder.VoiceMailViewHolder;
 
 public class VoiceMailListAdapter extends BaseAdapter
 {
-	@SuppressWarnings("unused")
 	private final static String TAG = "VoiceMailListAdapter";
 
 	private LayoutInflater mInflater = null;
@@ -149,7 +146,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 			}
 	
 			remoteNumberPretty = currentVoiceMailDataDBObject.getRemoteNumberPretty();
-			
 			remoteName = currentVoiceMailDataDBObject.getRemoteName();
 			
 			if (remoteName == null || remoteName.length() == 0)
