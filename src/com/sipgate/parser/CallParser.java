@@ -21,6 +21,7 @@ public class CallParser extends DefaultHandler
 
 	private StringBuffer currentValue = null;
 	private String parent = null;
+	private String location = null;
 	
 	public CallParser()
 	{
@@ -33,6 +34,7 @@ public class CallParser extends DefaultHandler
 		callDataDBObjects.clear();
 		currentValue.setLength(0);
 		parent = null;
+		location = null;
 	}
 	
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
@@ -53,7 +55,10 @@ public class CallParser extends DefaultHandler
 	{
 		if ("call".equalsIgnoreCase(localName))
 		{
-			callDataDBObjects.add(callDataDBObject);
+			if (!location.equalsIgnoreCase("trash"))
+			{
+				callDataDBObjects.add(callDataDBObject);
+			}
 		}
 		else if ("id".equalsIgnoreCase(localName))
 		{
@@ -102,6 +107,10 @@ public class CallParser extends DefaultHandler
 			{
 				callDataDBObject.setReadModifyUrl(currentValue.toString());
 			}
+		}
+		else if ("location".equalsIgnoreCase(localName))
+		{
+			location = currentValue.toString();
 		}
 		else if ("numberE164".equalsIgnoreCase(localName))
 		{

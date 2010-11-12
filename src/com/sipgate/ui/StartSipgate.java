@@ -3,6 +3,7 @@ package com.sipgate.ui;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -18,7 +19,7 @@ import com.sipgate.util.PhoneNumberFormatter;
  */
 public class StartSipgate extends Activity {
 //	private static final String TAG = "StartSipgate";
-	
+		
 	/**
 	 * Overwritten onCreate procedure
 	 * 

@@ -1,13 +1,6 @@
 <PreferenceScreen
 	xmlns:android="http://schemas.android.com/apk/res/android">
-			<ListPreference
-				android:key="pref"
-				android:title="@string/settings_pref"
-				android:entries="@array/pref_display_values"
-				android:entryValues="@array/pref_values"
-				android:summary="@string/settings_pref2"
-				android:dialogTitle="@string/settings_pref" />
-	<PreferenceScreen android:title="@string/settings_account"> <!-- android:shouldDisableView="true" android:enabled="false" android:selectable="false">-->
+		<PreferenceScreen android:title="@string/settings_account"> <!-- android:shouldDisableView="true" android:enabled="false" android:selectable="false">-->
 			<EditTextPreference
 				android:key="username"
 				android:title="@string/settings_username"

@@ -8,10 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
@@ -47,27 +49,41 @@ public class Setup extends Activity implements OnClickListener {
 	
 	private SettingsClient settingsClient = null;
 	
+	private ProgressDialog progressDialog = null;
+	
+	private Context context = null;
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) 
+	{
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.sipgate_setup);
 		
-		isVoiceAccount = isVoiceAccount();
+		context = this;
 		
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 		
-		this.settingsClient = SettingsClient.getInstance(getApplicationContext());
-		if (!this.settingsClient.isProvisioned()) {
-
-			if (isVoiceAccount) {
+		settingsClient = SettingsClient.getInstance(getApplicationContext());
+		
+		if (!settingsClient.isProvisioned()) 
+		{
+			showWait();
+			
+			if (isVoiceAccount()) 
+			{
 				prepareVoiceSetup();
-			} else {
+			} 
+			else 
+			{
 				prepareTeamSetup();
 			}
+			
+			hideWait();
 		}
-		else {
-			//Intent intent = new Intent(this, Sipgate.class);
+		else 
+		{
 			Intent intent = new Intent(this, com.sipgate.ui.SipgateFrames.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
@@ -111,7 +127,6 @@ public class Setup extends Activity implements OnClickListener {
 		
 		this.registrar = provisioningData.getRegistrar();
 		this.outboundProxy = provisioningData.getOutboundProxy();
-
 		
 		extensions = provisioningData.getExtensions();
 
@@ -224,6 +239,27 @@ public class Setup extends Activity implements OnClickListener {
 		
 	}
 	
+	private void showWait() 
+	{
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				progressDialog = ProgressDialog.show(context, "", getResources().getString(R.string.sipgate_load_extension), true);
+				Looper.loop();
+			}
+		}).start();
+	}
+
+	private void hideWait() 
+	{
+		if (progressDialog != null && progressDialog.isShowing())
+		{
+			progressDialog.cancel();
+		}
+	}
 	
 	private class MyArrayAdapter extends ArrayAdapter<String>
 	{
@@ -235,7 +271,7 @@ public class Setup extends Activity implements OnClickListener {
 
 	private void setupMobileExtension(String phoneNumber) {
 		String model = android.os.Build.MODEL;
-		String vendor = android.os.Build.MANUFACTURER;
+		String vendor = android.os.Build.PRODUCT;
 		String firmware = android.os.Build.VERSION.RELEASE;
 
 		SipgateProvisioningData provisioningData = getProvisioningData();

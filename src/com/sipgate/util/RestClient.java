@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.ApiException;
@@ -37,6 +38,7 @@ import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
 import com.sipgate.parser.CallParser;
+import com.sipgate.parser.ContactParser;
 import com.sipgate.parser.VoiceMailParser;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
@@ -64,6 +66,7 @@ public class RestClient implements ApiClientInterface {
 	private int subLength = 0;
 	
 	private SAXParser saxParser = null;
+	private ContactParser contactParser = null;
 	private CallParser callParser = null;
 	private VoiceMailParser voiceMailParser = null;
 	
@@ -77,6 +80,8 @@ public class RestClient implements ApiClientInterface {
 		try 
 		{
 			saxParser = SAXParserFactory.newInstance().newSAXParser();
+			
+			contactParser = new ContactParser();
 			callParser = new CallParser();
 			voiceMailParser = new VoiceMailParser();
 		}
@@ -194,45 +199,6 @@ public class RestClient implements ApiClientInterface {
 	}
 	
 
-	public Vector<CallDataDBObject> getCalls() throws ApiException
-	{
-		try 
-		{
-			inputStream = authenticationInterface.getCalls();
-		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}
-		
-		if (inputStream == null) 
-		{
-			Log.e(TAG, "getCalls() -> inputstream is null");
-			return null;
-		}
-	
-		if (callParser != null && saxParser != null)
-		{
-			callParser.init();
-			
-			try 
-			{
-				saxParser.parse(inputStream, callParser);
-				return callParser.getCallDataDBObjects();
-			}
-			catch (SAXException e) 
-			{
-				e.printStackTrace();
-			}
-			catch (IOException e) 
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		Log.e(TAG, "getCalls() -> saxParser or callParser is null");
-		return null;
-	}
 	
 	public String getBaseProductType() throws IOException, URISyntaxException
 	{
@@ -357,7 +323,8 @@ public class RestClient implements ApiClientInterface {
 			return null;
 		}
 		
-		try {
+		try 
+		{
 			db = dbf.newDocumentBuilder();
 			doc = db.parse(inputStream);
 			doc.getDocumentElement().normalize();
@@ -391,13 +358,96 @@ public class RestClient implements ApiClientInterface {
 			
 			return extensions;
 		
-		} catch (Exception e) {
+		}
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
 		return null;
 	}
 
+	public Vector<ContactDataDBObject> getContacts() throws ApiException
+	{
+		try 
+		{
+			inputStream = authenticationInterface.getContacts();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+		if (inputStream == null) 
+		{
+			Log.e(TAG, "getContacts() -> inputstream is null");
+			return null;
+		}
+	
+		if (contactParser != null && saxParser != null)
+		{
+			contactParser.init();
+			
+			try 
+			{
+				saxParser.parse(inputStream, contactParser);
+				return contactParser.getContactDataDBObjects();
+			}
+			catch (SAXException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		Log.e(TAG, "getContacts() -> saxParser or contactParser is null");
+		return null;
+	}
+	
+	
+	public Vector<CallDataDBObject> getCalls() throws ApiException
+	{
+		try 
+		{
+			inputStream = authenticationInterface.getCalls();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+		if (inputStream == null) 
+		{
+			Log.e(TAG, "getCalls() -> inputstream is null");
+			return null;
+		}
+	
+		if (callParser != null && saxParser != null)
+		{
+			callParser.init();
+			
+			try 
+			{
+				saxParser.parse(inputStream, callParser);
+				return callParser.getCallDataDBObjects();
+			}
+			catch (SAXException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		Log.e(TAG, "getCalls() -> saxParser or callParser is null");
+		return null;
+	}
+	
 	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException
 	{
 		try 

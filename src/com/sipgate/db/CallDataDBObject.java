@@ -71,19 +71,36 @@ public class CallDataDBObject extends BaseDBObject
 		statement.bindLong(12, id);
 	}
 
-	public String getCreateStatement()
+	public String[] getCreateStatement()
 	{
-		return "CREATE TABLE CallData (id INTEGER PRIMARY KEY NOT NULL, direction INTEGER, missed INTEGER, read INTEGER, time INTEGER, localNumberE164 VARCHAR, localNumberPretty VARCHAR, localName VARCHAR, remoteNumberE164 VARCHAR, remoteNumberPretty VARCHAR, remoteName VARCHAR, readModifyUrl VARCHAR)";
+		return new String[]	{	"CREATE TABLE CallData (" +
+									"id INTEGER PRIMARY KEY NOT NULL, " +
+									"direction INTEGER, " +
+									"missed INTEGER, " +
+									"read INTEGER, " +
+									"time INTEGER, " +
+									"localNumberE164 VARCHAR, " +
+									"localNumberPretty VARCHAR, " +
+									"localName VARCHAR, " +
+									"remoteNumberE164 VARCHAR, " +
+									"remoteNumberPretty VARCHAR, " +
+									"remoteName VARCHAR, " +
+									"readModifyUrl VARCHAR);",
+								"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);"
+		};
 	}
 
 	public String getDeleteStatement()
 	{		
-		return "DELETE FROM CallData WHERE id = ?";
+		return 	"DELETE FROM CallData WHERE id = ?";
 	}
 
 	public String getInsertStatement()
 	{
-		return "INSERT INTO CallData (id, direction, missed, read, time, localNumberE164, localNumberPretty, localName, remoteNumberE164, remoteNumberPretty, remoteName, readModifyUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		return 	"INSERT INTO CallData (" +
+					"id, direction, missed, read, time, localNumberE164, localNumberPretty, " +
+					"localName, remoteNumberE164, remoteNumberPretty, remoteName, readModifyUrl) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
@@ -93,7 +110,10 @@ public class CallDataDBObject extends BaseDBObject
 
 	public String getUpdateStatement()
 	{
-		return "UPDATE CallData SET direction = ?, missed = ?, read = ?, time = ?, localNumberE164 = ?, localNumberPretty = ?, localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, readModifyUrl = ? WHERE id = ?";
+		return 	"UPDATE CallData " +
+					"SET direction = ?, missed = ?, read = ?, time = ?, localNumberE164 = ?, localNumberPretty = ?, " +
+					"localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, readModifyUrl = ? " +
+				"WHERE id = ?";
 	}
 
 	public long getId()
@@ -239,5 +259,18 @@ public class CallDataDBObject extends BaseDBObject
 	public void setReadModifyUrl(String readModifyUrl)
 	{
 		this.readModifyUrl = readModifyUrl;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof CallDataDBObject)
+		{
+			return ((CallDataDBObject)obj).getId() == id;
+		}
+		else
+		{	
+			return super.equals(obj);
+		}
 	}
 }

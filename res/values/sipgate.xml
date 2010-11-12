@@ -4,6 +4,7 @@
 	<string name="sipgate_wrong_credentials">Wrong username and / or password, please try again ...</string>
 	<string name="sipgate_no_credentials">No username and / or password provided ...</string>
 	<string name="sipgate_wait">Please wait. Connecting to Server...</string>
+	<string name="sipgate_load_extension">Please wait. Loading extensions...</string>
 	<string name="username">username</string>
 	<string name="password">password</string>
 	<string name="ok">ok</string>

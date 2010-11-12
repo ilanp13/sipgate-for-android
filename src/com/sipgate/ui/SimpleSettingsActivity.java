@@ -27,7 +27,6 @@ import com.sipgate.util.SettingsClient;
 
 public class SimpleSettingsActivity extends Activity implements OnClickListener {
 	private static final String TAG = "SimpleSettingsActivity";
-	private Context context = this;
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -143,12 +142,10 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
 							
 							ApiServiceProvider.getInstance(getApplicationContext()).unRegister();
             		
-							SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(context);
+							SipgateDBAdapter sipgateDBAdapter = SipgateDBAdapter.getInstance(getApplicationContext());
 							
-							sipgateDBAdapter.deleteAllCallDBObjects();
-							sipgateDBAdapter.deleteAllVoiceMailDBObjects();
-							
-							sipgateDBAdapter.close();
+							sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
+							sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
 							
 							Intent intent = new Intent(getApplicationContext(), Login.class);
 							startActivity(intent);

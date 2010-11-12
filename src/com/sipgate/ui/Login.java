@@ -3,9 +3,12 @@ package com.sipgate.ui;
 import java.io.Serializable;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,71 +29,29 @@ public class Login extends Activity implements OnClickListener {
 	private Button okButton;
 
 	private ApiServiceProvider apiServiceProvider = null;
-
-	private void showWait() {
-		okButton.setClickable(false);
-		okButton.setEnabled(false);
-		showWaitToast();
-	}
-
-	private void hideWait() {
-		okButton.setClickable(true);
-		okButton.setEnabled(true);
-	}
-
-	private void showWrongCredentialsToast() {
-		int duration = Toast.LENGTH_LONG;
-		Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(
-				R.string.sipgate_wrong_credentials), duration);
-		toast.show();
-	}
-
-	private void showNetworkProblemToast() {
-		int duration = Toast.LENGTH_LONG;
-		Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(
-				R.string.sipgate_network_problem), duration);
-		toast.show();
-	}
-
-	private void showNoCredentialsToast() {
-		int duration = Toast.LENGTH_LONG;
-		Toast toast = Toast.makeText(getApplicationContext(),
-				getResources().getString(R.string.sipgate_no_credentials), duration);
-		toast.show();
-	}
-
-	private void showWaitToast() {
-		int duration = Toast.LENGTH_LONG;
-		Toast toast = Toast
-				.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_wait), duration);
-		toast.show();
-	}
-
-	private void openSetupActivity(Serializable data) {
-		try {
-			Intent intent = new Intent(getApplicationContext(), Setup.class);
-			intent.putExtra("com.sipgate.ui.credentials", data);
-			startActivity(intent);
-		} catch (ActivityNotFoundException e) {
-			Log.w(TAG, e.getLocalizedMessage());
-		}
-	}
-
+	private ProgressDialog progressDialog = null;
+	
+	private Context context = this;
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) 
+	{
 		super.onCreate(savedInstanceState);
-
-		this.apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
-		if (apiServiceProvider.isRegistered()) {
-			Intent authorizationIntent = new Intent(this, Setup.class);
-			startActivity(authorizationIntent);
-		}
 
 		setContentView(R.layout.sipgate_setup_login);
 
+		context = this;
+
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
-
+		
+		this.apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
+		
+		if (apiServiceProvider.isRegistered()) 
+		{
+			Intent authorizationIntent = new Intent(this, Setup.class);
+			startActivity(authorizationIntent);
+		}
 	}
 	
 	@Override
@@ -112,24 +73,28 @@ public class Login extends Activity implements OnClickListener {
 		return result;
 	}
 
-	public void onClick(View v) {
+	public void onClick(View v) 
+	{
 		EditText username = (EditText) findViewById(R.id.inputUsername);
 		EditText password = (EditText) findViewById(R.id.inputPassword);
 
-		try {
+		try 
+		{
+						
 			String user = username.getText().toString();
 			String pass = password.getText().toString();
 
-			if ((user.length()) > 0 && (pass.length() > 0)) {
-				SipgateProvisioningData data = null;
+			if ((user.length()) > 0 && (pass.length() > 0)) 
+			{
 				showWait();
-
+				
+				SipgateProvisioningData data = null;
+				
 				ApiServiceProvider apiProvider = ApiServiceProvider.getInstance(getApplicationContext());
 				apiProvider.register(user, pass);
 
 				data = apiProvider.getProvisioningData();
 
-				hideWait();
 				openSetupActivity(data);
 			} else {
 				showNoCredentialsToast();
@@ -137,13 +102,92 @@ public class Login extends Activity implements OnClickListener {
 		} catch (NetworkProblemException e) {
 			showNetworkProblemToast();
 		} catch (Exception e) {
-			// TODO FIXME we need to differenciate between credentials- and other errors !!!
 			showWrongCredentialsToast();
 			e.printStackTrace();
-		} finally {
+		} 
+		finally
+		{
 			hideWait();
 		}
-
+	}
+	
+	private void openSetupActivity(Serializable data) {
+		try {
+			Intent intent = new Intent(getApplicationContext(), Setup.class);
+			intent.putExtra("com.sipgate.ui.credentials", data);
+			startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			Log.w(TAG, e.getLocalizedMessage());
+		}
+	}
+	
+	private void showWait() 
+	{
+		okButton.setClickable(false);
+		okButton.setEnabled(false);
+		
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				progressDialog = ProgressDialog.show(context, "", getResources().getString(R.string.sipgate_wait), true);
+				Looper.loop();
+			}
+		}).start();
 	}
 
+	private void hideWait() 
+	{
+		okButton.setClickable(true);
+		okButton.setEnabled(true);
+	
+		if (progressDialog != null && progressDialog.isShowing())
+		{
+			progressDialog.cancel();
+		}
+	}
+
+	private void showWrongCredentialsToast() 
+	{
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_wrong_credentials), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+
+	private void showNetworkProblemToast() 
+	{
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_network_problem), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+
+	private void showNoCredentialsToast() 
+	{
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_credentials), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
 }
