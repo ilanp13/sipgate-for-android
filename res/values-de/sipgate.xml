@@ -4,6 +4,7 @@
 	<string name="sipgate_wrong_credentials">Falscher Beutzername oder falsches Passwort. Bitte versuchen Sie es noch einmal ...</string>
 	<string name="sipgate_no_credentials">Kein Benutzername oder Passwort angegeben ...</string>
 	<string name="sipgate_wait">Bitte warten. Verbinde zum Server...</string>
+	<string name="sipgate_load_extension">Bitte warten. Lade Telefoneliste...</string>
 	<string name="username">Benutzername</string>
 	<string name="password">Passwort</string>
 	<string name="ok">Ok</string>
@@ -16,7 +17,7 @@
 	<string name="simple_settings_balance">Guthaben</string>
 	<string name="simple_settings_wlan">VoIP via WLAN</string>
 	<string name="simple_settings_3g">VoIP via 3G</string>
-	<string name="simple_settings_advanced">Profi-Einstellungen</string>
+	<string name="simple_settings_advanced">Experten-Einstellungen</string>
 	<string name="dateTimeFormatForDay">dd.MM.yyyy</string>
    	<string name="dateTimeFormatForTime">HH:mm</string>
    	<string name="refresh">aktualisieren</string>

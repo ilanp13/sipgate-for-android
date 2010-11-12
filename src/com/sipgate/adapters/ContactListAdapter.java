@@ -1,155 +1,215 @@
 package com.sipgate.adapters;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.sipgate.R;
-import com.sipgate.models.SipgateContact;
+import com.sipgate.db.ContactDataDBObject;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.models.holder.ContactViewHolder;
-import com.sipgate.util.AndroidContactsClient;
 
-public class ContactListAdapter extends BaseAdapter
+public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 {
 	private final static String TAG = "ContactListAdapter";
+
+	private LayoutInflater mInflater = null;
 	
-	private final LayoutInflater mInflater;
-	private AndroidContactsClient contactsClient;
-	private HashMap<Integer,SipgateContact> contactsCacheMap = null;
+	private SipgateDBAdapter sipgateDBAdapter = null;
+	
+	private Vector<ContactDataDBObject> contactDataDBObjects = null;
 	
 	private ContactViewHolder holder = null;
 	
-	private SipgateContact sipgateContact = null;
-	private SipgateContact lastSipgateContact = null;
-	private SipgateContact nextSipgateContact = null;
-	private SipgateContact currentContact = null;
+	private ContactDataDBObject currentContactDataDBObject = null;
+	private ContactDataDBObject lastContactDataDBObject = null;
+	private ContactDataDBObject nextContactDataDBObject = null;
+		
+	private String currentDisplayName = null;
+	private String lastDisplayName = null;
+	private String nextDisplayName = null;
 	
-	private Bitmap photo = null;
-	private String displayName = null;
 	private String currentFirstLetter = null;
 	private String lastFirstLetter = null;
 	private String nextFirstLetter = null;
-
+		
+	private HashMap <String, Integer> index = null;
+	private Object[] sections = null;
+		
 	public ContactListAdapter(Activity activity) 
 	{
 		mInflater = activity.getLayoutInflater();
-		contactsClient = new AndroidContactsClient(activity);
-		contactsCacheMap = new HashMap<Integer, SipgateContact>();
-	}
+		
+		index = new HashMap<String, Integer>();
+			
+		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
+		
+		contactDataDBObjects = sipgateDBAdapter.getAllContactData();
 
-	@Override
-	public boolean areAllItemsEnabled() {
+		refreshIndex(contactDataDBObjects);
+	}
+		
+	public boolean areAllItemsEnabled() 
+	{
 		return true;
 	}
-
-	@Override
-	public boolean isEnabled(int position) {
-		return true;
-	}
-
-	@Override
-	public Object getItem(int position) {
-		return this.getContact(position);
-	}
-
-	@Override
-	public long getItemId(int position) {
-		SipgateContact contact = this.getContact(position);
 	
-		if (contact != null) {
-			return contact.getId();
+	public boolean isEnabled(int position) 
+	{
+		return true;
+	}
+		
+	public Object getItem(int position) 
+	{
+		if (getCount() >= position)
+		{
+			return contactDataDBObjects.elementAt(position);
+		}
+	
+		return null;
+	}
+	
+	public long getItemId(int position) 
+	{
+		if (getCount() >= position)
+		{
+			return position;
 		}
 		
 		return 0;
 	}
-
+	
 	@Override
-	public int getItemViewType(int position) {
+	public int getItemViewType(int position) 
+	{
 		return 0;
 	}
 	
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		if (convertView == null) {
+	public View getView(int position, View convertView, ViewGroup parent) 
+	{
+		if (convertView == null) 
+		{
 			convertView = mInflater.inflate(R.layout.sipgate_contacts_list_bit, null);
 			holder = new ContactViewHolder();
 			holder.contactName = (TextView) convertView.findViewById(R.id.contactName);
-			holder.contactImage = (ImageView) convertView.findViewById(R.id.contactPhoto);
 			holder.category = (TextView) convertView.findViewById(R.id.ContactsLetterTextView);
 			holder.separator = (View) convertView.findViewById(R.id.ContactsSeparator);
 			convertView.setTag(holder);
 
-		} else {
+		} else 
+		{
 			holder = (ContactViewHolder) convertView.getTag();
 		}
-		
-		sipgateContact = (SipgateContact) getItem(position);
+				
+		currentContactDataDBObject = (ContactDataDBObject) getItem(position);
 
-		if (sipgateContact == null) {
-			Log.e(TAG, "item at position " + position + " is null");
-			return null;
-		}	
-
-		displayName = sipgateContact.getDisplayName();
-		if (displayName != null) {
-			Log.d(TAG, displayName);
-		} else {
-			Log.d(TAG, "no name");
-		}
-		currentFirstLetter = displayName.substring(0, 1);
-
-		holder.contactName.setText(displayName);
-		holder.category.setText(currentFirstLetter);
-
-		photo = sipgateContact.getPhoto();
-		if (photo != null) {
-			holder.contactImage.setImageBitmap(photo);
-			Log.d(TAG, "has pic");
-		} else {
-			Log.d(TAG, "no pic");
-		}
-
-		if (position >= 1) {
-			lastSipgateContact = (SipgateContact) getItem(position - 1);
-			lastFirstLetter = lastSipgateContact.getDisplayName().substring(0, 1);
-			if (lastFirstLetter.equalsIgnoreCase(currentFirstLetter)) {
-				holder.category.setVisibility(View.GONE);
-			} else {
-				holder.category.setVisibility(View.VISIBLE);
-			}
-		}
-
-		if (position < getCount() - 1) {
-			nextSipgateContact = (SipgateContact) getItem(position + 1);
-			
-			// TODO fix contacts!!!
-			
-			if (nextSipgateContact != null)
+		if (currentContactDataDBObject != null)
+		{
+			if (currentContactDataDBObject.getDisplayName() != null ||  currentContactDataDBObject.getDisplayName().length() > 0)
 			{
-				nextFirstLetter = nextSipgateContact.getDisplayName().substring(0, 1);
-				if (!nextFirstLetter.equalsIgnoreCase(currentFirstLetter)) {
-					holder.separator.setVisibility(View.GONE);
-				} else {
-					holder.separator.setVisibility(View.VISIBLE);
+				currentDisplayName = currentContactDataDBObject.getDisplayName();
+			}
+			else
+			{
+				currentDisplayName = currentContactDataDBObject.getFirstName();
+				
+				if (currentDisplayName.length() > 0)
+				{
+					currentDisplayName += " ";
+				}
+				
+				currentDisplayName += currentContactDataDBObject.getLastName();
+			}
+			
+			currentFirstLetter = currentDisplayName.substring(0,1).toUpperCase();
+ 
+			holder.contactName.setText(currentDisplayName);
+			holder.category.setText(currentFirstLetter);
+						
+			if (position > 0) 
+			{
+				lastContactDataDBObject = (ContactDataDBObject) getItem(position - 1);
+			
+				if (lastContactDataDBObject.getDisplayName() != null ||  lastContactDataDBObject.getDisplayName().length() > 0)
+				{
+					lastDisplayName = lastContactDataDBObject.getDisplayName();
+				}
+				else
+				{
+					lastDisplayName = lastContactDataDBObject.getFirstName();
+					
+					if (lastDisplayName.length() > 0)
+					{
+						lastDisplayName += " ";
+					}
+					
+					lastDisplayName += lastContactDataDBObject.getLastName();
+				}
+				
+				lastFirstLetter = lastDisplayName.substring(0,1).toUpperCase();
+								
+				if (lastFirstLetter.equalsIgnoreCase(currentFirstLetter)) 
+				{
+					holder.category.setVisibility(View.GONE);
+				} 
+				else 
+				{
+					holder.category.setVisibility(View.VISIBLE);
 				}
 			}
 			else
 			{
-				holder.separator.setVisibility(View.VISIBLE);
+				holder.category.setVisibility(View.VISIBLE);
+			}
+						
+			if (position < getCount() - 1) 
+			{
+				nextContactDataDBObject = (ContactDataDBObject) getItem(position + 1);
+			
+				if (nextContactDataDBObject.getDisplayName() != null ||  nextContactDataDBObject.getDisplayName().length() > 0)
+				{
+					nextDisplayName = nextContactDataDBObject.getDisplayName();
+				}
+				else
+				{
+					nextDisplayName = nextContactDataDBObject.getFirstName();
+					
+					if (nextDisplayName.length() > 0)
+					{
+						nextDisplayName += " ";
+					}
+					
+					nextDisplayName += nextContactDataDBObject.getLastName();
+				}
+				
+				nextFirstLetter = nextDisplayName.substring(0, 1).toUpperCase();
+				
+				if (!nextFirstLetter.equalsIgnoreCase(currentFirstLetter)) 
+				{
+					holder.separator.setVisibility(View.GONE);
+				}
+				else 
+				{
+					holder.separator.setVisibility(View.VISIBLE);
+				}
 			}
 		}
 		
 		return convertView;
 	}
-
+	
 	public boolean hasStableIds() 
 	{
 		return true;
@@ -158,33 +218,96 @@ public class ContactListAdapter extends BaseAdapter
 	@Override
 	public boolean isEmpty()
 	{
-		return (contactsClient.getCount() == 0);
+		return (contactDataDBObjects.size() == 0);
+	}
+
+	@Override
+	public int getCount()
+	{
+		return contactDataDBObjects.size();
 	}
 	
 	@Override
-	public int getCount() {
-		return contactsClient.getCount();
-	}
-	
-	@Override
-	public void notifyDataSetChanged() {
-		contactsCacheMap.clear();
+	public void notifyDataSetChanged() 
+	{
+		try
+		{
+			contactDataDBObjects = sipgateDBAdapter.getAllContactData();
+		
+			refreshIndex(contactDataDBObjects);
+		}
+		catch (Exception e) 
+		{
+			Log.e(TAG, "notifyDataSetChanged()", e);
+		}
 		
 		super.notifyDataSetChanged();
 	}
+
+	public void refreshIndex(Vector<ContactDataDBObject> contactDataDBObjects)
+	{	
+		int size = contactDataDBObjects.size();
+		
+		ContactDataDBObject contactDataDBObject = null;
+		
+		index.clear();
+		
+		for (int i = size - 1; i >= 0; i--) 
+		{
+			contactDataDBObject = contactDataDBObjects.get(i);
+			
+			if (contactDataDBObject.getDisplayName() != null ||  contactDataDBObject.getDisplayName().length() > 0)
+			{
+				currentDisplayName = contactDataDBObject.getDisplayName();
+			}
+			else
+			{
+				currentDisplayName = contactDataDBObject.getFirstName();
+				
+				if (currentDisplayName.length() > 0)
+				{
+					currentDisplayName += " ";
+				}
+				
+				currentDisplayName += contactDataDBObject.getLastName();
+			}
+			
+			currentFirstLetter = currentDisplayName.substring(0,1).toUpperCase();
+			
+	        index.put(currentFirstLetter, i);
+        } 
+				
+		Set<String> keys = index.keySet();
+		Iterator<String> it = keys.iterator();
+		ArrayList<String> keyList = new ArrayList<String>(); 
+		
+		while (it.hasNext()) 
+		{
+			keyList.add(it.next());
+		}
+		
+		Collections.sort(keyList);
+		
+		sections = new String[keyList.size()];
+		
+		keyList.toArray(sections);
+	}
 	
-	private SipgateContact getContact(int position) {
-		currentContact = contactsCacheMap.get(position);
-		
-		if (currentContact == null) {
-			currentContact = contactsClient.getContact(position);
-			contactsCacheMap.put(position, currentContact);
-		}
-		
-		if (currentContact == null) {
-			Log.w(TAG, "getContact returning null. contactsmap has " + contactsCacheMap.size() + " items. adapter has " + getCount() + " items");
-		}
-		
-		return currentContact;
+	@Override
+	public int getPositionForSection(int section)
+	{
+		return index.get(sections[section]);
+	}
+
+	@Override
+	public int getSectionForPosition(int position)
+	{
+		return 0;
+	}
+
+	@Override
+	public Object[] getSections()
+	{
+		return sections;		
 	}
 }

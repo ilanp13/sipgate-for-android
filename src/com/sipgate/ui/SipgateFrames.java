@@ -76,7 +76,6 @@ public class SipgateFrames extends TabActivity {
 
 		this.apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 
-
 		this.tabSpecContacts = tabs.newTabSpec("Contacts");;
 		this.tabSpecContacts.setIndicator(res.getText(R.string.sipgate_tab_contacts), res.getDrawable(R.drawable.tab_contacts));
 		this.tabSpecContacts.setContent(new Intent(this, ContactListActivity.class));
@@ -98,9 +97,9 @@ public class SipgateFrames extends TabActivity {
 			this.addVmTab();
 		}
 		
-		this.startService(new Intent(this, SipgateBackgroundService.class));
+		startService(new Intent(this, SipgateBackgroundService.class));
+		
 		Log.d(TAG, "calling setcurrenttab from oncreate");
-
 		this.setCurrentTab(bundle);
 	}
 

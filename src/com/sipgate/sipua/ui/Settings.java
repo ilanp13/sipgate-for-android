@@ -69,10 +69,6 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	private static final int MENU_IMPORT = 0;
 	private static final int MENU_DELETE = 1;
 
-	// All possible values of the PREF_PREF preference (see bellow) 
-	public static final String VAL_PREF_PSTN = "PSTN";
-	public static final String VAL_PREF_SIP = "SIP";
-
 	/*-
 	 * ****************************************
 	 * **** HOW TO USE SHARED PREFERENCES *****
@@ -101,7 +97,6 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final String PREF_3G = "3g";
 	public static final String PREF_EDGE = "edge";
 	public static final String PREF_VPN = "vpn";
-	public static final String PREF_PREF = "pref";
 	public static final String PREF_AUTO_ON = "auto_on";
 	public static final String PREF_AUTO_ONDEMAND = "auto_on_demand";
 	public static final String PREF_AUTO_HEADSET = "auto_headset";
@@ -119,7 +114,6 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final String PREF_STUN = "stun";
 	public static final String PREF_STUN_SERVER = "stun_server";
 	public static final String PREF_STUN_SERVER_PORT = "stun_server_port";
-	public static final String PREF_PAR = "par";
 	public static final String PREF_IMPROVE = "improve";
 	public static final String PREF_POSURL = "posurl";
 	public static final String PREF_POS = "pos";
@@ -143,7 +137,6 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final boolean	DEFAULT_3G = false;
 	public static final boolean	DEFAULT_EDGE = false;
 	public static final boolean	DEFAULT_VPN = false;
-	public static final String	DEFAULT_PREF = VAL_PREF_SIP;
 	public static final boolean	DEFAULT_AUTO_ON = false;
 	public static final boolean	DEFAULT_AUTO_ONDEMAND = false;
 	public static final boolean	DEFAULT_AUTO_HEADSET = false;
@@ -248,7 +241,6 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 
 			edit.putString(PREF_PORT, DEFAULT_PORT);
 			edit.putString(PREF_SERVER, DEFAULT_SERVER);
-			edit.putString(PREF_PREF, DEFAULT_PREF);				
 			edit.putString(PREF_PROTOCOL, DEFAULT_PROTOCOL);
 			edit.commit();
         	Receiver.engine(this).updateDNS();
@@ -557,11 +549,7 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
     	getPreferenceScreen().findPreference(PREF_EXCLUDEPAT).setSummary(settings.getString(PREF_EXCLUDEPAT, DEFAULT_EXCLUDEPAT)); 
     	getPreferenceScreen().findPreference(PREF_POSURL).setSummary(settings.getString(PREF_POSURL, DEFAULT_POSURL)); 
     	getPreferenceScreen().findPreference(PREF_CALLTHRU2).setSummary(settings.getString(PREF_CALLTHRU2, DEFAULT_CALLTHRU2)); 
-    	if (! settings.getString(PREF_PREF, DEFAULT_PREF).equals(VAL_PREF_PSTN)) {
-    		getPreferenceScreen().findPreference(PREF_PAR).setEnabled(true);
-    	} else {
-    		getPreferenceScreen().findPreference(PREF_PAR).setEnabled(false);
-      	}
+  
     	fill(PREF_EARGAIN,  "" + DEFAULT_EARGAIN,  R.array.eargain_values, R.array.eargain_display_values);
     	fill(PREF_MICGAIN,  "" + DEFAULT_MICGAIN,  R.array.eargain_values, R.array.eargain_display_values);
     	fill(PREF_HEARGAIN, "" + DEFAULT_HEARGAIN, R.array.eargain_values, R.array.eargain_display_values);

@@ -1,8 +1,9 @@
 package com.sipgate.util;
 
 
-public abstract class Constants {
-	public static final String PREFERENCES_NAME = "OAUTH_PREFERENCES";
+public abstract class Constants 
+{
+	public static final String API_VERSION_SUFFIX = "version=2.19";
 
 	public static final String CALLBACK_URL  = "icecondor-android-app:///";
 	
@@ -12,8 +13,6 @@ public abstract class Constants {
 	public static String OAUTH_VERIFIER = "";
 	public static String ACCESS_TOKEN = "";
 	public static String OAUTH_TOKEN_SECRET = "";
-
-	public static final String API_VERSION_SUFFIX = "version=2.17";  // TODO FIXME
 
 	public static final String API_BASEURL =  "https://api.sipgate.net";
 	public static final String API_10_HOSTNAME = "samurai.sipgate.net";

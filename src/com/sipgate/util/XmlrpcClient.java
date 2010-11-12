@@ -2,6 +2,7 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -21,6 +22,9 @@ import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.ContactDataDBObject;
+import com.sipgate.db.ContactNumberDBObject;
+import com.sipgate.db.ContactNumberDBObject.PhoneType;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -164,9 +168,6 @@ public class XmlrpcClient implements ApiClientInterface {
 		HashMap<String, Object> ownUriSet = null;
 		SipgateOwnUri ownUriDataTmp = null;
 		
-		ArrayList<String> inList = new ArrayList<String>();
-		ArrayList<String> tosList = new ArrayList<String>();
-		
 		for (Object ownUriSetObject : ownUriList) 
 		{
 			ownUriSet = (HashMap<String, Object>) ownUriSetObject;
@@ -177,9 +178,10 @@ public class XmlrpcClient implements ApiClientInterface {
 
 			Object[] inListObject = (Object[]) ownUriSet.get("E164In");
 			
-			inList.clear();
+			ArrayList<String> inList = new ArrayList<String>();
 			
-			for (Object inObject : inListObject) {
+			for (Object inObject : inListObject) 
+			{
 				inList.add((String) inObject);
 			}
 			
@@ -187,9 +189,10 @@ public class XmlrpcClient implements ApiClientInterface {
 
 			Object[] tosListObject = (Object[]) ownUriSet.get("TOS");
 			
-			tosList.clear();
+			ArrayList<String> tosList = new ArrayList<String>();
 			
-			for (Object tosObject : tosListObject) {
+			for (Object tosObject : tosListObject) 
+			{
 				tosList.add((String) tosObject);
 			}
 			
@@ -248,8 +251,6 @@ public class XmlrpcClient implements ApiClientInterface {
 			
 			Object[] HistoryList = (Object[]) apiResult.get("History");
 			
-			int counter = 0;
-			
 			CallDataDBObject callDataDBObject = null;
 			HashMap<String, Object> historySet = null;
 			
@@ -268,8 +269,6 @@ public class XmlrpcClient implements ApiClientInterface {
 			
 			for (Object HistoryObject : HistoryList) {
 				
-				if(counter == 50) break;
-					
 				callDataDBObject = new CallDataDBObject();
 				
 				historySet = (HashMap<String, Object>) HistoryObject;
@@ -277,8 +276,6 @@ public class XmlrpcClient implements ApiClientInterface {
 				if (historySet.containsKey("TOS") && historySet.get("TOS") != null && !historySet.get("TOS").equals("voice")) {
 					continue;
 				}
-				
-				counter++;
 				
 				callID = (String)historySet.get("EntryID");
 				
@@ -313,10 +310,10 @@ public class XmlrpcClient implements ApiClientInterface {
 				numberRemote = (String) historySet.get("RemoteUri");
 
 				localNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberLocal, locale.getCountry());
-				localNumberE164 = formatter.e164NumberWithPrefix("");
+				localNumberE164 = formatter.e164NumberWithPrefix("+");
 
 				remoteNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberRemote, locale.getCountry());
-				rempoteNumberE164 = formatter.e164NumberWithPrefix("");
+				rempoteNumberE164 = formatter.e164NumberWithPrefix("+");
 								
 				if(direction.equals("accepted")){
 					callDataDBObject.setMissed(false);
@@ -394,6 +391,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		// request credentials for all sip-uris
 		ArrayList<String> requestedUris = new ArrayList<String>();
 		HashMap<String, String> uriToAlias = new HashMap<String, String>();
+		
 		for (SipgateOwnUri sipgateOwnUri : ownUris) {
 			if (sipgateOwnUri.getTos().contains("voice")) {
 				requestedUris.add(sipgateOwnUri.getSipUri());
@@ -491,4 +489,160 @@ public class XmlrpcClient implements ApiClientInterface {
 			throws FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
+
+	@Override
+	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
+	{
+		Vector<ContactDataDBObject> contactDataDBObjects = new Vector<ContactDataDBObject>();
+
+		try 
+		{
+			parameters.clear();
+			apiResult = (HashMap<String, Object>) doXmlrpcCall("samurai.PhonebookListGet", parameters);
+			
+			Object[] phonebookList = (Object[]) apiResult.get("PhonebookList");
+			
+			HashMap<String, Object> objectHashMap = null;
+			
+			ArrayList<String> entryIds = new ArrayList<String>();
+			
+			for (Object phonebookObject : phonebookList) 
+			{
+				objectHashMap = (HashMap<String, Object>) phonebookObject;
+				
+				entryIds.add((String)objectHashMap.get("EntryID"));
+			}
+			
+			parameters.clear();
+			parameters.put("EntryIDList", entryIds);
+			
+			apiResult = (HashMap<String, Object>) doXmlrpcCall("samurai.PhonebookEntryGet", parameters);
+
+			Object[] entryList = (Object[]) apiResult.get("EntryList");
+			
+			for (Object entryObject : entryList) 
+			{
+				objectHashMap = (HashMap<String, Object>) entryObject;
+				
+				contactDataDBObjects.add(getContactDataDBObjectFromVCard((String)objectHashMap.get("EntryID"), (String)objectHashMap.get("Entry")));
+			}
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+		
+		return contactDataDBObjects;
+	}
+	
+	public ContactDataDBObject getContactDataDBObjectFromVCard(String entryId, String vCard)
+	{
+		ContactDataDBObject contactDataDBObject = new ContactDataDBObject();
+		ContactNumberDBObject contactNumberDBObject = null;
+		
+		contactDataDBObject.setUuid(entryId);
+		
+		String[] vCardRows = vCard.split("\n");
+		
+		String value = "";
+		
+		for (String currentRow : vCardRows)
+		{
+			if (currentRow.contains("FN;"))
+			{
+				currentRow = currentRow.substring(currentRow.indexOf(":") + 1);
+				
+				if (contactDataDBObject.getDisplayName().length() == 0)
+				{
+					contactDataDBObject.setDisplayName(decodeQuotedPrintable(currentRow));
+				}
+			}
+			else if (currentRow.contains("TEL;"))
+			{
+				contactNumberDBObject = new ContactNumberDBObject();
+
+				contactNumberDBObject.setUuid(contactDataDBObject.getUuid());
+				
+				currentRow = currentRow.substring(currentRow.indexOf(";") + 1);
+				
+				if (currentRow.indexOf(";") > -1)
+				{
+					value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
+					currentRow = currentRow.substring(currentRow.indexOf(";") + 1);
+				}
+				else
+				{
+					value = currentRow.substring(0, currentRow.indexOf(":")).toUpperCase();
+				}
+								
+				if (value.equals("CELL"))
+				{
+					if (currentRow.indexOf(";") > -1)
+					{
+						value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
+					}
+					
+					contactNumberDBObject.setType(value);
+				} 
+				else if (value.equals("VOICE"))
+				{
+					if (currentRow.indexOf(";") > -1)
+					{
+						value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
+					}
+					else
+					{
+						value = "WORK";
+					}
+					
+					contactNumberDBObject.setType(value);
+				}
+				else
+				{
+					contactNumberDBObject.setType("OTHER");
+				}
+			
+				currentRow = currentRow.substring(currentRow.indexOf(":") + 1);
+				
+				contactNumberDBObject.setNumberE164(currentRow);
+				contactNumberDBObject.setNumberPretty(formatter.formattedPhoneNumberFromStringWithCountry(currentRow, locale.getCountry()));
+			
+				contactDataDBObject.addContactNumberDBObject(contactNumberDBObject);	
+			}
+		}
+				
+		return contactDataDBObject;
+	}
+	
+	public String decodeQuotedPrintable(String inString)
+	{
+		if (inString.contains("=")) 
+		{
+	        StringBuffer builder = new StringBuffer();
+	        
+	        int pos;
+
+	        while (inString.contains("=")) 
+	        {
+	        	pos = inString.indexOf('=');
+	            
+	        	builder.append(inString.substring(0, pos));
+
+	            char chr = (char) (Character.digit(inString.charAt(pos + 1), 16) * 16 + Character.digit(inString.charAt(pos + 2), 16));
+	          
+	            builder.append(chr);
+
+	            inString = inString.substring(pos + 2 + 1);
+	        }
+	        
+	        builder.append(inString);
+	        
+	        return builder.toString();
+	    } 
+		else 
+	    {
+	        return inString;
+	    }
+	}
 }
+

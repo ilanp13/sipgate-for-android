@@ -62,8 +62,7 @@
 <string name="auto_disabled">Automatische Rufannahme aus</string>
 <string name="hint">Zieladresse</string>
 <string name="empty">Bitte geben Sie eine Rufnummer ein</string>
-<string name="notfast">Keine geeignete Datenverbindung verfügbar</string>
-
+<string name="notfast">Keine geeignete Datenverbindung verfügbar. Möchten Sie über GSM anrufen?</string>
 <string name="settings_account">Zugangsdaten</string>
 <string name="settings_username">Authentifizierungsname</string>
 <string name="settings_password">Paßwort</string>
@@ -120,14 +119,6 @@
 <string name="yes">Ja</string>
 <string name="no">Nein</string>
 <string name="dontask">Nicht fragen</string>
-
-<string name="settings_pref">Bevorzugte Anrufart</string>
-<string name="settings_pref2">Ausnahmen durch \'+\' hinter Nummern anhängen oder auf \'Textnachricht an\' klicken</string>
-    <string-array name="pref_display_values">
-        <item>sipgate</item>
-        <item>sipgate, wenn verfügbar</item>
-        <item>Telefon</item>
-    </string-array>
 <string name="settings_compression">Sprachkompression</string>
     <string-array name="compression_display_values">
         <item>Nur über WLAN</item>

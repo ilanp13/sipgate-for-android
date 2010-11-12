@@ -19,15 +19,28 @@ import com.sipgate.db.base.BaseDBObject;
  */
 public class SipgateDBAdapter extends BaseDBAdapter
 {
+	private static SipgateDBAdapter sipgateDBAdapter = null;
+	
 	/**
 	 * Default constructor.
 	 * 
 	 * @param context The application context
 	 * @since 1.0
 	 */
-	public SipgateDBAdapter(Context context)
+	private SipgateDBAdapter(Context context)
 	{
 		super(context, "sipgateDB.sqlite");
+	}
+		
+	/**
+	 * Gets a cursor with all the contact data.
+	 * 
+	 * @return A cursor with all the contact data records
+	 * @since 1.0
+	 */
+	public Cursor getAllContactDataCursor()
+	{
+		return database.query("ContactData", null, null, null, null, null, "upper(displayName) asc");
 	}
 	
 	/**
@@ -50,6 +63,52 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	public Cursor getAllVoiceMailDataCursor()
 	{
 		return database.query("VoiceMailData", null, null, null, null, null, "time desc");
+	}
+	
+	/**
+	 * Gets a Vector with all the contact data.
+	 * 
+	 * @return A vector with all the contact data objects
+	 * @since 1.0
+	 */
+	public Vector<ContactDataDBObject> getAllContactData()
+	{
+		Vector<ContactDataDBObject> contactData = new Vector<ContactDataDBObject>();
+
+		Cursor cursor = getAllContactDataCursor();
+		
+		ContactDataDBObject contact = null;
+		
+		try
+		{
+			if (cursor != null)
+			{
+				while (cursor.moveToNext())
+				{
+					contact = new ContactDataDBObject();
+					
+					contact.setUuid(cursor.getString(0));
+					contact.setFirstName(cursor.getString(1));
+					contact.setLastName(cursor.getString(2));
+					contact.setDisplayName(cursor.getString(3));
+						
+					contactData.add(contact);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getAllContactData() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+		
+		return contactData;
 	}
 	
 	/**
@@ -93,7 +152,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getName(), "getAllCallData() -> inputstream is null");
+			Log.e(getClass().getName(), "getAllCallData() -> " + e.getMessage());
 		}
 		finally
 		{
@@ -141,8 +200,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 					voiceMail.setRemoteName(cursor.getString(10));
 					voiceMail.setTranscription(cursor.getString(11));
 					voiceMail.setContentUrl(cursor.getString(12));
-					voiceMail.setLocalFileUrl(cursor.getString(13));
-					voiceMail.setReadModifyUrl(cursor.getString(14));
+					voiceMail.setReadModifyUrl(cursor.getString(13));
 					
 					voiceMailData.add(voiceMail);
 				}
@@ -150,7 +208,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getName(), "getAllVoiceMailData() -> inputstream is null");
+			Log.e(getClass().getName(), "getAllVoiceMailData() -> " + e.getMessage());
 		}
 		finally
 		{
@@ -163,6 +221,42 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		return voiceMailData;
 	}
 	
+	/**
+	 * Gets a cursor with a specific contact data record.
+	 * 
+	 * @param uuid The contact uiid
+	 * @return A cursor with the specific contact data record
+	 * @since 1.0
+	 */
+	public Cursor getContactDataCursorByUuid(String uuid)
+	{
+		return database.query("ContactData", null, "uuid = ?", new String[]{ uuid }, null, null, null);
+	}
+	
+	/**
+	 * Gets a cursor with all contact numbers of a specific contact uuid record.
+	 * 
+	 * @param uuid The contact uuid
+	 * @return A cursor with all contact numbers the specific contact uuid
+	 * @since 1.0
+	 */
+	public Cursor getContactNumberCursorByUuid(String uuid)
+	{
+		return database.query("ContactNumber", null, "uuid = ?", new String[]{ uuid }, null, null, null);
+	}
+	
+	/**
+	 * Gets a cursor with all contact numbers of a specific contact uuid record.
+	 * 
+	 * @param uuid The contact uuid
+	 * @return A cursor with all contact numbers the specific contact uuid
+	 * @since 1.0
+	 */
+	public Cursor getContactNumberCursorByNumberE164(String numberE164)
+	{
+		return database.query("ContactNumber", null, "numberE164 = ?", new String[]{ numberE164 }, null, null, null);
+	}
+		
 	/**
 	 * Gets a cursor with a specific call record.
 	 * 
@@ -186,6 +280,217 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	{
 		return database.query("VoiceMailData", null, "id = ?", new String[]{ String.valueOf(id) }, null, null, null);
 	}	
+	
+	/**
+	 * Gets a cursor with a specific voice mail file record.
+	 * 
+	 * @param id The voice mail id
+	 * @return A cursor with the specific voice mail data record
+	 * @since 1.0
+	 */
+	public Cursor getVoiceMailFileCursorById(long id)
+	{
+		return database.query("VoiceMailFile", null, "id = ?", new String[]{ String.valueOf(id) }, null, null, null);
+	}	
+	
+	/**
+	 * Gets an object with a specific contact record.
+	 * 
+	 * @param uuid The contact uuid
+	 * @return An object with the specific contact data record without contact numbers
+	 * @since 1.0
+	 */
+	public ContactDataDBObject getContactDataDBObjectByUuid(String uuid)
+	{
+		ContactDataDBObject contact = null;
+		
+		Cursor cursor = getContactDataCursorByUuid(uuid);
+		
+		try
+		{
+			if (cursor != null && cursor.moveToNext())
+			{
+				contact = new ContactDataDBObject();
+				
+				contact.setUuid(cursor.getString(0));
+				contact.setFirstName(cursor.getString(1));
+				contact.setLastName(cursor.getString(2));
+				contact.setDisplayName(cursor.getString(3));
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getContactDataDBObjectByUuid() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+	
+		return contact;
+	}
+
+	/**
+	 * Gets an object with a specific contact number record.
+	 * 
+	 * @param numberE164 The contact number in E164 format
+	 * @return An object with the specific contact number record without contact numbers
+	 * @since 1.0
+	 */
+	public ContactNumberDBObject getContactNumberDBObjectByNumberE164(String numberE164)
+	{
+		ContactNumberDBObject contactNumber = null;
+		
+		Cursor cursor = getContactNumberCursorByNumberE164(numberE164);
+		
+		try
+		{
+			if (cursor != null && cursor.moveToNext())
+			{
+				contactNumber = new ContactNumberDBObject();
+				
+				contactNumber.setId(cursor.getLong(0));
+				contactNumber.setType(cursor.getString(1));
+				contactNumber.setUuid(cursor.getString(2));
+				contactNumber.setNumberE164(cursor.getString(3));
+				contactNumber.setNumberPretty(cursor.getString(4));
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getContactNumberDBObjectByNumberE164() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+	
+		return contactNumber;
+	}
+	
+	/**
+	 * Gets an object with all contact number records of a specific uuid.
+	 * 
+	 * @param uuid The contact uuid
+	 * @return An vector with the all contact number records of the specific uuid.
+	 * @since 1.0
+	 */
+	public Vector<ContactNumberDBObject> getContactNumberDBObjectsByUuid(String uuid)
+	{
+		Vector<ContactNumberDBObject> contactNumberDBObjects = new Vector<ContactNumberDBObject>();
+
+		Cursor cursor = getContactNumberCursorByUuid(uuid);
+		
+		ContactNumberDBObject contactNumber = null;
+		
+		try
+		{
+			if (cursor != null)
+			{
+				while (cursor.moveToNext())
+				{
+					contactNumber = new ContactNumberDBObject();
+					
+					contactNumber.setId(cursor.getLong(0));
+					contactNumber.setType(cursor.getString(1));
+					contactNumber.setUuid(cursor.getString(2));
+					contactNumber.setNumberE164(cursor.getString(3));
+					contactNumber.setNumberPretty(cursor.getString(4));
+						
+					contactNumberDBObjects.add(contactNumber);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getContactNumberDBObjectsByUuid() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+		
+		return contactNumberDBObjects;
+	}
+	
+	/**
+	 * Gets an object with a specific contact record.
+	 * 
+	 * @param uuid The contact uuid
+	 * @return An object with the specific contact data record with contact numbers
+	 * @since 1.0
+	 */
+	public ContactDataDBObject getContactDataDBObjectWithContactNumbersByUuid(String uuid)
+	{
+		ContactDataDBObject contact = getContactDataDBObjectByUuid(uuid);
+		
+		Vector<ContactNumberDBObject> contactNumbers = getContactNumberDBObjectsByUuid(uuid);
+		
+		if (contact != null)
+		{
+			if (contactNumbers != null)
+			{
+				contact.setContactNumberDBObjects(contactNumbers);
+			}
+		}
+		
+		return contact;
+	}
+	
+	/**
+	 * Gets an object with a specific contact record.
+	 * 
+	 * @param numberE164 a number in e164 format of a contact
+	 * @return An object with the specific contact data record
+	 * @since 1.0
+	 */
+	public ContactDataDBObject getContactDataDBObjectByNumberE164(String numberE164)
+	{
+		ContactDataDBObject contact = null;
+		
+		ContactNumberDBObject contactNumber = getContactNumberDBObjectByNumberE164(numberE164);
+		
+		if (contactNumber != null)
+		{
+			Cursor cursor = getContactDataCursorByUuid(contactNumber.getUuid());
+			
+			try
+			{
+				if (cursor != null && cursor.moveToNext())
+				{
+					contact = new ContactDataDBObject();
+					
+					contact.setUuid(cursor.getString(0));
+					contact.setFirstName(cursor.getString(1));
+					contact.setLastName(cursor.getString(2));
+					contact.setDisplayName(cursor.getString(3));
+				}
+			}
+			catch (Exception e)
+			{
+				Log.e(getClass().getName(), "getContactDataDBObjectByNumberE164() -> " + e.getMessage());
+			}
+			finally
+			{
+				if (!cursor.isClosed() && cursor != null)
+				{
+					cursor.close();
+				}
+			}
+		}
+		
+		return contact;
+	}
+	
 	
 	/**
 	 * Gets an object with a specific call record.
@@ -221,7 +526,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getName(), "getCallDataDBObjectById() -> inputstream is null");
+			Log.e(getClass().getName(), "getCallDataDBObjectById() -> " + e.getMessage());
 		}
 		finally
 		{
@@ -253,8 +558,6 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			{
 				voiceMail = new VoiceMailDataDBObject();
 				
-				voiceMail = new VoiceMailDataDBObject();
-				
 				voiceMail.setId(cursor.getLong(0));
 				voiceMail.setRead(cursor.getLong(1));
 				voiceMail.setSeen(cursor.getLong(2));
@@ -268,13 +571,12 @@ public class SipgateDBAdapter extends BaseDBAdapter
 				voiceMail.setRemoteName(cursor.getString(10));
 				voiceMail.setTranscription(cursor.getString(11));
 				voiceMail.setContentUrl(cursor.getString(12));
-				voiceMail.setLocalFileUrl(cursor.getString(13));
-				voiceMail.setReadModifyUrl(cursor.getString(14));
+				voiceMail.setReadModifyUrl(cursor.getString(13));
 			}
 		}
 		catch (Exception e)
 		{
-			Log.e(getClass().getName(), "getVoiceMailDataDBObjectById() -> inputstream is null");
+			Log.e(getClass().getName(), "getVoiceMailDataDBObjectById() -> " + e.getMessage());
 		}
 		finally
 		{
@@ -285,6 +587,82 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 	
 		return voiceMail;
+	}
+	
+	/**
+	 * Gets an object with a specific voice mail file record.
+	 * 
+	 * @param id The voice mail id
+	 * @return An object with the specific voice mail file record
+	 * @since 1.0
+	 */
+	public VoiceMailFileDBObject getVoiceMailFileDBObjectById(long id)
+	{
+		VoiceMailFileDBObject voiceMailFile = null;
+		
+		Cursor cursor = getVoiceMailFileCursorById(id);
+		
+		try
+		{
+			if (cursor != null && cursor.moveToNext())
+			{
+				voiceMailFile = new VoiceMailFileDBObject();
+			
+				voiceMailFile.setId(cursor.getLong(0));
+				voiceMailFile.setValue(cursor.getBlob(1));
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getVoiceMailFileDBObjectById() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+	
+		return voiceMailFile;
+	}
+	
+	/**
+	 * Gets the number of the contact data records in the database.
+	 * 
+	 * @return The number of the contact data records in the database
+	 * @since 1.0
+	 */
+	public long getContactDataCount()
+	{
+		long count = 0;
+		
+		SQLiteStatement statement = database.compileStatement("Select count(*) from ContactData");
+		
+		count = statement.simpleQueryForLong();
+		
+		statement.close();
+		
+		return count;
+	}
+	
+	/**
+	 * Gets the number of the contact number records in the database.
+	 * 
+	 * @return The number of the contact number records in the database
+	 * @since 1.0
+	 */
+	public long getContactNumberCount()
+	{
+		long count = 0;
+		
+		SQLiteStatement statement = database.compileStatement("Select count(*) from ContactNumber");
+		
+		count = statement.simpleQueryForLong();
+		
+		statement.close();
+		
+		return count;
 	}
 	
 	/**
@@ -326,6 +704,57 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	}
 	
 	/**
+	 * Gets the number of the voice mail file records in the database.
+	 * 
+	 * @return The number of the voice mail file records in the database
+	 * @since 1.0
+	 */
+	public long getVoiceMailFileCount()
+	{
+		long count = 0;
+		
+		SQLiteStatement statement = database.compileStatement("Select count(*) from VoiceMailFile");
+		
+		count = statement.simpleQueryForLong();
+		
+		statement.close();
+		
+		return count;
+	}
+	
+	
+	/**
+	 * Deletes all contact data records in the database;
+	 * 
+	 * @since 1.0
+	 */
+	public void deleteAllContactDataDBObjects()
+	{
+		SQLiteStatement statement = database.compileStatement("Delete from ContactData");
+		
+		statement.execute();
+		
+		statement.close();
+	}
+	
+	/**
+	 * Deletes all contact number records in the database by contactId;
+	 * 
+	 * @since 1.0
+	 */
+	public void deleteAllContactNumberDBObjectsByUuid(String uuid)
+	{
+		SQLiteStatement statement = database.compileStatement("Delete from ContactNumber WHERE uuid = ?");
+	
+		statement.bindString(1, uuid);
+		
+		statement.execute();
+		
+		statement.close();
+	}
+	
+	
+	/**
 	 * Deletes all call data records in the database.
 	 * 
 	 * @since 1.0
@@ -344,13 +773,103 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 * 
 	 * @since 1.0
 	 */
-	public void deleteAllVoiceMailDBObjects()
+	public void deleteAllVoiceMailDataDBObjects()
 	{
 		SQLiteStatement statement = database.compileStatement("Delete from VoiceMailData");
 		
 		statement.execute();
 		
 		statement.close();
+	}
+	
+	/**
+	 * Deletes all voice mail data records in the database.
+	 * 
+	 * @since 1.0
+	 */
+	public void deleteAllVoiceMailFileDBObjects()
+	{
+		SQLiteStatement statement = database.compileStatement("Delete from VoiceMailFile");
+		
+		statement.execute();
+		
+		statement.close();
+	}
+	
+	/**
+	 * Inserts several contact data objects into the database
+	 * 
+	 * @param contactDataDBObjects A vector of the contact data objects.
+	 * @since 1.0
+	 */
+	public void insertAllContactDataDBObjects(Vector<ContactDataDBObject> contactDataDBObjects)
+	{
+		if (contactDataDBObjects.size() > 0)
+		{
+			try
+			{
+				SQLiteStatement statement = database.compileStatement(contactDataDBObjects.get(0).getInsertStatement());     	                    
+				
+				startTransaction();
+				
+				for (BaseDBObject baseDBObject : contactDataDBObjects) 
+				{
+					baseDBObject.bindInsert(statement);
+					statement.execute(); 
+				}
+		
+				statement.close(); 
+				
+				commitTransaction();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				
+				if(inTransaction())
+				{
+					rollbackTransaction();
+				}
+			}
+		}
+	}
+		
+	/**
+	 * Inserts several contact number objects into the database
+	 * 
+	 * @param contactNumberDBObjects A vector of the contact number objects.
+	 * @since 1.0
+	 */
+	public void insertAllContactNumberDBObjects(Vector<ContactNumberDBObject> contactNumberDBObjects)
+	{
+		if (contactNumberDBObjects.size() > 0)
+		{
+			try
+			{
+				SQLiteStatement statement = database.compileStatement(contactNumberDBObjects.get(0).getInsertStatement());     	                    
+				
+				startTransaction();
+				
+				for (BaseDBObject baseDBObject : contactNumberDBObjects) 
+				{
+					baseDBObject.bindInsert(statement);
+					statement.execute(); 
+				}
+		
+				statement.close(); 
+				
+				commitTransaction();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				
+				if(inTransaction())
+				{
+					rollbackTransaction();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -363,20 +882,31 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	{
 		if (callDataDBObjects.size() > 0)
 		{
-			database.beginTransaction();
-			
-			SQLiteStatement statement = database.compileStatement(callDataDBObjects.get(0).getInsertStatement());     	                    
-			
-			for (BaseDBObject baseDBObject : callDataDBObjects) 
+			try
 			{
-				baseDBObject.bindInsert(statement);
-				statement.execute(); 
-			}
+				SQLiteStatement statement = database.compileStatement(callDataDBObjects.get(0).getInsertStatement());     	                    
+				
+				startTransaction();
+				
+				for (BaseDBObject baseDBObject : callDataDBObjects) 
+				{
+					baseDBObject.bindInsert(statement);
+					statement.execute(); 
+				}
 		
-			statement.close(); 
-			
-			database.setTransactionSuccessful();
-			database.endTransaction();
+				statement.close(); 
+				
+				commitTransaction();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				
+				if(inTransaction())
+				{
+					rollbackTransaction();
+				}
+			}
 		}
 	}
 	
@@ -386,48 +916,151 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 * @param voiceMailDataDBObjects A vector of the voice mail data objects.
 	 * @since 1.0
 	 */
-	public void insertAllVoiceMailDBObjects(Vector<VoiceMailDataDBObject> voiceMailDataDBObjects)
+	public void insertAllVoiceMailDataDBObjects(Vector<VoiceMailDataDBObject> voiceMailDataDBObjects)
 	{
 		if (voiceMailDataDBObjects.size() > 0)
 		{
-			database.beginTransaction();
-			
-			SQLiteStatement statement = database.compileStatement(voiceMailDataDBObjects.get(0).getInsertStatement());     	                    
-			
-			for (BaseDBObject baseDBObject : voiceMailDataDBObjects) 
+			try
 			{
-				baseDBObject.bindInsert(statement);
-				statement.execute(); 
-			}
+				SQLiteStatement statement = database.compileStatement(voiceMailDataDBObjects.get(0).getInsertStatement());     	                    
+				
+				startTransaction();
+				
+				for (BaseDBObject baseDBObject : voiceMailDataDBObjects) 
+				{
+					baseDBObject.bindInsert(statement);
+					statement.execute(); 
+				}
 		
-			statement.close(); 
+				statement.close(); 
+				
+				commitTransaction();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				
+				if(inTransaction())
+				{
+					rollbackTransaction();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Inserts several voice mail file objects into the database
+	 * 
+	 * @param voiceMailFileDBObjects A vector of the voice mail file objects.
+	 * @since 1.0
+	 */
+	public void insertAllVoiceMailFileDBObjects(Vector<VoiceMailFileDBObject> voiceMailFileDBObjects)
+	{
+		if (voiceMailFileDBObjects.size() > 0)
+		{
+			try
+			{
+				SQLiteStatement statement = database.compileStatement(voiceMailFileDBObjects.get(0).getInsertStatement());     	                    
+				
+				startTransaction();
+				
+				for (BaseDBObject baseDBObject : voiceMailFileDBObjects) 
+				{
+					baseDBObject.bindInsert(statement);
+					statement.execute(); 
+				}
+		
+				statement.close(); 
+				
+				commitTransaction();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				
+				if(inTransaction())
+				{
+					rollbackTransaction();
+				}
+			}
+		}
+	}
+	
+	public static SipgateDBAdapter getInstance(Context context)
+	{
+		if (sipgateDBAdapter == null)
+		{
+			sipgateDBAdapter = new SipgateDBAdapter(context);
+		}
+
+		return sipgateDBAdapter;
+	}
+
+	public static void destroy()
+	{
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
 			
-			database.setTransactionSuccessful();
-			database.endTransaction();
+			sipgateDBAdapter = null;
 		}
 	}
 	
 	@Override
 	public void createTables(SQLiteDatabase database)
 	{
-		CallDataDBObject callDataDBObject = new CallDataDBObject();
-	
-		database.execSQL(callDataDBObject.getCreateStatement());
+		ContactNumberDBObject contactNumberDBObject = new ContactNumberDBObject();
 		
+		for(String statement : contactNumberDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
+		
+		ContactDataDBObject contactDataDBObject = new ContactDataDBObject();
+
+		for(String statement : contactDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
+
+		CallDataDBObject callDataDBObject = new CallDataDBObject();
+		
+		for(String statement : callDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
+		
+		VoiceMailFileDBObject voiceMailFileDBObject = new VoiceMailFileDBObject();
+
+		for(String statement : voiceMailFileDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
+
 		VoiceMailDataDBObject voiceMailDataDBObject = new VoiceMailDataDBObject();
 		
-		database.execSQL(voiceMailDataDBObject.getCreateStatement());
-	}
-
+		for(String statement : voiceMailDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
+	}	
+	
 	@Override
 	public void dropTables(SQLiteDatabase database)
 	{
+		ContactNumberDBObject contactNumberDBObject = new ContactNumberDBObject();
+		database.execSQL(contactNumberDBObject.getDropStatement());
+		
+		ContactDataDBObject contactDataDBObject = new ContactDataDBObject();
+		database.execSQL(contactDataDBObject.getDropStatement());
+
 		CallDataDBObject callDataDBObject = new CallDataDBObject();
-	
 		database.execSQL(callDataDBObject.getDropStatement());
-		
+
+		VoiceMailFileDBObject voiceMailFileDBObject = new VoiceMailFileDBObject();
+		database.execSQL(voiceMailFileDBObject.getDropStatement());
+
 		VoiceMailDataDBObject voiceMailDataDBObject = new VoiceMailDataDBObject();
-		
-		database.execSQL(voiceMailDataDBObject.getDropStatement());
+		database.execSQL(voiceMailDataDBObject.getDropStatement());	
 	}
 }

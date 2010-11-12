@@ -34,6 +34,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -70,7 +71,8 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 	public static final boolean market = false;
 
 	private TextView txtCallee;
-	private float txtSize;
+	private float maxTextHeight = 0;
+	
 	private Vibrator vib;
 	private AlertDialog m_AlertDlg;
 	private String numberToDial = "";
@@ -153,24 +155,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.sipgate);
-//		sip_uri_box = (AutoCompleteTextView) findViewById(R.id.txt_callee);
-//		sip_uri_box = (TextView) findViewById(R.id.txt_callee);
-//		sip_uri_box.setOnKeyListener(new OnKeyListener() {
-//		    public boolean onKey(View v, int keyCode, KeyEvent event) {
-//		        if (event.getAction() == KeyEvent.ACTION_DOWN &&
-//		        		keyCode == KeyEvent.KEYCODE_ENTER) {
-//		          call_menu();
-//		          return true;
-//		        }
-//		        return false;
-//		    }
-//		});
-//		sip_uri_box.setOnItemClickListener(new OnItemClickListener() {
-//			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-//					long arg3) {
-//				call_menu();
-//			}
-//		});
+
 		on(this,true);
 
 		ImageButton callButton = (ImageButton) findViewById(R.id.call_button);
@@ -203,8 +188,8 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		ImageButton dialPound = (ImageButton) findViewById(R.id.pound);
 		ImageButton dialBackspace = (ImageButton) findViewById(R.id.backspace);
 		
-		this.txtCallee = (TextView) findViewById(R.id.txt_callee);
-		this.txtSize = this.txtCallee.getTextSize();
+		txtCallee = (TextView) findViewById(R.id.txt_callee);
+		maxTextHeight = txtCallee.getTextSize();
 		
 		dialOne.setOnClickListener(this);
 		dialOne.setOnLongClickListener(this);
@@ -233,58 +218,52 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		dialBackspace.setOnClickListener(this);
 		dialBackspace.setOnLongClickListener(this);
 
-		this.vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-		final Context mContext = this;
-		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Settings.PREF_MESSAGE, Settings.DEFAULT_MESSAGE)) {
-			
-		} else if (PreferenceManager.getDefaultSharedPreferences(this).getString(Settings.PREF_PREF, Settings.DEFAULT_PREF).equals(Settings.VAL_PREF_PSTN) &&
-				!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(Settings.PREF_NODEFAULT, Settings.DEFAULT_NODEFAULT))
-			new AlertDialog.Builder(this)
-				.setMessage(R.string.dialog_default)
-	            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-	                    public void onClick(DialogInterface dialog, int whichButton) {
-	                		Editor edit = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-	                		edit.putString(Settings.PREF_PREF, Settings.VAL_PREF_SIP);
-	                		edit.commit();	
-	                    }
-	                })
-	            .setNeutralButton(R.string.no, new DialogInterface.OnClickListener() {
-	                    public void onClick(DialogInterface dialog, int whichButton) {
-	
-	                    }
-	                })
-	            .setNegativeButton(R.string.dontask, new DialogInterface.OnClickListener() {
-	                    public void onClick(DialogInterface dialog, int whichButton) {
-	                		Editor edit = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-	                		edit.putBoolean(Settings.PREF_NODEFAULT, true);
-	                		edit.commit();
-	                    }
-	                })
-				.show();
+		vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 	}
 	
 	void call_menu()
 	{
-		String target = this.numberToDial;
+		final String target = this.numberToDial;
+		
 		if (m_AlertDlg != null) 
 		{
 			m_AlertDlg.cancel();
 		}
+		
 		if (target.length() == 0)
+		{
 			m_AlertDlg = new AlertDialog.Builder(this)
-				.setMessage(R.string.empty)
-				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
-				.setCancelable(true)
-				.show();
+			.setMessage(R.string.empty)
+			.setTitle(R.string.app_name)
+			.setIcon(R.drawable.icon22)
+			.setCancelable(true)
+			.show();
+		}
 		else if (!Receiver.engine(this).call(target))
+		{
 			m_AlertDlg = new AlertDialog.Builder(this)
-				.setMessage(R.string.notfast)
-				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
-				.setCancelable(true)
-				.show();
+							.setMessage(R.string.notfast)
+							.setTitle(R.string.app_name)
+							.setIcon(R.drawable.icon22)
+							.setCancelable(false)
+					        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() 
+					        {
+					           public void onClick(DialogInterface dialog, int id) 
+					           {
+					        		Intent intent = new Intent(Intent.ACTION_CALL, Uri.fromParts("tel", Uri.decode(target), null));
+						   		    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						   		    startActivity(intent);
+					           }
+					        })
+					        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() 
+					        {
+					           public void onClick(DialogInterface dialog, int id) 
+					           {
+					                dialog.cancel();
+					           }
+					        })
+							.show();
+		}			
 	}
 
 	public static boolean on(Context context) {
@@ -452,41 +431,54 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		addDigit(digit);
 	}
 	
-	private void addDigit(String digit) {
-		this.vib.vibrate(20);
-		//String text = this.txtCallee.getText().toString();
-		if(digit == "--" && this.numberToDial.length()>0) {
-			this.numberToDial = this.numberToDial.substring(0,this.numberToDial.length()-1);
-		} else if(digit == "##") {
-			this.numberToDial = "";
-		} else if(digit!="--" && digit!="##") {
-			this.numberToDial += digit;
+	private void addDigit(String digit) 
+	{
+		vib.vibrate(20);
+		
+		if(digit.equals("--") && this.numberToDial.length()>0) 
+		{
+			numberToDial = numberToDial.substring(0, numberToDial.length()-1);
+		} 
+		else if(digit.equals("##")) 
+		{
+			numberToDial = "";
 		}
+		else if(!digit.equals("--") && !digit.equals("##")) 
+		{
+			numberToDial += digit;
+		}
+		
 		PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 		Locale locale = Locale.getDefault();
-		String formattedNumber = formatter.formattedPhoneNumberFromStringWithCountry(this.numberToDial, locale.getCountry());
-		this.txtCallee.setText(formattedNumber);
+		String formattedNumber = formatter.formattedPhoneNumberFromStringWithCountry(numberToDial, locale.getCountry());
 		
-		float size = 0;
-		float height = 0;
-		do {
-			size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
-			if(size>(this.txtCallee.getWidth()-100)) {
-				this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) .99));
-				//this.txtCallee.scrollTo((int)size-this.txtCallee.getWidth()+100,0);
-			}
-		} while (size>(this.txtCallee.getWidth()-100));
-		if (!numberToDial.equals("")) {
-			do {
-				size = this.txtCallee.getPaint().measureText((String) this.txtCallee.getText());
-				height = this.txtCallee.getTextSize();
-				if(size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize) {
-					this.txtCallee.setTextSize(this.txtCallee.getTextSize() * ((float) 1.01));
-					//this.txtCallee.scrollTo(0,0);
-				}
-			} while (size <= (this.txtCallee.getWidth()-100) * ((float) .99) && height <= this.txtSize); 
-		} else {
-			this.txtCallee.setTextSize(this.txtSize);
+		if (txtCallee.getText().equals(""))
+		{
+			txtCallee.setTextSize(maxTextHeight);	
+		}
+		
+		txtCallee.setText(formattedNumber);
+				
+		float textWidth = txtCallee.getPaint().measureText((String) txtCallee.getText());
+		float textHeight = txtCallee.getTextSize();
+		float maxWidth = txtCallee.getWidth()-txtCallee.getTotalPaddingLeft()-txtCallee.getTotalPaddingRight()-txtCallee.getCompoundDrawablePadding();
+		
+		while ((float)textWidth <= (float)maxWidth && (float)textHeight < (float)maxTextHeight && (digit.equals("--")))
+		{
+			textHeight = textHeight * (float) 1.01;
+			
+			txtCallee.setTextSize(textHeight);
+		
+			textWidth = txtCallee.getPaint().measureText((String) txtCallee.getText());
+		}
+		
+		while ((float)textWidth >= (float)maxWidth)
+		{
+			textHeight = textHeight * (float) 0.99;
+			
+			txtCallee.setTextSize(textHeight);
+		
+			textWidth = txtCallee.getPaint().measureText((String) txtCallee.getText());
 		}
 	}
 	
@@ -494,10 +486,12 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.crackedglass);
 	    mp.start();
 		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		
 		vib.cancel();
 		vib.vibrate(1000);
-		this.vib.cancel();
-		this.vib.vibrate(1000);
+		
+		vib.cancel();
+		vib.vibrate(1000);
 		ImageButton dialOne = (ImageButton) findViewById(R.id.one);
 		ImageButton dialTwo = (ImageButton) findViewById(R.id.two);
 		ImageButton dialThree = (ImageButton) findViewById(R.id.three);
