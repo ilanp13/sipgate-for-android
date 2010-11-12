@@ -65,7 +65,9 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 	private	int unreadCounter = 0;
 	
-	private long start = 0;
+	private int deleted = 0;
+	private int inserted = 0;
+	private int updated = 0;
 	
 	/**
 	 * @since 1.0
@@ -73,24 +75,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	public void onCreate() 
 	{
 		super.onCreate();
-	
-		start = System.currentTimeMillis();
 		
 		notifyClient = new NotificationClient(this); 
 		
-		Log.d(TAG, "call NotificationClient(): " + (System.currentTimeMillis() - start) + "ms");
-		
-		start = System.currentTimeMillis();
-		
 		apiClient = ApiServiceProvider.getInstance(this);
 			
-		Log.d(TAG, "call  ApiServiceProvider.getInstance(): " + (System.currentTimeMillis() - start) + "ms");
-	
-		start = System.currentTimeMillis();
-		
 		startService();
-		
-		Log.d(TAG, "call startService(): " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	/**
@@ -229,6 +219,10 @@ public class SipgateBackgroundService extends Service implements EventService
 			return;
 		}
 		
+		deleted = 0;
+		inserted = 0;
+		updated = 0;
+		
 		unreadCounter = 0;
 		
 		try
@@ -247,6 +241,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				if (!newVoiceMailDataDBObjects.contains(oldVoiceMailDataDBObject))
 				{
 					sipgateDBAdapter.delete(oldVoiceMailDataDBObject);
+					deleted++;
 				}
 			}
 					
@@ -264,6 +259,8 @@ public class SipgateBackgroundService extends Service implements EventService
 					{
 						unreadCounter++;
 					}
+					
+					updated++;
 				}
 				else
 				{
@@ -273,9 +270,15 @@ public class SipgateBackgroundService extends Service implements EventService
 					{
 						unreadCounter++;
 					}
+					
+					inserted++;
 				}
 			}
 			
+			Log.d(TAG, "VoiceMailDataDBObject deleted: " + deleted);
+			Log.d(TAG, "VoiceMailDataDBObject inserted: " + inserted);
+			Log.d(TAG, "VoiceMailDataDBObject updated: " + updated);
+											
 			sipgateDBAdapter.commitTransaction();
 		}
 		catch (Exception e)
@@ -292,7 +295,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		{
 			createNewVoiceMailNotification(unreadCounter);
 		
-			Log.d(TAG, "new unread voicemails: " + unreadCounter);
+			Log.d(TAG, "new unseen voicemails: " + unreadCounter);
 		}
 		else
 		{
@@ -339,9 +342,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			sipgateDBAdapter.startTransaction();
 			
-			int deleted = 0;
-			int inserted = 0;
-			int updated = 0;
+			deleted = 0;
+			inserted = 0;
+			updated = 0;
 		
 			for (ContactDataDBObject oldContactDataDBObject : oldContactDataDBObjects) 
 			{
@@ -372,9 +375,9 @@ public class SipgateBackgroundService extends Service implements EventService
 				}
 			}
 			
-			Log.d(TAG, "deleted: " + deleted);
-			Log.d(TAG, "inserted: " + inserted);
-			Log.d(TAG, "updated: " + updated);
+			Log.d(TAG, "ContactDataDBObject deleted: " + deleted);
+			Log.d(TAG, "ContactDataDBObject inserted: " + inserted);
+			Log.d(TAG, "ContactDataDBObject updated: " + updated);
 									
 			sipgateDBAdapter.commitTransaction();
 		}
@@ -418,6 +421,10 @@ public class SipgateBackgroundService extends Service implements EventService
 			return;
 		}
 		
+		deleted = 0;
+		inserted = 0;
+		updated = 0;
+
 		unreadCounter = 0;
 		
 		try
@@ -436,6 +443,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				if (!newCallDataDBObjects.contains(oldCallDataDBObject))
 				{
 					sipgateDBAdapter.delete(oldCallDataDBObject);
+					deleted++;
 				}
 			}
 					
@@ -456,6 +464,8 @@ public class SipgateBackgroundService extends Service implements EventService
 					{
 						unreadCounter++;
 					}
+					
+					updated++;
 				}
 				else
 				{
@@ -465,8 +475,14 @@ public class SipgateBackgroundService extends Service implements EventService
 					{
 						unreadCounter++;
 					}
+					
+					inserted++;
 				}
 			}
+
+			Log.d(TAG, "CallDataDBObject deleted: " + deleted);
+			Log.d(TAG, "CallDataDBObject inserted: " + inserted);
+			Log.d(TAG, "CallDataDBObject updated: " + updated);
 			
 			sipgateDBAdapter.commitTransaction();
 		}
