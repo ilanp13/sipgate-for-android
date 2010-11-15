@@ -1,5 +1,6 @@
 package com.sipgate.service;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
@@ -20,6 +21,7 @@ import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.db.VoiceMailDataDBObject;
+import com.sipgate.exceptions.StoreDataException;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 import com.sipgate.util.NotificationClient;
@@ -35,12 +37,18 @@ import com.sipgate.util.NotificationClient.NotificationType;
  */
 public class SipgateBackgroundService extends Service implements EventService 
 {
-	public static final String ACTION_NEWEVENTS = "action_newEvents";
+	public enum NotificationReason {STARTED, FINISHED_NEW_DATA, FINISHED_NO_DATA, FAILED};
+	
+	public static final String ACTION_CALLS_GET = "action_calls_get";
+	public static final String ACTION_CALLS_NEW = "action_calls_new";
+	public static final String ACTION_CALLS_NO = "action_calls_no";
+	public static final String ACTION_CALLS_ERROR = "action_calls_error";
+	
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 
 	private static final long CONTACT_REFRESH_INTERVAL = 600000; // every 10mins
-	private static final long CALL_REFRESH_INTERVAL = 60000; // every min
+	private static final long CALL_REFRESH_INTERVAL = 30000; // every min
 	private static final long VOICEMAIL_REFRESH_INTERVAL = 60000; // every min
 		
 	private static final String TAG = "SipgateBackgroundService";
@@ -52,7 +60,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private Timer voiceMailRefreshTimer = null;
 	
 	private Set<PendingIntent> contactListener = new HashSet<PendingIntent>();
-	private Set<PendingIntent> callListener = new HashSet<PendingIntent>();
+	private HashMap<String, PendingIntent> callListener = new HashMap<String, PendingIntent>();
 	private Set<PendingIntent> voiceMailListener = new HashSet<PendingIntent>();
 	
 	private NotificationClient notifyClient = null;
@@ -173,11 +181,35 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		try 
 		{
+			PendingIntent pendingIntent = callListener.get(ACTION_CALLS_GET);
+			
+			if (pendingIntent != null) {
+				pendingIntent.send();
+			}
+		} 
+		catch (CanceledException e) 
+		{
+			e.printStackTrace();
+		}
+		
+		try 
+		{
 			notifyIfNewCalls(apiClient.getCalls(), this);
 		} 
 		catch (Exception e) 
 		{
-			e.printStackTrace();
+			try 
+			{
+				PendingIntent pendingIntent = callListener.get(ACTION_CALLS_ERROR);
+				
+				if (pendingIntent != null) {
+					pendingIntent.send();
+				}
+			} 
+			catch (CanceledException canceledException) 
+			{
+				canceledException.printStackTrace();
+			}
 		}
 		
 		Log.v(TAG, "refreshCallEvents() -> finish");
@@ -307,7 +339,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			try 
 			{
 				Log.d(TAG, "notifying refresh voice mails to activity");
-				pendingIntent.send();
+				pendingIntent.send(NotificationReason.FINISHED_NEW_DATA.ordinal());
 			} 
 			catch (CanceledException e) 
 			{
@@ -396,7 +428,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			try 
 			{
 				Log.d(TAG, "notifying refresh contacts to activity");
-				pendingIntent.send();
+				pendingIntent.send(NotificationReason.FINISHED_NEW_DATA.ordinal());
 			} 
 			catch (CanceledException e) 
 			{
@@ -408,10 +440,11 @@ public class SipgateBackgroundService extends Service implements EventService
 	/**
 	 * @author graef
 	 * @param Vector with callDataDBObjects
+	 * @throws StoreDataException 
 	 * @since 1.1
 	 */
 	
-	public void notifyIfNewCalls(Vector<CallDataDBObject> newCallDataDBObjects, Context context) 
+	public void notifyIfNewCalls(Vector<CallDataDBObject> newCallDataDBObjects, Context context) throws StoreDataException 
 	{
 		Log.d(TAG, "notifyIfUnreadsCalls");
 		
@@ -494,6 +527,8 @@ public class SipgateBackgroundService extends Service implements EventService
 			{
 				sipgateDBAdapter.rollbackTransaction();
 			}
+			
+			throw new StoreDataException();
 		}
 	
 		if (unreadCounter > 0) 
@@ -507,18 +542,25 @@ public class SipgateBackgroundService extends Service implements EventService
 			removeNewCallNotification();
 		}
 		
-		for (PendingIntent pendingIntent: callListener)
+
+		try 
 		{
-			try 
-			{
-				Log.d(TAG, "notifying refresh calls to activity");
+			PendingIntent pendingIntent = null;;
+			if (inserted > 0 ) {
+				pendingIntent = callListener.get(ACTION_CALLS_NEW);
+			} else {
+				pendingIntent = callListener.get(ACTION_CALLS_NO);
+			}
+			
+			if (pendingIntent != null) {
 				pendingIntent.send();
-			} 
-			catch (CanceledException e) 
-			{
-				e.printStackTrace();
-			}			
-		}
+			}
+		} 
+		catch (CanceledException e) 
+		{
+			e.printStackTrace();
+		}			
+
 	}
 		
 	/**
@@ -634,20 +676,20 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @since 1.1
 	 */
-	public void registerOnCallsIntent(PendingIntent i) throws RemoteException 
+	public void registerOnCallsIntents(String s, PendingIntent i) throws RemoteException 
 	{
 		Log.d(TAG, "registering on call events intent");
-		callListener.add(i);
+		callListener.put(s, i);
 	}
 
 	/**
 	 * 
 	 * @since 1.1
 	 */
-	public void unregisterOnCallsIntent(PendingIntent i) throws RemoteException 
+	public void unregisterOnCallsIntents(String s) throws RemoteException 
 	{
 		Log.d(TAG, "unregistering on call events intent");
-		callListener.remove(i);
+		callListener.remove(s);
 	}
 	
 	/**
@@ -782,18 +824,18 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * 
 			 * @since 1.1
 			 */
-			public void unregisterOnCallsIntent(PendingIntent i) throws RemoteException 
+			public void unregisterOnCallsIntents(String s) throws RemoteException 
 			{
-				service.unregisterOnCallsIntent(i);
+				service.unregisterOnCallsIntents(s);
 			}
 
 			/**
 			 * 
 			 * @since 1.1
 			 */
-			public void registerOnCallsIntent(PendingIntent i) throws RemoteException 
+			public void registerOnCallsIntents(String s, PendingIntent i) throws RemoteException 
 			{
-				service.registerOnCallsIntent(i);
+				service.registerOnCallsIntents(s, i);
 			}
 
 			@Override

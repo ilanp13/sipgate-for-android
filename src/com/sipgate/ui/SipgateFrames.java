@@ -24,6 +24,7 @@ package com.sipgate.ui;
 import com.sipgate.R;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.SipgateApplication;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
 import android.app.TabActivity;
@@ -41,7 +42,7 @@ import android.widget.TabHost.TabSpec;
 // see ADDITIONAL_TERMS.txt
 /////////////////////////////////////////////////////////////////////
 public class SipgateFrames extends TabActivity {
-	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};  // FIXME: replace by class integrating the TAB_-constants
+	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};
 	
 	private static final String TAG = "TabActivity";
 	private static final int TAB_DIAL = 0;
@@ -108,7 +109,7 @@ public class SipgateFrames extends TabActivity {
 			this.currentTab = (SipgateTab) bundle.getSerializable("view");
 			Log.d("bundle", this.currentTab.toString());
 		} else {
-			Log.e("bundle", "Not provided");
+			Log.d("bundle", "Not provided");
 			this.currentTab = SipgateTab.DIALPAD;
 		}
 
@@ -182,8 +183,25 @@ public class SipgateFrames extends TabActivity {
 	@Override
 	public void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		Bundle bundle = intent.getExtras();
-		Log.d(TAG, "calling setcurrenttab from onNewIntent");
-		this.setCurrentTab(bundle);
+		String action = intent.getAction();
+		SipgateApplication application = (SipgateApplication) getApplication();
+		
+		if (action.equals(SipgateBackgroundService.ACTION_CALLS_NEW)) {
+			application.setRefreshState(SipgateApplication.RefreshState.NEW_EVENTS);
+			tabs.setCurrentTab(TAB_CALLLIST);
+		} else if (action.equals(SipgateBackgroundService.ACTION_CALLS_NO)) {
+			application.setRefreshState(SipgateApplication.RefreshState.NO_EVENTS);
+			tabs.setCurrentTab(TAB_CALLLIST);
+		} else if (action.equals(SipgateBackgroundService.ACTION_CALLS_GET)) {
+			application.setRefreshState(SipgateApplication.RefreshState.GET_EVENTS);
+			tabs.setCurrentTab(TAB_CALLLIST);
+		} else if (action.equals(SipgateBackgroundService.ACTION_CALLS_ERROR)) {
+			application.setRefreshState(SipgateApplication.RefreshState.ERROR);
+			tabs.setCurrentTab(TAB_CALLLIST);
+		} else {
+			Bundle bundle = intent.getExtras();
+			Log.d(TAG, "calling setcurrenttab from onNewIntent");
+			this.setCurrentTab(bundle);
+		}
 	}
 }

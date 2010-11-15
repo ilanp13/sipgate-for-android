@@ -8,19 +8,23 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.adapters.CallListAdapter;
@@ -28,6 +32,7 @@ import com.sipgate.db.CallDataDBObject;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.util.SipgateApplication;
 
 public class CallListActivity extends Activity implements OnItemClickListener 
 {
@@ -36,12 +41,22 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	private CallListAdapter callListAdapter = null;
 	private AlertDialog m_AlertDlg = null;
 	
+	private ImageView refreshSpinner = null;
+	private LinearLayout refreshView = null;
 	private ListView elementList = null;
 	private TextView emptyList = null;
 	
+	private AnimationDrawable frameAnimation = null;
+	private Thread animationThread = null;
+	private boolean isAnimationRunning = false;
+	
 	private ServiceConnection serviceConnection = null;
 	private EventService serviceBinding = null;
-	private PendingIntent onNewCallPendingIntent = null;
+	
+	private PendingIntent onNewCallsPendingIntent = null;
+	private PendingIntent onNoCallsPendingIntent = null;
+	private PendingIntent onGetCallsPendingIntent = null;
+	private PendingIntent onErrorPendingIntent = null;
 	
 	private Context context = null;
 	
@@ -52,9 +67,18 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		
 		setContentView(R.layout.sipgate_call_list);
 		
+		refreshSpinner = (ImageView) findViewById(R.id.sipgateCallListRefreshImage);
+		refreshView = (LinearLayout) findViewById(R.id.sipgateCallListRefreshView);
 		elementList = (ListView) findViewById(R.id.CalllistListView);
 		emptyList = (TextView) findViewById(R.id.EmptyCallListTextView);
-
+		
+		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
+		animationThread = new Thread(new Runnable() {
+			public void run() {
+				frameAnimation.start();
+			}
+		});
+		
 		context = getApplicationContext();
 		
 		callListAdapter = new CallListAdapter(this);
@@ -67,7 +91,30 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	protected void onResume() {
 		super.onResume();
 		
-		startScanActivity();		
+		SipgateApplication.RefreshState refreshState = ((SipgateApplication) getApplication()).getRefreshState();
+		
+		switch (refreshState) {
+			case NEW_EVENTS: 
+				refreshView.setVisibility(View.GONE);
+				showNewEntriesToast();
+				break;
+			case NO_EVENTS: 
+				refreshView.setVisibility(View.GONE);
+				showNoEntriesToast();
+				break;
+			case GET_EVENTS: 
+				refreshView.setVisibility(View.VISIBLE);
+				break;
+			case ERROR: 
+				refreshView.setVisibility(View.GONE);
+				showErrorToast();
+				break;
+			default:
+				refreshView.setVisibility(View.GONE);
+				break;
+		}
+		
+		registerForBackgroundIntents();		
 		
 		callListAdapter.notifyDataSetChanged();
 		
@@ -77,14 +124,19 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		} else {
 			elementList.setVisibility(View.VISIBLE);
 			emptyList.setVisibility(View.GONE);
-		}	
+		}
+		
+		if(!isAnimationRunning) {
+			animationThread.start();
+			isAnimationRunning = true;
+		}
 	}
 	
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
-	
+		
 		stopScanActivity();
 	}
 		
@@ -96,7 +148,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		stopScanActivity();
 	}
 	
-	private void startScanActivity()
+	private void registerForBackgroundIntents()
 	{
 		Intent intent = new Intent(this, SipgateBackgroundService.class);
 		context.startService(intent);
@@ -117,7 +169,10 @@ public class CallListActivity extends Activity implements OnItemClickListener
 						serviceBinding = (EventService) binder;
 						try {
 							Log.d(TAG, "service binding -> registerOnCallsIntent");
-							serviceBinding.registerOnCallsIntent(getNewMessagesIntent());
+							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NEW, newCallsIntent());
+							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NO, noCallsIntent());
+							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_GET, getCallsIntent());
+							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_ERROR, errorIntent());
 						} catch (RemoteException e) {
 							e.printStackTrace();
 						}
@@ -135,12 +190,15 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	}
 	
 	public void stopScanActivity()
-	{
+	{		
 		if (serviceConnection != null) {
 			try {
 				if (serviceBinding != null) {
 					Log.d(TAG, "service unbinding -> unregisterOnCallsIntent");
-					serviceBinding.unregisterOnCallsIntent(getNewMessagesIntent());
+					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NEW);
+					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NO);
+					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_GET);
+					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_ERROR);
 				}
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -152,14 +210,44 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		}
 	}
 
-	private PendingIntent getNewMessagesIntent() {
-		if (onNewCallPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFramesCalls.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
-			onNewCallPendingIntent = PendingIntent.getActivity(this,
+	private PendingIntent newCallsIntent() {
+		if (onNewCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NEW);
+			onNewCallsPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
-		return onNewCallPendingIntent;
+		return onNewCallsPendingIntent;
+	}
+	
+	private PendingIntent noCallsIntent() {
+		if (onNoCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NO);
+			onNoCallsPendingIntent = PendingIntent.getActivity(this,
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNoCallsPendingIntent;
+	}
+	
+	private PendingIntent getCallsIntent() {
+		if (onGetCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_GET);
+			onGetCallsPendingIntent = PendingIntent.getActivity(this,
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onGetCallsPendingIntent;
+	}
+	
+	private PendingIntent errorIntent() {
+		if (onErrorPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_ERROR);
+			onErrorPendingIntent = PendingIntent.getActivity(this,
+					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onErrorPendingIntent;
 	}
 	
 	@Override
@@ -182,6 +270,45 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		m.selectItem(item, this.getApplicationContext(), this);
 
 		return result;
+	}
+	
+	private void showNewEntriesToast() {
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_new_entries), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+	
+	private void showNoEntriesToast() {
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_entries), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+	
+	private void showErrorToast() {
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_api_error), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
 	}
 	
 	private void call_menu(final String target)

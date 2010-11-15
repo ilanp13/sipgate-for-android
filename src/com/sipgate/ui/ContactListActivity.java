@@ -1,35 +1,31 @@
 package com.sipgate.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.sipgate.R;
 import com.sipgate.adapters.ContactListAdapter;
-import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
-import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
-import com.sipgate.sipua.ui.Receiver;
 
 public class ContactListActivity extends Activity implements OnItemClickListener 
 {
@@ -37,8 +33,14 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	
 	private ContactListAdapter contactListAdapter = null;
 	
+	private ImageView refreshSpinner = null;
+	private LinearLayout refreshView = null;
 	private ListView elementList = null;
 	private TextView emptyList = null;
+	
+	private AnimationDrawable frameAnimation = null;
+	private Thread animationThread = null;
+	private boolean isAnimationRunning = false;
 	
 	private ServiceConnection serviceConnection = null;
 	private EventService serviceBinding = null;
@@ -53,9 +55,18 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		
 		setContentView(R.layout.sipgate_contacts_list);
 		
+		refreshSpinner = (ImageView) findViewById(R.id.sipgateContactsListRefreshImage);
+		refreshView = (LinearLayout) findViewById(R.id.sipgateContactsListRefreshView);
 		elementList = (ListView) findViewById(R.id.ContactsListView);
 		emptyList = (TextView) findViewById(R.id.EmptyContactListTextView);
 
+		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
+		animationThread = new Thread() {
+			public void run() {
+				frameAnimation.start();
+			}
+		};
+		
 		context = getApplicationContext();
 		
 		contactListAdapter = new ContactListAdapter(this);
@@ -83,6 +94,11 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			elementList.setVisibility(View.VISIBLE);
 			emptyList.setVisibility(View.GONE);
 		}	
+		
+		if(!isAnimationRunning) {
+			animationThread.start();
+			isAnimationRunning = true;
+		}
 	}
 	
 	@Override
@@ -180,7 +196,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		if (onContactPendingIntent == null) 
 		{
 			Intent onChangedIntent = new Intent(this, SipgateFramesContacts.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NEW);
 			onContactPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
 		

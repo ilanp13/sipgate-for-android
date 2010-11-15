@@ -2,6 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/sipgateCallList" android:layout_height="fill_parent"
 	android:layout_width="fill_parent" android:orientation="vertical">
+	<LinearLayout android:id="@+id/sipgateCallListRefreshView"
+		android:layout_height="wrap_content" android:orientation="horizontal"
+		android:layout_width="fill_parent" android:gravity="center"
+		android:background="#333333" android:padding="2dip">
+		<ImageView android:id="@+id/sipgateCallListRefreshImage"
+			android:layout_width="wrap_content" android:layout_gravity="center"
+			android:layout_marginRight="5px"
+			android:layout_height="wrap_content" android:background="@drawable/refresh_spinner"></ImageView>
+		<TextView android:text="@string/sipgate_refresh" android:id="@+id/CallListNumberTextView"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:gravity="center" android:textColor="#FFFFFF"
+			android:textSize="12dip"></TextView>
+	</LinearLayout>
 	<ListView android:id="@+id/CalllistListView"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
 		android:divider="#808080" android:dividerHeight="1px">

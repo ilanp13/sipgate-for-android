@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -23,6 +24,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -43,8 +46,14 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	
 	private VoiceMailListAdapter voiceMailListAdapter = null;
 	
+	private ImageView refreshSpinner = null;
+	private LinearLayout refreshView = null;
 	private ListView elementList = null;
 	private TextView emptyList = null;
+	
+	private AnimationDrawable frameAnimation = null;
+	private Thread animationThread = null;
+	private boolean isAnimationRunning = false;
 	
 	private ServiceConnection serviceConnection = null;
 	private EventService serviceBinding = null;
@@ -72,9 +81,18 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		
 		sipgateDBAdapter = SipgateDBAdapter.getInstance(this);
 		
+		refreshSpinner = (ImageView) findViewById(R.id.sipgateVoiceMailListRefreshImage);
+		refreshView = (LinearLayout) findViewById(R.id.sipgateVoiceMailListRefreshView);
 		elementList = (ListView) findViewById(R.id.EventListView);
 		emptyList = (TextView) findViewById(R.id.EmptyEventListTextView);
 
+		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
+		animationThread = new Thread() {
+			public void run() {
+				frameAnimation.start();
+			}
+		};
+		
 		appContext = getApplicationContext();
 		apiClient = ApiServiceProvider.getInstance(activity);
 		
@@ -109,6 +127,11 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			elementList.setVisibility(View.VISIBLE);
 			emptyList.setVisibility(View.GONE);
 		}	
+		
+		if(!isAnimationRunning) {
+			animationThread.start();
+			isAnimationRunning = true;
+		}
 	}
 	
 	@Override
@@ -187,7 +210,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	{
 		if (onNewVoiceMailPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFramesVoiceMails.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NEW);
 			onNewVoiceMailPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}

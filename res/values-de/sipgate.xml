@@ -77,4 +77,8 @@
    	<string name="sipgate_a_new_call">Ein neuer Anruf</string>
    	<string name="sipgate_loading">Lade. Bitte warten...</string>
    	<string name="sipgate_download_failed">Voice mail konnte nicht heruntergeladen werden.</string>
+   	<string name="sipgate_refresh">Aktualisieren...</string>
+   	<string name="sipgate_api_error">Beim Aktualisieren ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</string>
+   	<string name="sipgate_new_entries">Liste wurde aktualisiert.</string>
+	<string name="sipgate_no_entries">Liste wurde aktualisiert. Es gab keine neuen Einträge.</string>
 </resources>
