@@ -210,7 +210,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	{
 		if (onNewVoiceMailPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFramesVoiceMails.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NEW);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
 			onNewVoiceMailPendingIntent = PendingIntent.getActivity(this,
 					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}

@@ -196,7 +196,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		if (onContactPendingIntent == null) 
 		{
 			Intent onChangedIntent = new Intent(this, SipgateFramesContacts.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NEW);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
 			onContactPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
 		
