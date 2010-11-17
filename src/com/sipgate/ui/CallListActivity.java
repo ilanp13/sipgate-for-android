@@ -35,7 +35,8 @@ import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.util.SipgateApplication;
 
 /**
- * This class represents the call list activity and implements all it's functions.
+ * This class represents the call list activity and implements all
+ * it's functions.
  * 
  * @author Karsten Knuth
  * @version 1.2
@@ -72,7 +73,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	/**
 	 * This function is called right after the class is started by an intent.
 	 * 
-	 * @param bundle The bundle wich caused the activity to be started.
+	 * @param bundle The bundle which caused the activity to be started.
 	 * @since 1.0
 	 */
 	public void onCreate(Bundle bundle) 
@@ -110,8 +111,11 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 * 
 	 * @since 1.0
 	 */
-	public void onResume() {
+	public void onResume()
+	{
 		super.onResume();
+		
+		registerForBackgroundIntents();
 		
 		refreshState = application.getRefreshState();
 		application.setRefreshState(SipgateApplication.RefreshState.NONE);
@@ -138,8 +142,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				refreshView.setVisibility(View.GONE);
 				break;
 		}
-		
-		registerForBackgroundIntents();
 		
 		if (callListAdapter.isEmpty()) {
 			elementList.setVisibility(View.GONE);
@@ -299,6 +301,22 @@ public class CallListActivity extends Activity implements OnItemClickListener
 			serviceConnection = null;
 		}
 	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that the download of new calls just has started.
+	 * 
+	 * @return The callback intent for starting to download calls.
+	 * @since 1.2
+	 */
+	private PendingIntent getCallsIntent() {
+		if (onGetCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
+			onGetCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onGetCallsPendingIntent;
+	}
 
 	/**
 	 * This functions returns a callback intent for the callback
@@ -311,8 +329,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		if (onNewCallsPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
-			onNewCallsPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+			onNewCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
 		return onNewCallsPendingIntent;
 	}
@@ -328,27 +345,9 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		if (onNoCallsPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NOEVENTS);
-			onNoCallsPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+			onNoCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
 		return onNoCallsPendingIntent;
-	}
-	
-	/**
-	 * This functions returns a callback intent for the callback
-	 * that the download of new calls just has started.
-	 * 
-	 * @return The callback intent for starting to download calls.
-	 * @since 1.2
-	 */
-	private PendingIntent getCallsIntent() {
-		if (onGetCallsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
-			onGetCallsPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
-		}
-		return onGetCallsPendingIntent;
 	}
 	
 	/**
@@ -362,8 +361,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		if (onErrorPendingIntent == null) {
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_ERROR);
-			onErrorPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+			onErrorPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
 		return onErrorPendingIntent;
 	}
@@ -426,7 +424,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	}
 	
 	/**
-	 * This function starts a call with the privided phone number.
+	 * This function starts a call with the provided phone number.
 	 * 
 	 * @param target The phone number of the person to be called.
 	 * @since 1.0

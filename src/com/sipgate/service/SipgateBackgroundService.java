@@ -62,7 +62,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	
 	private PendingIntent pendingIntent = null;
 	private HashMap<String, PendingIntent> newIntents = null;
-	private Set<PendingIntent> contactListener = new HashSet<PendingIntent>();
+	private HashMap<String, HashMap<String, PendingIntent>> contactListener = new HashMap<String, HashMap<String, PendingIntent>>();
 	private HashMap<String, HashMap<String, PendingIntent>> callListener = new HashMap<String, HashMap<String, PendingIntent>>();
 	private Set<PendingIntent> voiceMailListener = new HashSet<PendingIntent>();
 	
@@ -79,6 +79,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	private int deleted = 0;
 	private int updated = 0;
 	private int inserted = 0;
+	
+	private int insertedContacts = 0;
 	private int insertedCalls = 0;
 	
 	/**
@@ -111,18 +113,28 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This fucntion allows you to register for information about the
+	 * This function allows you to register for information about the
 	 * background services' status regarding the refreshing of
 	 * contacts.
 	 * 
-	 * @param i The intent that will function as call back.
+	 * @param tag A string uniquely identifying the process that wants to be called back.
+	 * @param getEventsIntent The intent used as callback when starting a refresh cycle.
+	 * @param newEventsIntent The intent used as callback when there was new data.
+	 * @param noEventsIntent The intent used as callback when there was no new data.
+	 * @param errorIntent The intent used as callback when an error occurred.
 	 * @throws RemoteException Thrown when the remote communication failed.
-	 * @since 1.1
+	 * @since 1.2
 	 */
-	public void registerOnContactsIntent(PendingIntent i) throws RemoteException
+	public void registerOnContactsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 	{
 		Log.d(TAG, "registering on contact events intent");
-		contactListener.add(i);
+		newIntents = new HashMap<String, PendingIntent>();
+		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
+		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
+		newIntents.put(ACTION_NOEVENTS, noEventsIntent);
+		newIntents.put(ACTION_ERROR, errorIntent);
+		
+		contactListener.put(tag, newIntents);
 	}
 	
 	/**
@@ -150,7 +162,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This fucntion allows you to register for information about the
+	 * This function allows you to register for information about the
 	 * background services' status regarding the refreshing of
 	 * voice mails.
 	 * 
@@ -168,14 +180,14 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * This function unregisters from information regarding
 	 * the refreshing of contacts.
 	 * 
-	 * @param i The intent to be removed.
+	 * @param tag A string uniquely identifying the process that wants to be no longer called back.
 	 * @throws RemoteException Thrown when the remote communication failed.
-	 * @since 1.1
+	 * @since 1.2
 	 */
-	public void unregisterOnContactsIntent(PendingIntent i) throws RemoteException
+	public void unregisterOnContactsIntent(String tag) throws RemoteException
 	{
 		Log.d(TAG, "unregistering on contact events intent");
-		contactListener.remove(i);
+		contactListener.remove(tag);
 	}
 	
 	/**
@@ -312,13 +324,17 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * This is a wrapper function for registering on the
 			 * contacts update status.
 			 * 
-			 * @param i The intent that will function as the callback.
+			 * @param tag A string uniquely identifying the process that wants to be called back.
+			 * @param getEventsIntent The intent used as callback when starting a refresh cycle.
+			 * @param newEventsIntent The intent used as callback when there was new data.
+			 * @param noEventsIntent The intent used as callback when there was no new data.
+			 * @param errorIntent The intent used as callback when an error occurred.
 			 * @throws RemoteException Thrown when the remote communication failed.
-			 * @since 1.1
+			 * @since 1.2
 			 */
-			public void registerOnContactsIntent(PendingIntent i) throws RemoteException
+			public void registerOnContactsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 			{
-				service.registerOnContactsIntent(i);				
+				service.registerOnContactsIntent(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);				
 			}
 			
 			/**
@@ -340,7 +356,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			/**
 			 * This is a wrapper function for registering on the
-			 * vioce mail update status.
+			 * voice mail update status.
 			 * 
 			 * @param i The intent that will function as the callback.
 			 * @throws RemoteException Thrown when the remote communication failed.
@@ -355,13 +371,13 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * This is a wrapper function for unregistering on the
 			 * contacts update status.
 			 * 
-			 * @param i The intent to be unregistered.
+			 * @param tag A string uniquely identifying the process that wants to no longer be called back.
 			 * @throws RemoteException Thrown when the remote communication failed.
-			 * @since 1.0
+			 * @since 1.2
 			 */
-			public void unregisterOnContactsIntent(PendingIntent i) throws RemoteException
+			public void unregisterOnContactsIntent(String tag) throws RemoteException
 			{
-				service.unregisterOnContactsIntent(i);
+				service.unregisterOnContactsIntent(tag);
 			}
 			
 			/**
@@ -436,6 +452,196 @@ public class SipgateBackgroundService extends Service implements EventService
 	public IBinder asBinder() 
 	{
 		return null;
+	}
+	
+	/**
+	 * This function syncs the newly downloaded contacts into
+	 * the database.
+	 * 
+	 * @param newCallDataDBObjects The Vector with the new contact data.
+	 * @param context The application context.
+	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
+	 * @return The number of newly added contacts.
+	 * @since 1.1
+	 */
+	public int notifyIfNewContacts(Vector<ContactDataDBObject> newContactDataDBObjects, Context context) throws StoreDataException 
+	{
+		Log.d(TAG, "notifyIfNewContacts");
+		
+		if (newContactDataDBObjects == null) {
+			Log.i(TAG, "notifyIfNewContacts() -> callDataDBObjects is null");
+			return -1;
+		}
+		
+		deleted = 0;
+		inserted = 0;
+		updated = 0;
+		
+		try {
+			if (sipgateDBAdapter == null) {
+				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
+			}
+			
+			Vector<ContactDataDBObject> oldContactDataDBObjects = sipgateDBAdapter.getAllContactData();
+			
+			sipgateDBAdapter.startTransaction();
+		
+			deleteOldContacts(newContactDataDBObjects, oldContactDataDBObjects);
+			updateContacts(newContactDataDBObjects, oldContactDataDBObjects);		
+
+			Log.d(TAG, "ContactDataDBObject deleted: " + deleted);
+			Log.d(TAG, "ContactDataDBObject inserted: " + inserted);
+			Log.d(TAG, "ContactDataDBObject updated: " + updated);
+									
+			sipgateDBAdapter.commitTransaction();
+		}
+		catch (Exception e) {
+			Log.e(TAG, "notifyIfNewContacts()", e);
+			
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
+				sipgateDBAdapter.rollbackTransaction();
+			}
+			
+			throw new StoreDataException();
+		}
+		
+		return inserted;
+	}
+	
+	/**
+	 * This function syncs the newly downloaded call data into
+	 * the database and creates a notification in the phones
+	 * notification area if needed.
+	 * 
+	 * @param newCallDataDBObjects The Vector with the new call data.
+	 * @param context The application context.
+	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
+	 * @return The number of newly added calls.
+	 * @since 1.1
+	 */
+	public int notifyIfNewCalls(Vector<CallDataDBObject> newCallDataDBObjects, Context context) throws StoreDataException 
+	{
+		Log.d(TAG, "notifyIfUnreadsCalls");
+		
+		if (newCallDataDBObjects == null) {
+			Log.i(TAG, "notifyIfUnreadsCalls() -> callDataDBObjects is null");
+			return -1;
+		}
+		
+		deleted = 0;
+		inserted = 0;
+		updated = 0;
+
+		unreadCounter = 0;
+		
+		try {
+			if (sipgateDBAdapter == null) {
+				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
+			}
+			
+			Vector<CallDataDBObject> oldCallDataDBObjects = sipgateDBAdapter.getAllCallData();
+			
+			sipgateDBAdapter.startTransaction();
+			
+			deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects);
+			updateCalls(newCallDataDBObjects, oldCallDataDBObjects);
+
+			Log.d(TAG, "CallDataDBObject deleted: " + deleted);
+			Log.d(TAG, "CallDataDBObject inserted: " + inserted);
+			Log.d(TAG, "CallDataDBObject updated: " + updated);
+			
+			sipgateDBAdapter.commitTransaction();
+		}
+		catch (Exception e) {
+			Log.e(TAG, "notifyIfUnreadsCalls()", e);
+			
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
+				sipgateDBAdapter.rollbackTransaction();
+			}
+			
+			throw new StoreDataException();
+		}
+	
+		if (unreadCounter > 0) {
+			createNewCallNotification(unreadCounter);
+			
+			Log.d(TAG, "new unread calls: " + unreadCounter);
+		}
+		else {
+			removeNewCallNotification();
+		}
+
+		return inserted;
+	}
+	
+	/**
+	 * This function syncs the newly downloaded voice mail data into
+	 * the database and creates a notification in the phones
+	 * notification area if needed.
+	 * 
+	 * @param newVoiceMailDataDBObjects A Vector of the new voice mails.
+	 * @param context The Application context.
+	 * @since 1.0
+	 */
+	public void notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) 
+	{
+		Log.d(TAG, "notifyIfUnreadVoiceMails");
+		
+		if (newVoiceMailDataDBObjects == null) {
+			Log.i(TAG, "notifyIfUnreadVoiceMails() -> voiceMailDataDBObjects is null");
+			return;
+		}
+		
+		deleted = 0;
+		inserted = 0;
+		updated = 0;
+		
+		unreadCounter = 0;
+		
+		try {
+			if (sipgateDBAdapter == null) {
+				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
+			}
+			
+			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
+			
+			sipgateDBAdapter.startTransaction();
+			
+			deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects);
+			updateVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects);
+			
+			Log.d(TAG, "VoiceMailDataDBObject deleted: " + deleted);
+			Log.d(TAG, "VoiceMailDataDBObject inserted: " + inserted);
+			Log.d(TAG, "VoiceMailDataDBObject updated: " + updated);
+											
+			sipgateDBAdapter.commitTransaction();
+		}
+		catch (Exception e) {
+			Log.e(TAG, "notifyIfUnreadsVoiceMails()", e);
+			
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
+				sipgateDBAdapter.rollbackTransaction();
+			}
+		}
+		
+		if (unreadCounter > 0) {
+			createNewVoiceMailNotification(unreadCounter);
+		
+			Log.d(TAG, "new unseen voicemails: " + unreadCounter);
+		}
+		else {
+			removeNewVoiceMailNotification();
+		}
+		
+		for (PendingIntent pendingIntent: voiceMailListener) {
+			try  {
+				Log.d(TAG, "notifying refresh voice mails to activity");
+				pendingIntent.send(NotificationReason.FINISHED_NEW_DATA.ordinal());
+			} 
+			catch (CanceledException e) {
+				e.printStackTrace();
+			}			
+		}
 	}
 	
 	/**
@@ -519,11 +725,30 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.v(TAG, "refreshContactEvents() -> start");
 		
+		notifyFrontend(contactListener, ACTION_GETEVENTS);
+		
 		try {
-			notifyIfNewContacts(apiClient.getContacts(), this);
+			insertedContacts = notifyIfNewContacts(apiClient.getContacts(), this);
+			
+			if (insertedContacts > 0 ) {
+				notifyFrontend(contactListener, ACTION_NEWEVENTS);
+			}
+			else {
+				notifyFrontend(contactListener, ACTION_NOEVENTS);
+			}
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
+			
+			try {
+				Thread.sleep(2000);
+			}
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				notifyFrontend(contactListener, ACTION_ERROR);
+			}
 		}
 		
 		Log.v(TAG, "refreshContactEvents() -> finish");
@@ -539,19 +764,21 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.v(TAG, "refreshCallEvents() -> start");
 		
-		notifyFrontend(ACTION_GETEVENTS);
+		notifyFrontend(callListener, ACTION_GETEVENTS);
 		
 		try {
 			insertedCalls = notifyIfNewCalls(apiClient.getCalls(), this);
 			
 			if (insertedCalls > 0 ) {
-				notifyFrontend(ACTION_NEWEVENTS);
-			} else {
-				notifyFrontend(ACTION_NOEVENTS);
+				notifyFrontend(callListener, ACTION_NEWEVENTS);
+			}
+			else {
+				notifyFrontend(callListener, ACTION_NOEVENTS);
 			}
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
+			
 			try {
 				Thread.sleep(2000);
 			}
@@ -559,7 +786,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				threadException.printStackTrace();
 			}
 			finally {
-				notifyFrontend(ACTION_ERROR);
+				notifyFrontend(callListener, ACTION_ERROR);
 			}
 		}
 		
@@ -590,9 +817,11 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * This function send a notification about the services status
 	 * to the subscribed frontend processes.
 	 * 
+	 * @param listener The hash map containing the listener callback intents.
 	 * @param action The action the frontend is supposed to show to the user.
+	 * @since 1.2
 	 */
-	private void notifyFrontend(String action) {
+	private void notifyFrontend(HashMap<String, HashMap<String, PendingIntent>> listener, String action) {
 		try {
 			for(String key : callListener.keySet()) {
 				pendingIntent = null;
@@ -605,200 +834,6 @@ public class SipgateBackgroundService extends Service implements EventService
 		} 
 		catch (CanceledException e) {
 			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * This function syncs the newly downloaded contacts into
-	 * the database.
-	 * 
-	 * @param newContactDataDBObjects The Vector with the new contacts data
-	 * @param context The application context
-	 * @since 1.1
-	 */
-	private void notifyIfNewContacts(Vector<ContactDataDBObject> newContactDataDBObjects, Context context) 
-	{
-		Log.d(TAG, "notifyIfNewContacts");
-		
-		if (newContactDataDBObjects == null) {
-			Log.i(TAG, "notifyIfNewContacts() -> callDataDBObjects is null");
-			return;
-		}
-		
-		try {
-			if (sipgateDBAdapter == null) {
-				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
-			}
-			
-			Vector<ContactDataDBObject> oldContactDataDBObjects = sipgateDBAdapter.getAllContactData();
-			
-			sipgateDBAdapter.startTransaction();
-			
-			deleted = 0;
-			inserted = 0;
-			updated = 0;
-		
-			deleteOldContacts(newContactDataDBObjects, oldContactDataDBObjects);
-			updateContacts(newContactDataDBObjects, oldContactDataDBObjects);		
-
-			Log.d(TAG, "ContactDataDBObject deleted: " + deleted);
-			Log.d(TAG, "ContactDataDBObject inserted: " + inserted);
-			Log.d(TAG, "ContactDataDBObject updated: " + updated);
-									
-			sipgateDBAdapter.commitTransaction();
-		}
-		catch (Exception e) {
-			Log.e(TAG, "notifyIfNewContacts()", e);
-			
-			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
-				sipgateDBAdapter.rollbackTransaction();
-			}
-		}
-		
-		for (PendingIntent pendingIntent: contactListener) {
-			try  {
-				Log.d(TAG, "notifying refresh contacts to activity");
-				pendingIntent.send(NotificationReason.FINISHED_NEW_DATA.ordinal());
-			} 
-			catch (CanceledException e)  {
-				e.printStackTrace();
-			}			
-		}
-	}
-	
-	/**
-	 * This function syncs the newly downloaded voice mail data into
-	 * the database and creates a notification in the phones
-	 * notification area if needed.
-	 * 
-	 * @param newCallDataDBObjects The Vector with the now call data.
-	 * @param context The application context.
-	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
-	 * @return The number of newly added calls.
-	 * @since 1.1
-	 */
-	private int notifyIfNewCalls(Vector<CallDataDBObject> newCallDataDBObjects, Context context) throws StoreDataException 
-	{
-		Log.d(TAG, "notifyIfUnreadsCalls");
-		
-		if (newCallDataDBObjects == null) {
-			Log.i(TAG, "notifyIfUnreadsCalls() -> callDataDBObjects is null");
-			return -1;
-		}
-		
-		deleted = 0;
-		inserted = 0;
-		updated = 0;
-
-		unreadCounter = 0;
-		
-		try {
-			if (sipgateDBAdapter == null) {
-				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
-			}
-			
-			Vector<CallDataDBObject> oldCallDataDBObjects = sipgateDBAdapter.getAllCallData();
-			
-			sipgateDBAdapter.startTransaction();
-			
-			deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects);
-			updateCalls(newCallDataDBObjects, oldCallDataDBObjects);
-
-			Log.d(TAG, "CallDataDBObject deleted: " + deleted);
-			Log.d(TAG, "CallDataDBObject inserted: " + inserted);
-			Log.d(TAG, "CallDataDBObject updated: " + updated);
-			
-			sipgateDBAdapter.commitTransaction();
-		}
-		catch (Exception e) {
-			Log.e(TAG, "notifyIfUnreadsCalls()", e);
-			
-			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
-				sipgateDBAdapter.rollbackTransaction();
-			}
-			
-			throw new StoreDataException();
-		}
-	
-		if (unreadCounter > 0) {
-			createNewCallNotification(unreadCounter);
-			
-			Log.d(TAG, "new unread calls: " + unreadCounter);
-		}
-		else {
-			removeNewCallNotification();
-		}
-
-		return inserted;
-	}
-	
-	/**
-	 * This function syncs the newly downloaded voice mail data into
-	 * the database and creates a notification in the phones
-	 * notification area if needed.
-	 * 
-	 * @param newVoiceMailDataDBObjects A Vector of the new voice mails.
-	 * @param context The Application context.
-	 * @since 1.0
-	 */
-	private void notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) 
-	{
-		Log.d(TAG, "notifyIfUnreadVoiceMails");
-		
-		if (newVoiceMailDataDBObjects == null) {
-			Log.i(TAG, "notifyIfUnreadVoiceMails() -> voiceMailDataDBObjects is null");
-			return;
-		}
-		
-		deleted = 0;
-		inserted = 0;
-		updated = 0;
-		
-		unreadCounter = 0;
-		
-		try {
-			if (sipgateDBAdapter == null) {
-				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
-			}
-			
-			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
-			
-			sipgateDBAdapter.startTransaction();
-			
-			deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects);
-			updateVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects);
-			
-			Log.d(TAG, "VoiceMailDataDBObject deleted: " + deleted);
-			Log.d(TAG, "VoiceMailDataDBObject inserted: " + inserted);
-			Log.d(TAG, "VoiceMailDataDBObject updated: " + updated);
-											
-			sipgateDBAdapter.commitTransaction();
-		}
-		catch (Exception e) {
-			Log.e(TAG, "notifyIfUnreadsVoiceMails()", e);
-			
-			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
-				sipgateDBAdapter.rollbackTransaction();
-			}
-		}
-		
-		if (unreadCounter > 0) {
-			createNewVoiceMailNotification(unreadCounter);
-		
-			Log.d(TAG, "new unseen voicemails: " + unreadCounter);
-		}
-		else {
-			removeNewVoiceMailNotification();
-		}
-		
-		for (PendingIntent pendingIntent: voiceMailListener) {
-			try  {
-				Log.d(TAG, "notifying refresh voice mails to activity");
-				pendingIntent.send(NotificationReason.FINISHED_NEW_DATA.ordinal());
-			} 
-			catch (CanceledException e) {
-				e.printStackTrace();
-			}			
 		}
 	}
 	
