@@ -823,9 +823,9 @@ public class SipgateBackgroundService extends Service implements EventService
 	 */
 	private void notifyFrontend(HashMap<String, HashMap<String, PendingIntent>> listener, String action) {
 		try {
-			for(String key : callListener.keySet()) {
+			for(String key : listener.keySet()) {
 				pendingIntent = null;
-				pendingIntent = callListener.get(key).get(action);
+				pendingIntent = listener.get(key).get(action);
 				
 				if (pendingIntent != null) {
 					pendingIntent.send();
