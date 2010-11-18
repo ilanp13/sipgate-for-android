@@ -460,12 +460,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getVoiceMails() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (voiceMailParser != null && saxParser != null)
@@ -480,15 +481,17 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getVoiceMails() -> saxParser or voiceMails is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	public boolean connectivityOk() throws ApiException, NetworkProblemException 
