@@ -72,11 +72,20 @@ public class SipgateBackgroundService extends Service implements EventService
 	private VoiceMailDataDBObject oldVoiceMailDataDBObject = null;
 	private CallDataDBObject oldCallDataDBObject = null;
 		
-	private	int unreadCounter = 0;
+	private	int unreadCallsCounter = 0;
+	private	int unreadVoiceMailsCounter = 0;
 	
-	private int deleted = 0;
-	private int updated = 0;
-	private int inserted = 0;
+	private int deletedContacts = 0;
+	private int updatedContacts = 0;
+	private int insertedContacts = 0;
+	
+	private int deletedCalls = 0;
+	private int updatedCalls = 0;
+	private int insertedCalls = 0;
+	
+	private int deletedVoiceMails = 0;
+	private int updatedVoiceMails = 0;
+	private int insertedVoiceMails = 0;
 	
 	/**
 	 * The onCreate function of the service, which is called at every
@@ -482,9 +491,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			return -1;
 		}
 		
-		deleted = 0;
-		inserted = 0;
-		updated = 0;
+		deletedContacts = 0;
+		insertedContacts = 0;
+		updatedContacts = 0;
 		
 		try {
 			if (sipgateDBAdapter == null) {
@@ -495,12 +504,12 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			sipgateDBAdapter.startTransaction();
 		
-			deleteOldContacts(newContactDataDBObjects, oldContactDataDBObjects);
-			updateContacts(newContactDataDBObjects, oldContactDataDBObjects);		
+			deleteOldContacts(newContactDataDBObjects, oldContactDataDBObjects, sipgateDBAdapter);
+			updateContacts(newContactDataDBObjects, oldContactDataDBObjects, sipgateDBAdapter);		
 
-			Log.d(TAG, "ContactDataDBObject deleted: " + deleted);
-			Log.d(TAG, "ContactDataDBObject inserted: " + inserted);
-			Log.d(TAG, "ContactDataDBObject updated: " + updated);
+			Log.d(TAG, "ContactDataDBObject deleted: " + deletedContacts);
+			Log.d(TAG, "ContactDataDBObject inserted: " + insertedContacts);
+			Log.d(TAG, "ContactDataDBObject updated: " + updatedContacts);
 									
 			sipgateDBAdapter.commitTransaction();
 		}
@@ -514,7 +523,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			throw new StoreDataException();
 		}
 		
-		return inserted;
+		return insertedContacts;
 	}
 	
 	/**
@@ -537,11 +546,11 @@ public class SipgateBackgroundService extends Service implements EventService
 			return -1;
 		}
 		
-		deleted = 0;
-		inserted = 0;
-		updated = 0;
+		deletedCalls = 0;
+		insertedCalls = 0;
+		updatedCalls = 0;
 
-		unreadCounter = 0;
+		unreadCallsCounter = 0;
 		
 		try {
 			if (sipgateDBAdapter == null) {
@@ -552,12 +561,12 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			sipgateDBAdapter.startTransaction();
 			
-			deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects);
-			updateCalls(newCallDataDBObjects, oldCallDataDBObjects);
+			deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
+			updateCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
 
-			Log.d(TAG, "CallDataDBObject deleted: " + deleted);
-			Log.d(TAG, "CallDataDBObject inserted: " + inserted);
-			Log.d(TAG, "CallDataDBObject updated: " + updated);
+			Log.d(TAG, "CallDataDBObject deleted: " + deletedCalls);
+			Log.d(TAG, "CallDataDBObject inserted: " + insertedCalls);
+			Log.d(TAG, "CallDataDBObject updated: " + updatedCalls);
 			
 			sipgateDBAdapter.commitTransaction();
 		}
@@ -571,16 +580,16 @@ public class SipgateBackgroundService extends Service implements EventService
 			throw new StoreDataException();
 		}
 	
-		if (unreadCounter > 0) {
-			createNewCallNotification(unreadCounter);
+		if (unreadCallsCounter > 0) {
+			createNewCallNotification(unreadCallsCounter);
 			
-			Log.d(TAG, "new unread calls: " + unreadCounter);
+			Log.d(TAG, "new unread calls: " + unreadCallsCounter);
 		}
 		else {
 			removeNewCallNotification();
 		}
 
-		return inserted;
+		return insertedCalls;
 	}
 	
 	/**
@@ -601,11 +610,11 @@ public class SipgateBackgroundService extends Service implements EventService
 			return -1;
 		}
 		
-		deleted = 0;
-		inserted = 0;
-		updated = 0;
+		deletedVoiceMails = 0;
+		insertedVoiceMails = 0;
+		updatedVoiceMails = 0;
 		
-		unreadCounter = 0;
+		unreadVoiceMailsCounter = 0;
 		
 		try {
 			if (sipgateDBAdapter == null) {
@@ -616,12 +625,12 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			sipgateDBAdapter.startTransaction();
 			
-			deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects);
-			updateVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects);
+			deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects, sipgateDBAdapter);
+			updateVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects, sipgateDBAdapter);
 			
-			Log.d(TAG, "VoiceMailDataDBObject deleted: " + deleted);
-			Log.d(TAG, "VoiceMailDataDBObject inserted: " + inserted);
-			Log.d(TAG, "VoiceMailDataDBObject updated: " + updated);
+			Log.d(TAG, "VoiceMailDataDBObject deleted: " + deletedVoiceMails);
+			Log.d(TAG, "VoiceMailDataDBObject inserted: " + insertedVoiceMails);
+			Log.d(TAG, "VoiceMailDataDBObject updated: " + updatedVoiceMails);
 											
 			sipgateDBAdapter.commitTransaction();
 		}
@@ -633,16 +642,16 @@ public class SipgateBackgroundService extends Service implements EventService
 			}
 		}
 		
-		if (unreadCounter > 0) {
-			createNewVoiceMailNotification(unreadCounter);
+		if (unreadVoiceMailsCounter > 0) {
+			createNewVoiceMailNotification(unreadVoiceMailsCounter);
 		
-			Log.d(TAG, "new unseen voicemails: " + unreadCounter);
+			Log.d(TAG, "new unseen voicemails: " + unreadVoiceMailsCounter);
 		}
 		else {
 			removeNewVoiceMailNotification();
 		}
 		
-		return inserted;
+		return insertedVoiceMails;
 	}
 	
 	/**
@@ -835,7 +844,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @param action The action the frontend is supposed to show to the user.
 	 * @since 1.2
 	 */
-	private void notifyFrontend(HashMap<String, HashMap<String, PendingIntent>> listener, String action) {
+	private void notifyFrontend(HashMap<String, HashMap<String, PendingIntent>> listener, String action)
+	{
 		try {
 			for(String key : listener.keySet()) {
 				pendingIntent = null;
@@ -856,14 +866,18 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newContactDataDBObjects The vector containing the new contacts.
 	 * @param oldContactDataDBObjects The vector containing the old contacts.
+	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void deleteOldContacts(Vector<ContactDataDBObject> newContactDataDBObjects, Vector<ContactDataDBObject> oldContactDataDBObjects)
+	private void deleteOldContacts(
+			Vector<ContactDataDBObject> newContactDataDBObjects,
+			Vector<ContactDataDBObject> oldContactDataDBObjects,
+			SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (ContactDataDBObject oldContactDataDBObject : oldContactDataDBObjects) {
 			if (!newContactDataDBObjects.contains(oldContactDataDBObject)) {
 				sipgateDBAdapter.delete(oldContactDataDBObject);
-				deleted++;
+				deletedContacts++;
 			}
 		}
 	}
@@ -873,14 +887,18 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newCallDataDBObjects The vector containing the new calls.
 	 * @param oldCallDataDBObjects The vector containing the old calls.
+	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void deleteOldCalls(Vector<CallDataDBObject> newCallDataDBObjects, Vector<CallDataDBObject> oldCallDataDBObjects)
+	private void deleteOldCalls(
+			Vector<CallDataDBObject> newCallDataDBObjects,
+			Vector<CallDataDBObject> oldCallDataDBObjects,
+			SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (CallDataDBObject oldCallDataDBObject : oldCallDataDBObjects) {
 			if (!newCallDataDBObjects.contains(oldCallDataDBObject)) {
 				sipgateDBAdapter.delete(oldCallDataDBObject);
-				deleted++;
+				deletedCalls++;
 			}
 		}
 	}
@@ -890,14 +908,18 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newVoiceMailDataDBObjects The vector containing the new voice mails.
 	 * @param oldVoiceMailDataDBObjects The vector containing the old voice mails.
+	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void deleteOldVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects)
+	private void deleteOldVoiceMails(
+			Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects,
+			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects,
+			SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (VoiceMailDataDBObject oldVoiceMailDataDBObject : oldVoiceMailDataDBObjects) {
 			if (!newVoiceMailDataDBObjects.contains(oldVoiceMailDataDBObject)) {
 				sipgateDBAdapter.delete(oldVoiceMailDataDBObject);
-				deleted++;
+				deletedVoiceMails++;
 			}
 		}
 	}
@@ -908,9 +930,13 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newContactDataDBObjects The vector containing the new calls.
 	 * @param oldContactDataDBObjects The vector containing the old calls.
+	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void updateContacts(Vector<ContactDataDBObject> newContactDataDBObjects, Vector<ContactDataDBObject> oldContactDataDBObjects)
+	private void updateContacts(
+			Vector<ContactDataDBObject> newContactDataDBObjects,
+			Vector<ContactDataDBObject> oldContactDataDBObjects,
+			SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (ContactDataDBObject newContactDataDBObject : newContactDataDBObjects) {
 			if (oldContactDataDBObjects.contains(newContactDataDBObject)) {	
@@ -919,13 +945,13 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter.deleteAllContactNumberDBObjectsByUuid(newContactDataDBObject.getUuid());
 				sipgateDBAdapter.insertAllContactNumberDBObjects(newContactDataDBObject.getContactNumberDBObjects());
 				
-				updated++;
+				updatedContacts++;
 			}
 			else {
 				sipgateDBAdapter.insert(newContactDataDBObject);
 				sipgateDBAdapter.insertAllContactNumberDBObjects(newContactDataDBObject.getContactNumberDBObjects());
 				
-				inserted++;
+				insertedContacts++;
 			}
 		}
 	}
@@ -936,9 +962,13 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newCallDataDBObjects The vector containing the new calls.
 	 * @param oldCallDataDBObjects The vector containing the old calls.
+	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void updateCalls(Vector<CallDataDBObject> newCallDataDBObjects, Vector<CallDataDBObject> oldCallDataDBObjects)
+	private void updateCalls(
+			Vector<CallDataDBObject> newCallDataDBObjects,
+			Vector<CallDataDBObject> oldCallDataDBObjects,
+			SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (CallDataDBObject newCallDataDBObject : newCallDataDBObjects) {
 			if (oldCallDataDBObjects.contains(newCallDataDBObject)) {	
@@ -951,19 +981,19 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter.update(newCallDataDBObject);
 				
 				if (!newCallDataDBObject.isRead() && newCallDataDBObject.isMissed() && newCallDataDBObject.getDirection() == CallDataDBObject.INCOMING) {
-					unreadCounter++;
+					unreadCallsCounter++;
 				}
 				
-				updated++;
+				updatedCalls++;
 			}
 			else {
 				sipgateDBAdapter.insert(newCallDataDBObject);
 				
 				if (!newCallDataDBObject.isRead() && newCallDataDBObject.isMissed() && newCallDataDBObject.getDirection() == CallDataDBObject.INCOMING) {
-					unreadCounter++;
+					unreadCallsCounter++;
 				}
 				
-				inserted++;
+				insertedCalls++;
 			}
 		}
 	}
@@ -974,9 +1004,13 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newVoiceMailDataDBObjects The vector containing the new voice mails.
 	 * @param oldVoiceMailDataDBObjects The vector containing the old voice mails.
+	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void updateVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects)
+	private void updateVoiceMails(
+			Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects,
+			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects,
+			SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (VoiceMailDataDBObject newVoiceMailDataDBObject : newVoiceMailDataDBObjects) {
 			if (oldVoiceMailDataDBObjects.contains(newVoiceMailDataDBObject)) {	
@@ -987,19 +1021,19 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter.update(newVoiceMailDataDBObject);
 
 				if (!newVoiceMailDataDBObject.isRead() && !newVoiceMailDataDBObject.isSeen()) {
-					unreadCounter++;
+					unreadVoiceMailsCounter++;
 				}
 				
-				updated++;
+				updatedVoiceMails++;
 			}
 			else {
 				sipgateDBAdapter.insert(newVoiceMailDataDBObject);
 				
 				if (!newVoiceMailDataDBObject.isRead()) {
-					unreadCounter++;
+					unreadVoiceMailsCounter++;
 				}
 				
-				inserted++;
+				insertedVoiceMails++;
 			}
 		}
 	}

@@ -413,10 +413,12 @@ public class OptionsMenu {
 			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
 			
+			intent = new Intent(activity, SipgateFrames.class);
+			intent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
+			appContext.startService(intent);
 		}
 		catch (ActivityNotFoundException e) {
 			Log.e(TAG, e.getLocalizedMessage());
 		}
 	}	
-
 }
