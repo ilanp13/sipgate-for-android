@@ -599,9 +599,11 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newVoiceMailDataDBObjects A Vector of the new voice mails.
 	 * @param context The Application context.
+	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
+	 * @return The number of newly added voice mails.
 	 * @since 1.0
 	 */
-	public int notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) 
+	public int notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) throws StoreDataException 
 	{
 		Log.d(TAG, "notifyIfUnreadVoiceMails");
 		
@@ -640,6 +642,8 @@ public class SipgateBackgroundService extends Service implements EventService
 			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
 				sipgateDBAdapter.rollbackTransaction();
 			}
+			
+			throw new StoreDataException();
 		}
 		
 		if (unreadVoiceMailsCounter > 0) {
