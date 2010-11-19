@@ -1,8 +1,6 @@
 package com.sipgate.service;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -48,9 +46,9 @@ public class SipgateBackgroundService extends Service implements EventService
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 
-	private static final long CONTACT_REFRESH_INTERVAL = 600000; // every 10mins
+	private static final long CONTACT_REFRESH_INTERVAL = 30000; // every 10mins
 	private static final long CALL_REFRESH_INTERVAL = 30000; // every min
-	private static final long VOICEMAIL_REFRESH_INTERVAL = 60000; // every min
+	private static final long VOICEMAIL_REFRESH_INTERVAL = 30000; // every min
 		
 	private static final String TAG = "SipgateBackgroundService";
 	
@@ -64,7 +62,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private HashMap<String, PendingIntent> newIntents = null;
 	private HashMap<String, HashMap<String, PendingIntent>> contactListener = new HashMap<String, HashMap<String, PendingIntent>>();
 	private HashMap<String, HashMap<String, PendingIntent>> callListener = new HashMap<String, HashMap<String, PendingIntent>>();
-	private Set<PendingIntent> voiceMailListener = new HashSet<PendingIntent>();
+	private HashMap<String, HashMap<String, PendingIntent>> voiceMailListener = new HashMap<String, HashMap<String, PendingIntent>>();
 	
 	private NotificationClient notifyClient = null;
 	private ApiServiceProvider apiClient = null;
@@ -80,12 +78,9 @@ public class SipgateBackgroundService extends Service implements EventService
 	private int updated = 0;
 	private int inserted = 0;
 	
-	private int insertedContacts = 0;
-	private int insertedCalls = 0;
-	
 	/**
 	 * The onCreate function of the service, which is called at every
-	 * first start and is used to instanciate several other classes.
+	 * first start and is used to instantiate several other classes.
 	 * 
 	 * @since 1.0
 	 */
@@ -166,14 +161,24 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * background services' status regarding the refreshing of
 	 * voice mails.
 	 * 
-	 * @param i The intent that will function as call back.
+	 * @param tag A string uniquely identifying the process that wants to be called back.
+	 * @param getEventsIntent The intent used as callback when starting a refresh cycle.
+	 * @param newEventsIntent The intent used as callback when there was new data.
+	 * @param noEventsIntent The intent used as callback when there was no new data.
+	 * @param errorIntent The intent used as callback when an error occurred.
 	 * @throws RemoteException Thrown when the remote communication failed.
-	 * @since 1.0
+	 * @since 1.2
 	 */
-	public void registerOnVoiceMailsIntent(PendingIntent i) throws RemoteException 
+	public void registerOnVoiceMailsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
 	{
 		Log.d(TAG, "registering on voice events intent");
-		voiceMailListener.add(i);
+		newIntents = new HashMap<String, PendingIntent>();
+		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
+		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
+		newIntents.put(ACTION_NOEVENTS, noEventsIntent);
+		newIntents.put(ACTION_ERROR, errorIntent);
+		
+		voiceMailListener.put(tag, newIntents);
 	}
 
 	/**
@@ -208,14 +213,14 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * This function unregisters from information regarding
 	 * the refreshing of voice mails.
 	 * 
-	 * @param i The intent to be removed.
+	 * @param tag A string uniquely identifying the process that wants to be no longer called back.
 	 * @throws RemoteException Thrown when the remote communication failed.
-	 * @since 1.0
+	 * @since 1.2
 	 */
-	public void unregisterOnVoiceMailsIntent(PendingIntent i) throws RemoteException 
+	public void unregisterOnVoiceMailsIntent(String tag) throws RemoteException 
 	{
 		Log.d(TAG, "unregistering on voice events intent");
-		voiceMailListener.remove(i);
+		voiceMailListener.remove(tag);
 	}
 	
 	/**
@@ -358,13 +363,17 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * This is a wrapper function for registering on the
 			 * voice mail update status.
 			 * 
-			 * @param i The intent that will function as the callback.
+			 * @param tag A string uniquely identifying the process that wants to be called back.
+			 * @param getEventsIntent The intent used as callback when starting a refresh cycle.
+			 * @param newEventsIntent The intent used as callback when there was new data.
+			 * @param noEventsIntent The intent used as callback when there was no new data.
+			 * @param errorIntent The intent used as callback when an error occurred.
 			 * @throws RemoteException Thrown when the remote communication failed.
-			 * @since 1.0
+			 * @since 1.2
 			 */
-			public void registerOnVoiceMailsIntent(PendingIntent i)	throws RemoteException 
+			public void registerOnVoiceMailsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent)	throws RemoteException 
 			{
-				service.registerOnVoiceMailsIntent(i);
+				service.registerOnVoiceMailsIntent(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);
 			}
 			
 			/**
@@ -397,13 +406,13 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * This is a wrapper function for unregistering on the
 			 * voice mail update status.
 			 * 
-			 * @param i The intent to be unregistered.
+			 * @param tag A string uniquely identifying the process that wants to no longer be called back.
 			 * @throws RemoteException Thrown when the remote communication failed.
-			 * @since 1.0
+			 * @since 1.2
 			 */
-			public void unregisterOnVoiceMailsIntent(PendingIntent i) throws RemoteException 
+			public void unregisterOnVoiceMailsIntent(String tag) throws RemoteException 
 			{
-				service.unregisterOnVoiceMailsIntent(i);
+				service.unregisterOnVoiceMailsIntent(tag);
 			}
 
 			/**
@@ -583,13 +592,13 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @param context The Application context.
 	 * @since 1.0
 	 */
-	public void notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) 
+	public int notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) 
 	{
 		Log.d(TAG, "notifyIfUnreadVoiceMails");
 		
 		if (newVoiceMailDataDBObjects == null) {
 			Log.i(TAG, "notifyIfUnreadVoiceMails() -> voiceMailDataDBObjects is null");
-			return;
+			return -1;
 		}
 		
 		deleted = 0;
@@ -633,15 +642,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			removeNewVoiceMailNotification();
 		}
 		
-		for (PendingIntent pendingIntent: voiceMailListener) {
-			try  {
-				Log.d(TAG, "notifying refresh voice mails to activity");
-				pendingIntent.send(NotificationReason.FINISHED_NEW_DATA.ordinal());
-			} 
-			catch (CanceledException e) {
-				e.printStackTrace();
-			}			
-		}
+		return inserted;
 	}
 	
 	/**
@@ -728,9 +729,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(contactListener, ACTION_GETEVENTS);
 		
 		try {
-			insertedContacts = notifyIfNewContacts(apiClient.getContacts(), this);
-			
-			if (insertedContacts > 0 ) {
+			if (notifyIfNewContacts(apiClient.getContacts(), this) > 0 ) {
 				notifyFrontend(contactListener, ACTION_NEWEVENTS);
 			}
 			else {
@@ -767,9 +766,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(callListener, ACTION_GETEVENTS);
 		
 		try {
-			insertedCalls = notifyIfNewCalls(apiClient.getCalls(), this);
-			
-			if (insertedCalls > 0 ) {
+			if (notifyIfNewCalls(apiClient.getCalls(), this) > 0 ) {
 				notifyFrontend(callListener, ACTION_NEWEVENTS);
 			}
 			else {
@@ -803,11 +800,28 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.v(TAG, "refreshVoicemailEvents() -> start");
 		
+		notifyFrontend(voiceMailListener, ACTION_GETEVENTS);
+		
 		try {
-			notifyIfNewVoiceMails(apiClient.getVoiceMails(), this);
+			if (notifyIfNewVoiceMails(apiClient.getVoiceMails(), this) > 0 ) {
+				notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
+			}
+			else {
+				notifyFrontend(voiceMailListener, ACTION_NOEVENTS);
+			}
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
+			
+			try {
+				Thread.sleep(2000);
+			}
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				notifyFrontend(voiceMailListener, ACTION_ERROR);
+			}
 		}
 		
 		Log.v(TAG, "refreshVoicemailEvents() -> finish");
