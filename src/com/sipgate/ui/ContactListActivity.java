@@ -286,7 +286,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 						
 						try {
 							Log.d(TAG, "service binding -> registerOnContactsIntent");
-							serviceBinding.registerOnContactsIntent(TAG, getContactsIntent(), newContactsIntent(), noContactsIntent(), errorIntent());
+							serviceBinding.registerOnContactsIntents(TAG, getContactsIntent(), newContactsIntent(), noContactsIntent(), errorIntent());
 						} 
 						catch (RemoteException e) {
 							e.printStackTrace();
@@ -318,7 +318,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			try {
 				if (serviceBinding != null) {
 					Log.d(TAG, "service unbinding -> unregisterOnContactsIntent");
-					serviceBinding.unregisterOnContactsIntent(TAG);
+					serviceBinding.unregisterOnContactsIntents(TAG);
 				}
 			} 
 			catch (RemoteException e) {

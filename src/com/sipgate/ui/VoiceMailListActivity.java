@@ -294,7 +294,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 						serviceBinding = (EventService) binder;
 						try {
 							Log.d(TAG, "service binding -> registerOnVoiceMailsIntent");
-							serviceBinding.registerOnVoiceMailsIntent(TAG, getVoiceMailsIntent(), newVoiceMailsIntent(), noVoiceMailsIntent(), errorIntent());
+							serviceBinding.registerOnVoiceMailsIntents(TAG, getVoiceMailsIntent(), newVoiceMailsIntent(), noVoiceMailsIntent(), errorIntent());
 						}
 						catch (RemoteException e) {
 							e.printStackTrace();
@@ -326,7 +326,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			try {
 				if (serviceBinding != null) {
 					Log.d(TAG, "service unbinding -> unregisterOnVoiceMailsIntent");
-					serviceBinding.unregisterOnVoiceMailsIntent(TAG);
+					serviceBinding.unregisterOnVoiceMailsIntents(TAG);
 				}
 			}
 			catch (RemoteException e) {

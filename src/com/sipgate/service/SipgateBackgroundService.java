@@ -129,7 +129,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void registerOnContactsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
+	public void registerOnContactsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 	{
 		Log.d(TAG, "registering on contact events intent");
 		newIntents = new HashMap<String, PendingIntent>();
@@ -178,7 +178,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void registerOnVoiceMailsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
+	public void registerOnVoiceMailsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
 	{
 		Log.d(TAG, "registering on voice events intent");
 		newIntents = new HashMap<String, PendingIntent>();
@@ -198,7 +198,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void unregisterOnContactsIntent(String tag) throws RemoteException
+	public void unregisterOnContactsIntents(String tag) throws RemoteException
 	{
 		Log.d(TAG, "unregistering on contact events intent");
 		contactListener.remove(tag);
@@ -226,7 +226,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void unregisterOnVoiceMailsIntent(String tag) throws RemoteException 
+	public void unregisterOnVoiceMailsIntents(String tag) throws RemoteException 
 	{
 		Log.d(TAG, "unregistering on voice events intent");
 		voiceMailListener.remove(tag);
@@ -346,9 +346,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void registerOnContactsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
+			public void registerOnContactsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 			{
-				service.registerOnContactsIntent(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);				
+				service.registerOnContactsIntents(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);				
 			}
 			
 			/**
@@ -380,9 +380,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void registerOnVoiceMailsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent)	throws RemoteException 
+			public void registerOnVoiceMailsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent)	throws RemoteException 
 			{
-				service.registerOnVoiceMailsIntent(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);
+				service.registerOnVoiceMailsIntents(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);
 			}
 			
 			/**
@@ -393,9 +393,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void unregisterOnContactsIntent(String tag) throws RemoteException
+			public void unregisterOnContactsIntents(String tag) throws RemoteException
 			{
-				service.unregisterOnContactsIntent(tag);
+				service.unregisterOnContactsIntents(tag);
 			}
 			
 			/**
@@ -419,9 +419,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void unregisterOnVoiceMailsIntent(String tag) throws RemoteException 
+			public void unregisterOnVoiceMailsIntents(String tag) throws RemoteException 
 			{
-				service.unregisterOnVoiceMailsIntent(tag);
+				service.unregisterOnVoiceMailsIntents(tag);
 			}
 
 			/**
