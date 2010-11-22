@@ -124,8 +124,6 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final String PREF_DNS = "dns";
 	public static final String PREF_VQUALITY = "vquality";
 	public static final String PREF_MESSAGE = "vmessage";
-	public static final String PREF_REFRESH_EVENTS = "refresh_events";
-	public static final String PREF_REFRESH_CONTACTS = "refresh_contacts";
 
 	// Default values of the preferences
 	public static final String	DEFAULT_USERNAME = "";
