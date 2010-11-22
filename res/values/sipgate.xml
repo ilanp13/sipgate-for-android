@@ -86,35 +86,5 @@
 	<string name="sipgate_api_error">An error occurred during the refresh. Please try again later.</string>
 	<string name="sipgate_new_entries">List has been refreshed.</string>
 	<string name="sipgate_no_entries">List has been refreshed. There were no new entries.</string>
-	<string name="simple_settings_refresh_timers">Refresh timers</string>
-	<string name="simple_settings_refresh_contacts">Refresh contacts</string>
-	<string name="simple_settings_refresh_events">Refresh events</string>
-    <string-array name="refresh_values_labels">
-        <item>1min</item>
-        <item>5min</item>
-        <item>15min</item>
-        <item>30min</item>
-        <item>1hr</item>
-        <item>3hr</item>
-        <item>6hr</item>
-        <item>daily</item>
-    </string-array>
-    <string-array name="refresh_values">
-        <item>1</item>
-        <item>5</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>180</item>
-        <item>360</item>
-        <item>1440</item>
-    </string-array>
-	<string name="simple_settings_refresh_value_1">every minute</string>
-	<string name="simple_settings_refresh_value_5">every 5 minutes</string>
-	<string name="simple_settings_refresh_value_15">every 15 minutes</string>
-	<string name="simple_settings_refresh_value_30">every 30 minutes</string>
-	<string name="simple_settings_refresh_value_60">every hour</string>
-	<string name="simple_settings_refresh_value_180">every 3 hours</string>
-	<string name="simple_settings_refresh_value_360">every 6 hours</string>
-	<string name="simple_settings_refresh_value_1440">once per day</string>
+	<string name="simple_settings_refresh_timers">Event refreshing</string>
 </resources>

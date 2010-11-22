@@ -14,10 +14,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
@@ -40,23 +40,24 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		Log.i(TAG, "AuthorizationActivity onCreate Call");
 
 		SettingsClient settings = SettingsClient.getInstance(getApplicationContext());
-
-		// Account Selection Row
-		LinearLayout accountSettings = (LinearLayout) findViewById(R.id.sipgateSettingsAccountRow);
+		
+		TableRow accountSettings = (TableRow) findViewById(R.id.sipgateSettingsAccountRow);
 		accountSettings.setOnClickListener(this);
-		accountSettings.setOnTouchListener(this);
+		TableRow accountSettingsValue = (TableRow) findViewById(R.id.sipgateSettingsAccountRowValue);
+		accountSettingsValue.setOnClickListener(this);
+		
 		TextView account = (TextView) findViewById(R.id.sipgateSettingsAccount);
 		account.setText(settings.getWebusername());
 
-		// Extension Chooser Row
-		LinearLayout extensionSettings = (LinearLayout) findViewById(R.id.sipgateSettingsExtensionRow);
+		TableRow extensionSettings = (TableRow) findViewById(R.id.sipgateSettingsExtensionRow);
 		extensionSettings.setOnClickListener(this);
-		extensionSettings.setOnTouchListener(this);
+		TableRow extensionSettingsValue = (TableRow) findViewById(R.id.sipgateSettingsExtensionRowValue);
+		extensionSettingsValue.setOnClickListener(this);
+
 		TextView extension = (TextView) findViewById(R.id.sipgateSettingsExtension);
 		extension.setText(settings.getExtensionAlias());
 
-		// Balance Row
-		LinearLayout balanceTable = (LinearLayout) findViewById(R.id.sipgateSettingsBalanceGroup);
+		TableLayout balanceTable = (TableLayout) findViewById(R.id.sipgateSettingsBalanceTable);
 		TextView balance = (TextView) findViewById(R.id.sipgateSettingsBalance);
 		ApiServiceProvider apiClient = ApiServiceProvider.getInstance(getApplicationContext());
 		SipgateBalanceData accountBalance = null;
@@ -86,63 +87,42 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 			balanceTable.setVisibility(View.GONE);
 		}
 
-		// VoIP over WLAN Setting Row
-		TableLayout wirelessSettings = (TableLayout) findViewById(R.id.sipgateSettingsWirelessRow);
-		wirelessSettings.setOnClickListener(this);
-		wirelessSettings.setOnTouchListener(this);
-		CheckBox wirelessCheckBox = (CheckBox) findViewById(R.id.sipgateSettingsWireless);
-		wirelessCheckBox.setChecked(settings.getUseWireless());
-		wirelessCheckBox.setOnClickListener(this);
-		wirelessCheckBox.setOnTouchListener(this);
-		
-		// VoIP over 3G Setting Row
-		TableLayout threeGSettings = (TableLayout) findViewById(R.id.sipgateSettings3GRow);
-		threeGSettings.setOnClickListener(this);
-		threeGSettings.setOnTouchListener(this);
-		CheckBox threeGCheckBox = (CheckBox) findViewById(R.id.sipgateSettings3G);
-		threeGCheckBox.setChecked(settings.getUse3G());
-		threeGCheckBox.setOnClickListener(this);
-		threeGCheckBox.setOnTouchListener(this);
+		SettingsClient settingsClient = SettingsClient
+				.getInstance(getApplicationContext());
 
-		// Advanced Settings Row
-		LinearLayout advancedSettings = (LinearLayout) findViewById(R.id.sipgateSettingsAdvancedRow);
+		TableRow wirelessSettings = (TableRow) findViewById(R.id.sipgateSettingsWirelessRow);
+		wirelessSettings.setOnClickListener(this);
+		CheckBox wirelessCheckBox = (CheckBox) findViewById(R.id.sipgateSettingsWireless);
+		wirelessCheckBox.setOnClickListener(this);
+		wirelessCheckBox.setChecked(settingsClient.getUseWireless());
+
+		TableRow threeGSettings = (TableRow) findViewById(R.id.sipgateSettings3GRow);
+		threeGSettings.setOnClickListener(this);
+		CheckBox threeGCheckBox = (CheckBox) findViewById(R.id.sipgateSettings3G);
+		threeGCheckBox.setOnClickListener(this);
+		threeGCheckBox.setChecked(settingsClient.getUse3G());
+
+		TableRow advancedSettings = (TableRow) findViewById(R.id.sipgateSettingsAdvancedRow);
 		advancedSettings.setOnClickListener(this);
 		advancedSettings.setOnTouchListener(this);
 
-		// Event Refresh Settings Row
-		LinearLayout refreshSettings = (LinearLayout) findViewById(R.id.sipgateSettingsRefreshRow);
+		TableRow refreshSettings = (TableRow) findViewById(R.id.sipgateSettingsRefreshRow);
 		refreshSettings.setOnClickListener(this);
-		refreshSettings.setOnTouchListener(this);
 	}
 
 	protected void onResume() {
 		super.onResume();
+
 	}
 
-/**
- * Handler for OnTouch-Events (needed for optic feedback on menu items to imitate the native behaviour)
- * 
- * @author niepel
- */
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		int action = event.getAction();
-		switch(action) {
-			case MotionEvent.ACTION_OUTSIDE:
-			case MotionEvent.ACTION_MOVE:
-			case MotionEvent.ACTION_UP:
-			case MotionEvent.ACTION_CANCEL:
-				v.setBackgroundColor(0xFF000000);
-				break;
-			case MotionEvent.ACTION_DOWN:
-				v.setBackgroundColor(0xFFFFC700);
-		}
+		v.setBackgroundColor(0xFFFF9900);
 		return false;
 	}
 	
 	public void onClick(View v) {
 		int id = v.getId();
-		v.setBackgroundColor(0xFF000000);
 		SettingsClient settingsClient = SettingsClient
 				.getInstance(getApplicationContext());
 		Intent intent = null;
@@ -151,6 +131,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		
 		switch (id) {
 		case R.id.sipgateSettingsAccountRow:
+		case R.id.sipgateSettingsAccountRowValue:
 
 			if (ApiServiceProvider.getInstance(getApplicationContext()).isRegistered()){
 				new AlertDialog.Builder(this)
@@ -192,6 +173,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 			}
 			break;
 		case R.id.sipgateSettingsExtensionRow:
+		case R.id.sipgateSettingsExtensionRowValue:
 			extension.setText("");
 			
 			settingsClient.unRegisterExtension();
