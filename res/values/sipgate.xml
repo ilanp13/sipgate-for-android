@@ -86,5 +86,4 @@
 	<string name="sipgate_api_error">An error occurred during the refresh. Please try again later.</string>
 	<string name="sipgate_new_entries">List has been refreshed.</string>
 	<string name="sipgate_no_entries">List has been refreshed. There were no new entries.</string>
-	<string name="simple_settings_refresh_timers">Event refreshing</string>
 </resources>

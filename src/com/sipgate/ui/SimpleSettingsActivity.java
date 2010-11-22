@@ -9,15 +9,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.CheckBox;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
@@ -28,7 +25,7 @@ import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.SettingsClient;
 
-public class SimpleSettingsActivity extends Activity implements OnClickListener, OnTouchListener {
+public class SimpleSettingsActivity extends Activity implements OnClickListener {
 	private static final String TAG = "SimpleSettingsActivity";
 	
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,10 +101,6 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 
 		TableRow advancedSettings = (TableRow) findViewById(R.id.sipgateSettingsAdvancedRow);
 		advancedSettings.setOnClickListener(this);
-		advancedSettings.setOnTouchListener(this);
-
-		TableRow refreshSettings = (TableRow) findViewById(R.id.sipgateSettingsRefreshRow);
-		refreshSettings.setOnClickListener(this);
 	}
 
 	protected void onResume() {
@@ -115,12 +108,6 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 
 	}
 
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		v.setBackgroundColor(0xFFFF9900);
-		return false;
-	}
-	
 	public void onClick(View v) {
 		int id = v.getId();
 		SettingsClient settingsClient = SettingsClient
@@ -221,10 +208,6 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 			break;
 		case R.id.sipgateSettingsAdvancedRow:
 			intent = new Intent(this, SettingsActivity.class);
-			startActivity(intent);
-			break;
-		case R.id.sipgateSettingsRefreshRow:
-			intent = new Intent(this, SettingsRefreshActivity.class);
 			startActivity(intent);
 			break;
 		default:
