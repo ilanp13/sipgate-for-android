@@ -110,20 +110,6 @@
 			<View android:layout_height="2px" android:layout_width="fill_parent"
 				android:background="#888888" />
 
-			<!-- Event Refresh Settings Row -->
-			<LinearLayout android:id="@+id/sipgateSettingsRefreshRow"
-				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:orientation="vertical">
-				<TextView android:layout_marginTop="15dip" android:layout_marginBottom="15dip"
-					android:text="@string/simple_settings_refresh_timers"
-					android:padding="3dip" android:textSize="20dip" android:textColor="#FFFFFF"
-					android:layout_width="fill_parent" android:layout_height="wrap_content" />
-			</LinearLayout>
-
-			<!-- Spacer Line -->
-			<View android:layout_height="2px" android:layout_width="fill_parent"
-				android:background="#888888" />
-
 			<!-- Advanced Settings Row -->
 			<LinearLayout android:id="@+id/sipgateSettingsAdvancedRow"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -131,6 +117,20 @@
 				<TextView android:layout_marginTop="15dip" android:layout_marginBottom="15dip"
 					android:text="@string/simple_settings_advanced" android:padding="3dip"
 					android:textSize="20dip" android:textColor="#FFFFFF"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			</LinearLayout>
+
+			<!-- Spacer Line -->
+			<View android:layout_height="2px" android:layout_width="fill_parent"
+				android:background="#888888" />
+
+			<!-- Event Refresh Settings Row -->
+			<LinearLayout android:id="@+id/sipgateSettingsRefreshRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<TextView android:layout_marginTop="15dip" android:layout_marginBottom="15dip"
+					android:text="@string/simple_settings_refresh_timers"
+					android:padding="3dip" android:textSize="20dip" android:textColor="#FFFFFF"
 					android:layout_width="fill_parent" android:layout_height="wrap_content" />
 			</LinearLayout>
 
