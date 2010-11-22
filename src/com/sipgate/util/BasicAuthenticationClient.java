@@ -24,10 +24,11 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectHandler;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
 import android.util.Log;
@@ -79,31 +80,32 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		}
 		return sb.toString();
 	}
-	
-	
-	@SuppressWarnings("unchecked")
-	private HttpPost createPostRequest(String url, Collection<? extends Entry> params) {
-		HttpPost ret = new HttpPost(url);
 		
-		List<NameValuePair> plist = new ArrayList<NameValuePair>(params.size());
+	@SuppressWarnings("unchecked")
+	private HttpPost createPostRequest(String url, Collection<? extends Entry> params) 
+	{
+		HttpPost httpPost = new HttpPost(url);
+				
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(params.size());  
+	    
 		Iterator<? extends Entry> i = params.iterator();
 		while (i.hasNext()) {
 			Entry e = i.next();
-			plist.add(new BasicNameValuePair((String) e.getKey(), (String) e.getValue()));
+			nameValuePairs.add(new BasicNameValuePair((String) e.getKey(), (String) e.getValue()));
 		}
 		
 		try {
-			ret.setEntity(new UrlEncodedFormEntity(plist));
+			httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return ret;
+		
+		httpPost.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+		
+		return httpPost;
 	}
 	
-	
-	
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	private InputStream accessProtectedResource(String httpMethod, String urlString, Collection<? extends Entry> params) throws AccessProtectedResourceException, NetworkProblemException {
 
     	URL url;
@@ -112,6 +114,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		} catch (MalformedURLException e1) {
 			throw new AccessProtectedResourceException();
 		}
+		
 		String username = this.user;
 		String password = this.pass;
 
@@ -126,26 +129,29 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 	
 		if (urlString.contains("?")) {
 			urlString += "&"+Constants.API_VERSION_SUFFIX; // TODO FIXME
-		} else {
+		} 
+		else {
 			urlString += "?"+Constants.API_VERSION_SUFFIX; // TODO FIXME
 		}
 		
-		HttpRequestBase request = null;
+		HttpUriRequest request = null;
 		
 		if (httpMethod.equals("GET")){
 			Log.d(TAG, "getting " + urlString);
 			urlString = appendUrlParameters(urlString, params);
 			request = new HttpGet(urlString);
-		} else if (httpMethod.equals("PUT")) {
+			request.addHeader("Accept-Encoding", "gzip");
+		} 
+		else if (httpMethod.equals("PUT")) {
 			urlString = appendUrlParameters(urlString, params);
 			request = new HttpPut(urlString);
-		} else if (httpMethod.equals("POST")) {
+		} 
+		else if (httpMethod.equals("POST")) {
 			request = createPostRequest(urlString, params);
-		} else {
+		} 
+		else {
 			throw new AccessProtectedResourceException("unknown method");	
 		}
-		
-		request.addHeader("Accept-Encoding", "gzip");
 		
 		HttpResponse response = null;
 		
@@ -240,13 +246,14 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/baseproducttype/");
 	}
 
-	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
-			throws AccessProtectedResourceException, NetworkProblemException {
+	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware) throws AccessProtectedResourceException, NetworkProblemException 
+	{
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("phoneNumber", phoneNumber);
 		params.put("model", model);
 		params.put("vendor", vendor);
 		params.put("firmware", firmware);
+		
 		return accessProtectedResource("POST", Constants.API_20_BASEURL + "/my/settings/mobile/extensions/", params.entrySet());
 	}
 }

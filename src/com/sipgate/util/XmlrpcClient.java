@@ -18,6 +18,7 @@ import org.xmlrpc.android.XMLRPCException;
 import org.xmlrpc.android.XMLRPCFault;
 import org.zoolu.sip.address.SipURL;
 
+import android.net.Credentials;
 import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
@@ -101,16 +102,24 @@ public class XmlrpcClient implements ApiClientInterface {
 		return apiResult;
 	}
 
-	private void clientIdentify() throws XMLRPCException, NetworkProblemException {
+	public boolean connectivityOk() throws ApiException, NetworkProblemException 
+	{
+		try
+		{
+			parameters.clear();
+			
+			parameters.put("ClientName", NAME);
+			parameters.put("ClientVersion", VERSION);
+			parameters.put("ClientVendor", VENDOR);
 		
-		parameters.clear();
+			apiResult = this.doXmlrpcCall("samurai.ClientIdentify", parameters);
 		
-		parameters.put("ClientName", NAME);
-		parameters.put("ClientVersion", VERSION);
-		parameters.put("ClientVendor", VENDOR);
-		
-		apiResult = this.doXmlrpcCall("samurai.ClientIdentify", parameters);
-		Log.d(TAG, apiResult.toString());
+			return (((String)apiResult.get("StatusCode")).equals("200"));
+		}
+		catch (XMLRPCException e)
+		{
+			return false;
+		}
 	}
 
 	private SipgateServerData serverDataGet() throws XMLRPCException, NetworkProblemException {
@@ -118,7 +127,7 @@ public class XmlrpcClient implements ApiClientInterface {
 
 		parameters.clear();
 		
-		apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.ServerdataGet", parameters);
+		apiResult = this.doXmlrpcCall("samurai.ServerdataGet", parameters);
 
 		sipgateServerData.setSipRegistrar((String) apiResult.get("SipRegistrar"));
 		sipgateServerData.setSipOutboundProxy((String) apiResult.get("SipOutboundProxy"));
@@ -459,29 +468,20 @@ public class XmlrpcClient implements ApiClientInterface {
 		throw new FeatureNotAvailableException();
 	}
 	
-	public boolean connectivityOk() throws ApiException {
-		try {
-			this.clientIdentify();
-		} catch (Exception e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	
 	public boolean featureAvailable(API_FEATURE feature) {
 		return false;
 	}
 
 	
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException {
+	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException 
+	{
 		throw new FeatureNotAvailableException();
 	}
 
 	
-	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException {
-		throw new FeatureNotAvailableException();
+	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException 
+	{
+		return "basic/plus";
 	}
 
 	

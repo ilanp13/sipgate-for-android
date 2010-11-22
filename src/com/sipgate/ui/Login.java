@@ -1,15 +1,11 @@
 package com.sipgate.ui;
 
-import java.io.Serializable;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,11 +16,12 @@ import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.R.id;
+import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.util.ApiServiceProvider;
 
-public class Login extends Activity implements OnClickListener {
+public class Login extends Activity implements OnClickListener 
+{
 	private final String TAG = "Login";
 	private Button okButton;
 
@@ -45,7 +42,7 @@ public class Login extends Activity implements OnClickListener {
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 		
-		this.apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
+		apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
 		
 		if (apiServiceProvider.isRegistered()) 
 		{
@@ -55,7 +52,8 @@ public class Login extends Activity implements OnClickListener {
 	}
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
 		boolean result = super.onCreateOptionsMenu(menu);
 
 		OptionsMenu m = new OptionsMenu();
@@ -65,7 +63,8 @@ public class Login extends Activity implements OnClickListener {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
 		boolean result = super.onOptionsItemSelected(item);
 		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
@@ -88,21 +87,27 @@ public class Login extends Activity implements OnClickListener {
 			{
 				showWait();
 				
-				SipgateProvisioningData data = null;
-				
-				ApiServiceProvider apiProvider = ApiServiceProvider.getInstance(getApplicationContext());
-				apiProvider.register(user, pass);
+				apiServiceProvider.register(user, pass);
 
-				data = apiProvider.getProvisioningData();
-
-				openSetupActivity(data);
-			} else {
+				if (apiServiceProvider.isRegistered()) {
+					Intent authorizationIntent = new Intent(this, Setup.class);
+					startActivity(authorizationIntent);
+				}
+				else {
+					showWrongCredentialsToast();
+				}
+			} 
+			else {
 				showNoCredentialsToast();
 			}
-		} catch (NetworkProblemException e) {
+		} 
+		catch (NetworkProblemException e) {
 			showNetworkProblemToast();
-		} catch (Exception e) {
+		} 
+		catch (ApiException e) {
 			showWrongCredentialsToast();
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
 		} 
 		finally
@@ -110,17 +115,7 @@ public class Login extends Activity implements OnClickListener {
 			hideWait();
 		}
 	}
-	
-	private void openSetupActivity(Serializable data) {
-		try {
-			Intent intent = new Intent(getApplicationContext(), Setup.class);
-			intent.putExtra("com.sipgate.ui.credentials", data);
-			startActivity(intent);
-		} catch (ActivityNotFoundException e) {
-			Log.w(TAG, e.getLocalizedMessage());
-		}
-	}
-	
+		
 	private void showWait() 
 	{
 		okButton.setClickable(false);
