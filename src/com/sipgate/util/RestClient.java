@@ -3,8 +3,6 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -45,7 +43,6 @@ import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 public class RestClient implements ApiClientInterface {
 	
 	private static final String TAG = "RestClient";
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
 	
 	private RestAuthenticationInterface authenticationInterface = null;
 	
@@ -376,12 +373,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getContacts() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (contactParser != null && saxParser != null)
@@ -396,15 +394,17 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getContacts() -> saxParser or contactParser is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	
@@ -417,12 +417,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getCalls() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (callParser != null && saxParser != null)
@@ -437,15 +438,17 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getCalls() -> saxParser or callParser is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException
@@ -457,12 +460,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getVoiceMails() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (voiceMailParser != null && saxParser != null)
@@ -477,15 +481,17 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getVoiceMails() -> saxParser or voiceMails is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	public boolean connectivityOk() throws ApiException, NetworkProblemException 
@@ -555,30 +561,4 @@ public class RestClient implements ApiClientInterface {
 		return null;
 	}
 	
-	private Element getNodeById(Element element, String id) 
-	{
-		helperNodeList = element.getElementsByTagName(id);
-		
-		if (helperNodeList != null && helperNodeList.getLength() > 0){
-			return (Element) helperNodeList.item(0);
-		}
-		
-		return null;
-	}
-	
-	private static long getCallTime(String dateString) 
-	{
-		long callTime = 0;
-		
-		try {
-			if (dateString != null) {
-				return dateformatterPretty.parse(dateString).getTime();
-			}
-		} 
-		catch (ParseException e) {
-			Log.e(TAG, "getCallTime", e);
-		}
-		
-		return callTime;
-	}
 }

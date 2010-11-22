@@ -34,6 +34,13 @@ import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.util.SipgateApplication;
 
+/**
+ * This class represents the call list activity and implements all
+ * it's functions.
+ * 
+ * @author Karsten Knuth
+ * @version 1.2
+ */
 public class CallListActivity extends Activity implements OnItemClickListener 
 {
 	private static final String TAG = "CallListActivity";
@@ -58,9 +65,17 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	private PendingIntent onGetCallsPendingIntent = null;
 	private PendingIntent onErrorPendingIntent = null;
 	
+	private SipgateApplication application = null;
+	private SipgateApplication.RefreshState refreshState = SipgateApplication.RefreshState.NONE;
+	
 	private Context context = null;
 	
-	@Override
+	/**
+	 * This function is called right after the class is started by an intent.
+	 * 
+	 * @param bundle The bundle which caused the activity to be started.
+	 * @since 1.0
+	 */
 	public void onCreate(Bundle bundle) 
 	{
 		super.onCreate(bundle);
@@ -73,8 +88,10 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		emptyList = (TextView) findViewById(R.id.EmptyCallListTextView);
 		
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
-		animationThread = new Thread(new Runnable() {
-			public void run() {
+		animationThread = new Thread(new Runnable()
+		{
+			public void run()
+			{
 				frameAnimation.start();
 			}
 		});
@@ -85,21 +102,33 @@ public class CallListActivity extends Activity implements OnItemClickListener
         
         elementList.setAdapter(callListAdapter);
         elementList.setOnItemClickListener(this);
+        
+        application = (SipgateApplication) getApplication();
     }
 	
-	@Override
-	protected void onResume() {
+	/**
+	 * This function is called every time the activity comes back to the foreground.
+	 * 
+	 * @since 1.0
+	 */
+	public void onResume()
+	{
 		super.onResume();
 		
-		SipgateApplication.RefreshState refreshState = ((SipgateApplication) getApplication()).getRefreshState();
+		registerForBackgroundIntents();
+		
+		refreshState = application.getRefreshState();
+		application.setRefreshState(SipgateApplication.RefreshState.NONE);
 		
 		switch (refreshState) {
 			case NEW_EVENTS: 
 				refreshView.setVisibility(View.GONE);
+				callListAdapter.notifyDataSetChanged();
 				showNewEntriesToast();
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
+				callListAdapter.notifyDataSetChanged();
 				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
@@ -113,10 +142,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				refreshView.setVisibility(View.GONE);
 				break;
 		}
-		
-		registerForBackgroundIntents();		
-		
-		callListAdapter.notifyDataSetChanged();
 		
 		if (callListAdapter.isEmpty()) {
 			elementList.setVisibility(View.GONE);
@@ -132,125 +157,36 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		}
 	}
 	
-	@Override
-	protected void onPause()
+	/**
+	 * This function is called every time the activity goes in to background.
+	 * 
+	 * @since 1.0
+	 */
+	public void onPause()
 	{
 		super.onPause();
 		
-		stopScanActivity();
+		unregisterFromBackgroungIntents();
 	}
-		
-	@Override
-	protected void onDestroy()
+	
+	/**
+	 * This function is called right before the activity is killed.
+	 * 
+	 * @since 1.0
+	 */
+	public void onDestroy()
 	{
 		super.onDestroy();
 		
-		stopScanActivity();
+		unregisterFromBackgroungIntents();
 	}
 	
-	private void registerForBackgroundIntents()
-	{
-		Intent intent = new Intent(this, SipgateBackgroundService.class);
-		context.startService(intent);
-
-		if (serviceConnection == null) {
-			Log.d(TAG, "service connection is null -> create new");
-			
-			serviceConnection = new ServiceConnection() {
-
-				public void onServiceDisconnected(ComponentName name) {
-					Log.d(TAG, "service " + name + " disconnected -> clear binding");
-					serviceBinding = null;
-				}
-
-				public void onServiceConnected(ComponentName name, IBinder binder) {
-					Log.v(TAG, "service " + name + " connected -> bind");
-					try {
-						serviceBinding = (EventService) binder;
-						try {
-							Log.d(TAG, "service binding -> registerOnCallsIntent");
-							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NEW, newCallsIntent());
-							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NO, noCallsIntent());
-							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_GET, getCallsIntent());
-							serviceBinding.registerOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_ERROR, errorIntent());
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						}
-					} catch (ClassCastException e) {
-						e.printStackTrace();
-					}
-				}
-			};
-			
-			boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-			Log.v(TAG, "bind service -> " + bindret);
-		} else {
-			Log.d(TAG, "service connection is not null -> already running");
-		}
-	}
-	
-	public void stopScanActivity()
-	{		
-		if (serviceConnection != null) {
-			try {
-				if (serviceBinding != null) {
-					Log.d(TAG, "service unbinding -> unregisterOnCallsIntent");
-					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NEW);
-					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_NO);
-					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_GET);
-					serviceBinding.unregisterOnCallsIntents(SipgateBackgroundService.ACTION_CALLS_ERROR);
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-
-			Log.v(TAG, "unbind service");
-			context.unbindService(serviceConnection);
-			serviceConnection = null;
-		}
-	}
-
-	private PendingIntent newCallsIntent() {
-		if (onNewCallsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NEW);
-			onNewCallsPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
-		}
-		return onNewCallsPendingIntent;
-	}
-	
-	private PendingIntent noCallsIntent() {
-		if (onNoCallsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_NO);
-			onNoCallsPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
-		}
-		return onNoCallsPendingIntent;
-	}
-	
-	private PendingIntent getCallsIntent() {
-		if (onGetCallsPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_GET);
-			onGetCallsPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
-		}
-		return onGetCallsPendingIntent;
-	}
-	
-	private PendingIntent errorIntent() {
-		if (onErrorPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_CALLS_ERROR);
-			onErrorPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
-		}
-		return onErrorPendingIntent;
-	}
-	
-	@Override
+	/**
+	 * This function is called every time the menu button is pressed.
+	 * 
+	 * @param menu The menu object to be used to create the menu.
+	 * @since 1.0
+	 */
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
 		boolean result = super.onCreateOptionsMenu(menu);
@@ -261,7 +197,12 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		return result;
 	}
 	
-	@Override
+	/**
+	 * This function is called when an item was chosen from the menu.
+	 * 
+	 * @param item The item from the menu that was selected.
+	 * @since 1.0
+	 */
 	public boolean onOptionsItemSelected(MenuItem item) 
 	{
 		boolean result = super.onOptionsItemSelected(item);
@@ -272,6 +213,165 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		return result;
 	}
 	
+	/**
+	 * This function is called when an item in the call list was clicked.
+	 * 
+	 * @param parent The View containing the clicked item.
+	 * @param view ?
+	 * @param position The position of the clicked item in the list.
+	 * @param id The id of the clicked item.
+	 * @since 1.0
+	 */
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) 
+	{
+		CallDataDBObject callDataDBObject = (CallDataDBObject) parent.getItemAtPosition(position);
+		callTarget(callDataDBObject.getRemoteNumberE164().replaceAll("tel:", "").replaceAll("dd:", ""));
+	}
+	
+	/**
+	 * This function provides the background sevice with callback
+	 * intent for several steps in the refresh cycle
+	 * 
+	 * @since 1.2
+	 */
+	private void registerForBackgroundIntents()
+	{
+		Intent intent = new Intent(this, SipgateBackgroundService.class);
+		context.startService(intent);
+
+		if (serviceConnection == null) {
+			Log.d(TAG, "service connection is null -> create new");
+			
+			serviceConnection = new ServiceConnection()
+			{
+				public void onServiceDisconnected(ComponentName name)
+				{
+					Log.d(TAG, "service " + name + " disconnected -> clear binding");
+					serviceBinding = null;
+				}
+
+				public void onServiceConnected(ComponentName name, IBinder binder)
+				{
+					Log.v(TAG, "service " + name + " connected -> bind");
+					try {
+						serviceBinding = (EventService) binder;
+						try {
+							Log.d(TAG, "service binding -> registerOnCallsIntent");
+							serviceBinding.registerOnCallsIntents(TAG, getCallsIntent(), newCallsIntent(), noCallsIntent(), errorIntent());
+						}
+						catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+					catch (ClassCastException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			
+			boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+			Log.v(TAG, "bind service -> " + bindret);
+		}
+		else {
+			Log.d(TAG, "service connection is not null -> already running");
+		}
+	}
+	
+	/**
+	 * This function deletes the callback intents from the background
+	 * service so the UI doesn't get any status updates anymore.
+	 * 
+	 * @since 1.2
+	 */
+	private void unregisterFromBackgroungIntents()
+	{		
+		if (serviceConnection != null) {
+			try {
+				if (serviceBinding != null) {
+					Log.d(TAG, "service unbinding -> unregisterOnCallsIntent");
+					serviceBinding.unregisterOnCallsIntents(TAG);
+				}
+			}
+			catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			Log.v(TAG, "unbind service");
+			context.unbindService(serviceConnection);
+			serviceConnection = null;
+		}
+	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that the download of new calls just has started.
+	 * 
+	 * @return The callback intent for starting to download calls.
+	 * @since 1.2
+	 */
+	private PendingIntent getCallsIntent() {
+		if (onGetCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
+			onGetCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onGetCallsPendingIntent;
+	}
+
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that new calls have been downloaded.
+	 * 
+	 * @return The callback intent for new calls.
+	 * @since 1.2
+	 */
+	private PendingIntent newCallsIntent() {
+		if (onNewCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onNewCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNewCallsPendingIntent;
+	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that no new calls have been downloaded.
+	 * 
+	 * @return The callback intent for no new calls.
+	 * @since 1.2
+	 */
+	private PendingIntent noCallsIntent() {
+		if (onNoCallsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NOEVENTS);
+			onNoCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNoCallsPendingIntent;
+	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that an error occurred during the download of new calls.
+	 * 
+	 * @return The callback intent for errors during the download.
+	 * @since 1.2
+	 */
+	private PendingIntent errorIntent() {
+		if (onErrorPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_ERROR);
+			onErrorPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onErrorPendingIntent;
+	}
+	
+	/**
+	 * This functions starts a new thread that shows a toast with the
+	 * "new entries" message.
+	 * 
+	 * @since 1.2
+	 */
 	private void showNewEntriesToast() {
 		new Thread(new Runnable()
 		{
@@ -285,6 +385,12 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		}).start();
 	}
 	
+	/**
+	 * This functions starts a new thread that shows a toast with the
+	 * "no new entries" message.
+	 * 
+	 * @since 1.2
+	 */
 	private void showNoEntriesToast() {
 		new Thread(new Runnable()
 		{
@@ -298,6 +404,12 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		}).start();
 	}
 	
+	/**
+	 * This functions starts a new thread that shows a toast with the
+	 * "error" message.
+	 * 
+	 * @since 1.2
+	 */
 	private void showErrorToast() {
 		new Thread(new Runnable()
 		{
@@ -311,15 +423,19 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		}).start();
 	}
 	
-	private void call_menu(final String target)
+	/**
+	 * This function starts a call with the provided phone number.
+	 * 
+	 * @param target The phone number of the person to be called.
+	 * @since 1.0
+	 */
+	private void callTarget(final String target)
 	{
-		if (m_AlertDlg != null) 
-		{
+		if (m_AlertDlg != null) {
 			m_AlertDlg.cancel();
 		}
 		
-		if (target.length() == 0)
-		{
+		if (target.length() == 0) {
 			m_AlertDlg = new AlertDialog.Builder(this)
 		
 				.setMessage(R.string.empty)
@@ -328,8 +444,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				.setCancelable(true)
 				.show();
 		}
-		else if (!Receiver.engine(this).call(target))
-		{
+		else if (!Receiver.engine(this).call(target)) {
 			m_AlertDlg = new AlertDialog.Builder(this)
 			.setMessage(R.string.notfast)
 			.setTitle(R.string.app_name)
@@ -354,11 +469,4 @@ public class CallListActivity extends Activity implements OnItemClickListener
 			.show();		
 		}
 	}	
-	
-	@Override
-	public void onItemClick(AdapterView<?> parent, View arg1, int position, long id) 
-	{
-		CallDataDBObject callDataDBObject = (CallDataDBObject) parent.getItemAtPosition(position);
-		call_menu(callDataDBObject.getRemoteNumberE164().replaceAll("tel:", "").replaceAll("dd:", ""));
-	}
 }
