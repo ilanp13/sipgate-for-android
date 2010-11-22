@@ -162,7 +162,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
-				voiceMailListAdapter.notifyDataSetChanged();
 				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
@@ -174,6 +173,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				break;
 			default:
 				refreshView.setVisibility(View.GONE);
+				voiceMailListAdapter.notifyDataSetChanged();
 				break;
 		}
 		
