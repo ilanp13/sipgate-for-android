@@ -49,6 +49,9 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	private ListView elementList = null;
 	private TextView emptyList = null;
 	
+	private LinearLayout contactsListCountView = null;
+	private TextView contactsCountTextView = null;
+		
 	private AnimationDrawable frameAnimation = null;
 	private Thread animationThread = null;
 	private boolean isAnimationRunning = false;
@@ -83,6 +86,9 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		elementList = (ListView) findViewById(R.id.ContactsListView);
 		emptyList = (TextView) findViewById(R.id.EmptyContactListTextView);
 
+		contactsListCountView = (LinearLayout) findViewById(R.id.ContactsListCountView);
+		contactsCountTextView = (TextView) findViewById(R.id.ContactsCountTextView);
+		
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
 		animationThread = new Thread()
 		{
@@ -119,23 +125,44 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		switch (refreshState) {
 			case NEW_EVENTS: 
 				refreshView.setVisibility(View.GONE);
+				
 				contactListAdapter.notifyDataSetChanged();
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				showNewEntriesToast();
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
 				refreshView.setVisibility(View.VISIBLE);
+				
+				contactsListCountView.setVisibility(View.GONE);
+				
 				break;
 			case ERROR: 
 				refreshView.setVisibility(View.GONE);
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				showErrorToast();
 				break;
 			default:
 				refreshView.setVisibility(View.GONE);
+				
 				contactListAdapter.notifyDataSetChanged();
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				break;
 		}
 		

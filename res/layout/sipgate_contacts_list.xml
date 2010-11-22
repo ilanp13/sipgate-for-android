@@ -15,9 +15,22 @@
 			android:gravity="center" android:textColor="#FFFFFF"
 			android:textSize="12dip"></TextView>
 	</LinearLayout>
+	<LinearLayout android:id="@+id/ContactsListCountView"
+		android:layout_height="wrap_content" android:orientation="horizontal"
+		android:layout_width="fill_parent" android:gravity="center"
+		android:background="#333333" android:padding="2dip">
+		<TextView android:text="" android:id="@+id/ContactsCountTextView"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:gravity="center" android:textColor="#FFFFFF"  android:layout_marginRight="5px"
+		android:textSize="12dip"></TextView>
+		<TextView android:text="@string/sipgate_contacts_in_list" android:id="@+id/ContactsInListTextView"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:gravity="center" android:textColor="#FFFFFF"
+			android:textSize="12dip"></TextView>
+	</LinearLayout>
 	<ListView android:id="@+id/ContactsListView"
 		android:layout_height="fill_parent" android:layout_width="fill_parent"
-		android:choiceMode="singleChoice" android:fastScrollEnabled="true">
+		android:choiceMode="singleChoice">
 	</ListView>
 	<TextView android:text="@string/sipgate_empty_contactlist"
 		android:id="@+id/EmptyContactListTextView" android:layout_width="fill_parent"

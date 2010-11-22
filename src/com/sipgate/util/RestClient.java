@@ -29,6 +29,7 @@ import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
+import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.interfaces.RestAuthenticationInterface;

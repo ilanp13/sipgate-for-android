@@ -82,6 +82,7 @@
 	<string name="sipgate_no_number">anonymous</string>
 	<string name="sipgate_loading">Loading. Please wait...</string>
 	<string name="sipgate_download_failed">Failed to download voice mail.</string>
+	<string name="sipgate_contacts_in_list">sipgate contacts</string>
 	<string name="sipgate_refresh">Refreshing...</string>
 	<string name="sipgate_api_error">An error occurred during the refresh. Please try again later.</string>
 	<string name="sipgate_new_entries">List has been refreshed.</string>

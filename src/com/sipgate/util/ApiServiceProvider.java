@@ -249,13 +249,6 @@ public class ApiServiceProvider {
 		return false;
 	}
 
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException,
-	FeatureNotAvailableException {
-		synchronized (this.apiClient) {
-			return apiClient.getMobileExtensions();
-		}
-	}
-
 	public String getBaseProductType() throws IOException, URISyntaxException,  FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.getBaseProductType();

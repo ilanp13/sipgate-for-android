@@ -29,7 +29,6 @@ public interface ApiClientInterface {
 	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public void setCallRead(String call) throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public boolean featureAvailable(API_FEATURE feature);
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException;
 	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException;
 	public MobileExtension setupMobileExtension(String phoneNumber,	String model, String vendor, String firmware) throws FeatureNotAvailableException;
 }

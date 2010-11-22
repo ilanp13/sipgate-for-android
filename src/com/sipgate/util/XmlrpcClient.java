@@ -8,7 +8,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -17,7 +16,6 @@ import org.xmlrpc.android.XMLRPCException;
 import org.xmlrpc.android.XMLRPCFault;
 import org.zoolu.sip.address.SipURL;
 
-import android.net.Credentials;
 import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
@@ -470,19 +468,11 @@ public class XmlrpcClient implements ApiClientInterface {
 	public boolean featureAvailable(API_FEATURE feature) {
 		return false;
 	}
-
-	
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException 
-	{
-		throw new FeatureNotAvailableException();
-	}
-
 	
 	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException 
 	{
 		return "basic/plus";
 	}
-
 	
 	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws FeatureNotAvailableException {
