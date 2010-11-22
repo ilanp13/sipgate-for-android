@@ -138,8 +138,6 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 				
 				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
 				contactsListCountView.setVisibility(View.VISIBLE);
-				
-				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
 				refreshView.setVisibility(View.VISIBLE);
@@ -413,25 +411,6 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			{
 				Looper.prepare();
 				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_new_entries), Toast.LENGTH_LONG).show();
-				Looper.loop();
-			}
-		}).start();
-	}
-	
-	/**
-	 * This functions starts a new thread that shows a toast with the
-	 * "no new entries" message.
-	 * 
-	 * @since 1.2
-	 */
-	private void showNoEntriesToast() {
-		new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_entries), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();
