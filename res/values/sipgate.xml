@@ -109,12 +109,15 @@
         <item>360</item>
         <item>1440</item>
     </string-array>
-	<string name="simple_settings_refresh_value_1">every minute</string>
-	<string name="simple_settings_refresh_value_5">every 5 minutes</string>
-	<string name="simple_settings_refresh_value_15">every 15 minutes</string>
-	<string name="simple_settings_refresh_value_30">every 30 minutes</string>
-	<string name="simple_settings_refresh_value_60">every hour</string>
-	<string name="simple_settings_refresh_value_180">every 3 hours</string>
-	<string name="simple_settings_refresh_value_360">every 6 hours</string>
-	<string name="simple_settings_refresh_value_1440">once per day</string>
+    <string-array name="simple_settings_refresh_values">
+        <item>every minute</item>
+		<item>every 5 minutes</item>
+		<item>every 15 minutes</item>
+		<item>every 30 minutes</item>
+		<item>every hour</item>
+		<item>every 3 hours</item>
+		<item>every 6 hours</item>
+		<item>once per day</item>
+    </string-array>
+
 </resources>
