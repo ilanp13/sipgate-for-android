@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.sipgate.R;
 import com.sipgate.service.EventService;
@@ -255,6 +256,8 @@ public class OptionsMenu {
 	private void refreshContactList(Intent intent, Context context, Activity activity)
 	{
 		try {
+			activity.findViewById(R.id.sipgateContactsListRefreshView).setVisibility(View.VISIBLE);
+			
 			intent = new Intent(activity, SipgateBackgroundService.class);
 			Context appContext = context.getApplicationContext();
 			appContext.startService(intent);
@@ -293,10 +296,6 @@ public class OptionsMenu {
 			
 			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
-			
-			intent = new Intent(activity, SipgateFrames.class);
-			intent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
-			appContext.startService(intent);	
 		}
 		catch (ActivityNotFoundException e) {
 			Log.e(TAG, e.getLocalizedMessage());
@@ -314,6 +313,8 @@ public class OptionsMenu {
 	private void refreshCallList(Intent intent, Context context, Activity activity)
 	{
 		try {
+			activity.findViewById(R.id.sipgateCallListRefreshView).setVisibility(View.VISIBLE);
+			
 			intent = new Intent(activity, SipgateBackgroundService.class);
 			Context appContext = context.getApplicationContext();
 			appContext.startService(intent);
@@ -352,11 +353,6 @@ public class OptionsMenu {
 			
 			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
-			
-			intent = new Intent(activity, SipgateFrames.class);
-			intent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
-			appContext.startService(intent);
-			
 		}
 		catch (ActivityNotFoundException e) {
 			Log.e(TAG, e.getLocalizedMessage());
@@ -374,6 +370,8 @@ public class OptionsMenu {
 	private void refreshVoiceMailList(Intent intent, Context context, Activity activity)
 	{
 		try {
+			activity.findViewById(R.id.sipgateVoiceMailListRefreshView).setVisibility(View.VISIBLE);
+			
 			intent = new Intent(activity, SipgateBackgroundService.class);
 			Context appContext = context.getApplicationContext();
 			appContext.startService(intent);
@@ -412,11 +410,9 @@ public class OptionsMenu {
 			
 			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
-			
 		}
 		catch (ActivityNotFoundException e) {
 			Log.e(TAG, e.getLocalizedMessage());
 		}
 	}	
-
 }

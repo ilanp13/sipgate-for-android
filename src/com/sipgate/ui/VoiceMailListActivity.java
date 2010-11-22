@@ -17,6 +17,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
@@ -29,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.adapters.VoiceMailListAdapter;
@@ -39,7 +41,17 @@ import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.MediaConnector;
+import com.sipgate.util.SipgateApplication;
 
+/**
+ * This class represents the voice mail list activity and implements
+ * all it's functions.
+ * 
+ * @author Karsten Knuth
+ * @author Marcus Hunger
+ * @authos graef
+ * @version 1.2
+ */
 public class VoiceMailListActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "VoiceMailListActivity";
@@ -57,7 +69,14 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	
 	private ServiceConnection serviceConnection = null;
 	private EventService serviceBinding = null;
-	private PendingIntent onNewVoiceMailPendingIntent = null;
+
+	private PendingIntent onNewVoiceMailsPendingIntent = null;
+	private PendingIntent onNoVoiceMailsPendingIntent = null;
+	private PendingIntent onGetVoiceMailsPendingIntent = null;
+	private PendingIntent onErrorPendingIntent = null;
+	
+	private SipgateApplication application = null;
+	private SipgateApplication.RefreshState refreshState = SipgateApplication.RefreshState.NONE;
 	
 	private Context appContext = null;
 	
@@ -72,7 +91,12 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	private String loadingString = null;
 	private String failedString = null;
 	
-	@Override
+	/**
+	 * This function is called right after the class is started by an intent.
+	 * 
+	 * @param bundle The bundle which caused the activity to be started.
+	 * @since 1.0
+	 */
 	public void onCreate(Bundle bundle) 
 	{
 		super.onCreate(bundle);
@@ -87,8 +111,10 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		emptyList = (TextView) findViewById(R.id.EmptyEventListTextView);
 
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
-		animationThread = new Thread() {
-			public void run() {
+		animationThread = new Thread()
+		{
+			public void run()
+			{
 				frameAnimation.start();
 			}
 		};
@@ -110,15 +136,46 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		
 		loadingString = getResources().getString(R.string.sipgate_loading);
 		failedString = getResources().getString(R.string.sipgate_download_failed);
+		
+		application = (SipgateApplication) getApplication();
 	}
 	
-	@Override
-	protected void onResume() {
+	/**
+	 * This function is called every time the activity comes back to the foreground.
+	 * 
+	 * @since 1.0
+	 */
+	public void onResume()
+	{
 		super.onResume();
 		
-		startScanActivity();		
+		registerForBackgroundIntents();		
 		
-		voiceMailListAdapter.notifyDataSetChanged();
+		refreshState = application.getRefreshState();
+		application.setRefreshState(SipgateApplication.RefreshState.NONE);
+		
+		switch (refreshState) {
+			case NEW_EVENTS: 
+				refreshView.setVisibility(View.GONE);
+				voiceMailListAdapter.notifyDataSetChanged();
+				showNewEntriesToast();
+				break;
+			case NO_EVENTS: 
+				refreshView.setVisibility(View.GONE);
+				showNoEntriesToast();
+				break;
+			case GET_EVENTS: 
+				refreshView.setVisibility(View.VISIBLE);
+				break;
+			case ERROR: 
+				refreshView.setVisibility(View.GONE);
+				showErrorToast();
+				break;
+			default:
+				refreshView.setVisibility(View.GONE);
+				voiceMailListAdapter.notifyDataSetChanged();
+				break;
+		}
 		
 		if (voiceMailListAdapter.isEmpty()) {
 			elementList.setVisibility(View.GONE);
@@ -134,90 +191,36 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		}
 	}
 	
-	@Override
-	protected void onPause()
+	/**
+	 * This function is called every time the activity goes in to background.
+	 * 
+	 * @since 1.0
+	 */
+	public void onPause()
 	{
 		super.onPause();
 	
-		stopScanActivity();
+		unregisterFromBackgroungIntents();
 	}
 		
-	@Override
-	protected void onDestroy()
+	/**
+	 * This function is called right before the activity is killed.
+	 * 
+	 * @since 1.0
+	 */
+	public void onDestroy()
 	{
 		super.onDestroy();
 		
-		stopScanActivity();
-	}
-	
-	private void startScanActivity()
-	{
-		Intent intent = new Intent(this, SipgateBackgroundService.class);
-		appContext.startService(intent);
-
-		if (serviceConnection == null) {
-			Log.d(TAG, "service connection is null -> create new");
-			
-			serviceConnection = new ServiceConnection() {
-
-				public void onServiceDisconnected(ComponentName name) {
-					Log.d(TAG, "service " + name + " disconnected -> clear binding");
-					serviceBinding = null;
-				}
-
-				public void onServiceConnected(ComponentName name, IBinder binder) {
-					Log.v(TAG, "service " + name + " connected -> bind");
-					try {
-						serviceBinding = (EventService) binder;
-						try {
-							Log.d(TAG, "service binding -> registerOnVoiceMailsIntent");
-							serviceBinding.registerOnVoiceMailsIntent(getNewMessagesIntent());
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						}
-					} catch (ClassCastException e) {
-						e.printStackTrace();
-					}
-				}
-			};
-			
-			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-			Log.v(TAG, "bind service -> " + bindret);
-		} else {
-			Log.d(TAG, "service connection is not null -> already running");
-		}
-	}
-	
-	public void stopScanActivity()
-	{
-		if (serviceConnection != null) {
-			try {
-				if (serviceBinding != null) {
-					Log.d(TAG, "service unbinding -> unregisterOnVoiceMailsIntent");
-					serviceBinding.unregisterOnVoiceMailsIntent(getNewMessagesIntent());
-				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-
-			Log.v(TAG, "unbind service");
-			appContext.unbindService(serviceConnection);
-			serviceConnection = null;
-		}
+		unregisterFromBackgroungIntents();
 	}
 
-	private PendingIntent getNewMessagesIntent() 
-	{
-		if (onNewVoiceMailPendingIntent == null) {
-			Intent onChangedIntent = new Intent(this, SipgateFramesVoiceMails.class);
-			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
-			onNewVoiceMailPendingIntent = PendingIntent.getActivity(this,
-					SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
-		}
-		return onNewVoiceMailPendingIntent;
-	}
-	
-	@Override
+	/**
+	 * This function is called every time the menu button is pressed.
+	 * 
+	 * @param menu The menu object to be used to create the menu.
+	 * @since 1.0
+	 */
 	public boolean onCreateOptionsMenu(Menu menu) 
 	{
 		boolean result = super.onCreateOptionsMenu(menu);
@@ -228,7 +231,12 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		return result;
 	}
 	
-	@Override
+	/**
+	 * This function is called when an item was chosen from the menu.
+	 * 
+	 * @param item The item from the menu that was selected.
+	 * @since 1.0
+	 */
 	public boolean onOptionsItemSelected(MenuItem item) 
 	{
 		boolean result = super.onOptionsItemSelected(item);
@@ -239,32 +247,15 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		return result;
 	}
 	
-	private void markAsRead(final VoiceMailDataDBObject voiceMailDataDBObject) 
-	{
-		if (!voiceMailDataDBObject.isRead()) {
-			Thread markThread = new Thread(){
-				public void run()
-				{
-					try 
-					{
-						apiClient.setVoiceMailRead(voiceMailDataDBObject.getReadModifyUrl());
-					
-						voiceMailDataDBObject.setRead(true);
-						
-						sipgateDBAdapter.update(voiceMailDataDBObject);
-					} 
-					catch (Exception e)
-					{
-						Log.e(TAG, "markAsRead()", e);
-					}
-				}
-			};
-			
-			markThread.start();
-		}
-	}
-	
-	@Override
+	/**
+	 * This function is called when an item in the call list was clicked.
+	 * 
+	 * @param parent The View containing the clicked item.
+	 * @param view ?
+	 * @param position The position of the clicked item in the list.
+	 * @param id The id of the clicked item.
+	 * @since 1.0
+	 */
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) 
 	{
 		VoiceMailDataDBObject voiceMailDataDBObject = (VoiceMailDataDBObject) parent.getItemAtPosition(position);
@@ -274,27 +265,265 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		markAsRead(voiceMailDataDBObject);
 	}
 	
+	/**
+	 * This function provides the background sevice with callback
+	 * intent for several steps in the refresh cycle.
+	 * 
+	 * @since 1.2
+	 */
+	private void registerForBackgroundIntents()
+	{
+		Intent intent = new Intent(this, SipgateBackgroundService.class);
+		appContext.startService(intent);
+
+		if (serviceConnection == null) {
+			Log.d(TAG, "service connection is null -> create new");
+			
+			serviceConnection = new ServiceConnection()
+			{
+
+				public void onServiceDisconnected(ComponentName name)
+				{
+					Log.d(TAG, "service " + name + " disconnected -> clear binding");
+					serviceBinding = null;
+				}
+
+				public void onServiceConnected(ComponentName name, IBinder binder)
+				{
+					Log.v(TAG, "service " + name + " connected -> bind");
+					try {
+						serviceBinding = (EventService) binder;
+						try {
+							Log.d(TAG, "service binding -> registerOnVoiceMailsIntent");
+							serviceBinding.registerOnVoiceMailsIntent(TAG, getVoiceMailsIntent(), newVoiceMailsIntent(), noVoiceMailsIntent(), errorIntent());
+						}
+						catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+					catch (ClassCastException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			
+			boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+			Log.v(TAG, "bind service -> " + bindret);
+		}
+		else {
+			Log.d(TAG, "service connection is not null -> already running");
+		}
+	}
+	
+	/**
+	 * This function deletes the callback intents from the background
+	 * service so the UI doesn't get any status updates anymore.
+	 * 
+	 * @since 1.2
+	 */
+	public void unregisterFromBackgroungIntents()
+	{
+		if (serviceConnection != null) {
+			try {
+				if (serviceBinding != null) {
+					Log.d(TAG, "service unbinding -> unregisterOnVoiceMailsIntent");
+					serviceBinding.unregisterOnVoiceMailsIntent(TAG);
+				}
+			}
+			catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			Log.v(TAG, "unbind service");
+			appContext.unbindService(serviceConnection);
+			serviceConnection = null;
+		}
+	}
+
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that the download of new voice mails just has started.
+	 * 
+	 * @return The callback intent for starting to download voice mails.
+	 * @since 1.2
+	 */
+	private PendingIntent getVoiceMailsIntent() {
+		if (onGetVoiceMailsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_GETEVENTS);
+			onGetVoiceMailsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onGetVoiceMailsPendingIntent;
+	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that new voice mails have been downloaded.
+	 * 
+	 * @return The callback intent for new voice mails.
+	 * @since 1.2
+	 */
+	private PendingIntent newVoiceMailsIntent() {
+		if (onNewVoiceMailsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NEWEVENTS);
+			onNewVoiceMailsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNewVoiceMailsPendingIntent;
+	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that no new voice mails have been downloaded.
+	 * 
+	 * @return The callback intent for no new voice mails.
+	 * @since 1.2
+	 */
+	private PendingIntent noVoiceMailsIntent() {
+		if (onNoVoiceMailsPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NOEVENTS);
+			onNoVoiceMailsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onNoVoiceMailsPendingIntent;
+	}
+	
+	/**
+	 * This functions returns a callback intent for the callback
+	 * that an error occurred during the download of new voice mails.
+	 * 
+	 * @return The callback intent for errors during the download.
+	 * @since 1.2
+	 */
+	private PendingIntent errorIntent() {
+		if (onErrorPendingIntent == null) {
+			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
+			onChangedIntent.setAction(SipgateBackgroundService.ACTION_ERROR);
+			onErrorPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
+		}
+		return onErrorPendingIntent;
+	}
+	
+	/**
+	 * This functions starts a new thread that shows a toast with the
+	 * "new entries" message.
+	 * 
+	 * @since 1.2
+	 */
+	private void showNewEntriesToast() {
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_new_entries), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+	
+	/**
+	 * This functions starts a new thread that shows a toast with the
+	 * "no new entries" message.
+	 * 
+	 * @since 1.2
+	 */
+	private void showNoEntriesToast() {
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_entries), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+	
+	/**
+	 * This functions starts a new thread that shows a toast with the
+	 * "error" message.
+	 * 
+	 * @since 1.2
+	 */
+	private void showErrorToast() {
+		new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Looper.prepare();
+				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_api_error), Toast.LENGTH_LONG).show();
+				Looper.loop();
+			}
+		}).start();
+	}
+	
+	/**
+	 * Sends a request to the api to mark a voice mail as read
+	 * when it is clicked.
+	 * 
+	 * @param voiceMailDataDBObject The voice mail to me marked as read.
+	 */
+	private void markAsRead(final VoiceMailDataDBObject voiceMailDataDBObject) 
+	{
+		if (!voiceMailDataDBObject.isRead()) {
+			Thread markThread = new Thread()
+			{
+				public void run()
+				{
+					try {
+						apiClient.setVoiceMailRead(voiceMailDataDBObject.getReadModifyUrl());
+					
+						voiceMailDataDBObject.setRead(true);
+						
+						sipgateDBAdapter.update(voiceMailDataDBObject);
+					} 
+					catch (Exception e) {
+						Log.e(TAG, "markAsRead()", e);
+					}
+				}
+			};
+			
+			markThread.start();
+		}
+	}
+	
+	/**
+	 * 
+	 * @author graef
+	 * @version 1.1
+	 */
 	private class DownloadVoiceMailTask extends AsyncTask <VoiceMailDataDBObject, Void, VoiceMailFileDBObject>
 	{
 		private InputStream inputStream = null;
 		private ByteArrayOutputStream byteArrayOutputStream = null; 
 		private ProgressDialog waitDialog = null;
 		
+		/**
+		 * Shows a wait dialog before we start downloading the file.
+		 * 
+		 * @since 1.1
+		 */
+		protected void onPreExecute()
+		{
+			waitDialog = ProgressDialog.show(activity, "", loadingString, true);
+		}
+		
 		protected VoiceMailFileDBObject doInBackground(VoiceMailDataDBObject... voiceMailDataDBObjects)
 		{
 			VoiceMailDataDBObject voiceMailDataDBObject = voiceMailDataDBObjects[0];
 			VoiceMailFileDBObject voiceMailFileDBObject = null;
 			
-			try 
-			{
+			try {
 				voiceMailFileDBObject = sipgateDBAdapter.getVoiceMailFileDBObjectById(voiceMailDataDBObject.getId());
 				
-				if (voiceMailFileDBObject == null)
-				{
+				if (voiceMailFileDBObject == null) {
 					inputStream = apiClient.getVoicemail(voiceMailDataDBObject.getContentUrl());
 					
-					if (inputStream == null) 
-					{
+					if (inputStream == null) {
 						throw new RuntimeException("voicemail inputstream is null");
 					}
 		
@@ -304,8 +533,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 					
 					int length = 0;
 					
-					while ((length = inputStream.read(chunk)) > 0) 
-					{
+					while ((length = inputStream.read(chunk)) > 0) {
 						byteArrayOutputStream.write(chunk, 0, length);
 					}
 					
@@ -317,38 +545,29 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 					sipgateDBAdapter.insert(voiceMailFileDBObject);
 				}
 			}					
-			catch (Exception e) 
-			{
+			catch (Exception e) {
 				Log.e(TAG, e.getLocalizedMessage(), e);
 			
-				if (waitDialog.isShowing())
-				{
+				if (waitDialog.isShowing()) {
 					waitDialog.dismiss();
 				}
 			}
-			finally 
-			{
-				try 
-				{
-					if (byteArrayOutputStream != null) 
-					{
+			finally {
+				try {
+					if (byteArrayOutputStream != null) {
 						byteArrayOutputStream.close();
 					}
 				}
-				catch (IOException e) 
-				{
+				catch (IOException e) {
 					Log.e(TAG, e.getLocalizedMessage(), e);
 				}
 				
-				try 
-				{
-					if (inputStream != null) 
-					{
+				try {
+					if (inputStream != null) {
 						inputStream.close();
 					}
 				}
-				catch (IOException e) 
-				{
+				catch (IOException e) {
 					Log.e(TAG, e.getLocalizedMessage(), e);
 				}
 			}
@@ -356,7 +575,12 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			return voiceMailFileDBObject;
 		} 
 		
-		@Override
+		/**
+		 * Hides the wait dialog and starts the playback after the
+		 * download is finished.
+		 * 
+		 * @since 1.1
+		 */
 		protected void onPostExecute(VoiceMailFileDBObject voiceMailFileDBObject)
 		{
 			if (waitDialog.isShowing())
@@ -387,12 +611,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				AlertDialog alert = builder.create();
 				alert.show();
 			}
-		}
-		
-		@Override
-		protected void onPreExecute()
-		{
-			waitDialog = ProgressDialog.show(activity, "", loadingString, true);
 		}
 	}
 }

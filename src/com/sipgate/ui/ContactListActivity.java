@@ -124,7 +124,6 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
-				contactListAdapter.notifyDataSetChanged();
 				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
@@ -136,6 +135,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 				break;
 			default:
 				refreshView.setVisibility(View.GONE);
+				contactListAdapter.notifyDataSetChanged();
 				break;
 		}
 		

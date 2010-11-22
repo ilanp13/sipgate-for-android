@@ -124,19 +124,19 @@ public class SipgateFrames extends TabActivity
 		String action = intent.getAction();
 		SipgateApplication application = (SipgateApplication) getApplication();
 		
-		if (action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
+		if (action != null && action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
 			application.setRefreshState(SipgateApplication.RefreshState.NEW_EVENTS);
 			tabs.setCurrentTab(tabs.getCurrentTab());
 		}
-		else if (action.equals(SipgateBackgroundService.ACTION_NOEVENTS)) {
+		else if (action != null && action.equals(SipgateBackgroundService.ACTION_NOEVENTS)) {
 			application.setRefreshState(SipgateApplication.RefreshState.NO_EVENTS);
 			tabs.setCurrentTab(tabs.getCurrentTab());
 		}
-		else if (action.equals(SipgateBackgroundService.ACTION_GETEVENTS)) {
+		else if (action != null && action.equals(SipgateBackgroundService.ACTION_GETEVENTS)) {
 			application.setRefreshState(SipgateApplication.RefreshState.GET_EVENTS);
 			tabs.setCurrentTab(tabs.getCurrentTab());
 		}
-		else if (action.equals(SipgateBackgroundService.ACTION_ERROR)) {
+		else if (action != null && action.equals(SipgateBackgroundService.ACTION_ERROR)) {
 			application.setRefreshState(SipgateApplication.RefreshState.ERROR);
 			tabs.setCurrentTab(tabs.getCurrentTab());
 		}

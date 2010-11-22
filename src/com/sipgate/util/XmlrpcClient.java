@@ -2,7 +2,6 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -25,7 +24,6 @@ import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
-import com.sipgate.db.ContactNumberDBObject.PhoneType;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -351,6 +349,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		return callDataDBObjects;
@@ -490,7 +489,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
 	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
 	{
 		Vector<ContactDataDBObject> contactDataDBObjects = new Vector<ContactDataDBObject>();
@@ -530,6 +529,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		return contactDataDBObjects;
