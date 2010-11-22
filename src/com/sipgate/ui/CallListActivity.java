@@ -128,7 +128,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
-				callListAdapter.notifyDataSetChanged();
 				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
@@ -140,6 +139,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				break;
 			default:
 				refreshView.setVisibility(View.GONE);
+				callListAdapter.notifyDataSetChanged();
 				break;
 		}
 		
