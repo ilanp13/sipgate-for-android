@@ -280,7 +280,7 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 				
 				formatter.initWithFreestyle(phoneNumber, locale.getCountry());
 				
-				phoneNumber = formatter.e164NumberWithPrefix("+");
+				phoneNumber = formatter.e164NumberWithPrefix("");
 				
 				MobileExtension mobileExtension = getMobileExtension(phoneNumber);
 
