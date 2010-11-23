@@ -742,11 +742,19 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(contactListener, ACTION_GETEVENTS);
 		
 		try {
-			if (notifyIfNewContacts(apiClient.getContacts(), this) > 0 ) {
-				notifyFrontend(contactListener, ACTION_NEWEVENTS);
+			try {
+				Thread.sleep(2000);
 			}
-			else {
-				notifyFrontend(contactListener, ACTION_NOEVENTS);
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				if (notifyIfNewContacts(apiClient.getContacts(), this) > 0 ) {
+					notifyFrontend(contactListener, ACTION_NEWEVENTS);
+				}
+				else {
+					notifyFrontend(contactListener, ACTION_NOEVENTS);
+				}
 			}
 		} 
 		catch (Exception e) {
@@ -779,11 +787,19 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(callListener, ACTION_GETEVENTS);
 		
 		try {
-			if (notifyIfNewCalls(apiClient.getCalls(), this) > 0 ) {
-				notifyFrontend(callListener, ACTION_NEWEVENTS);
+			try {
+				Thread.sleep(2000);
 			}
-			else {
-				notifyFrontend(callListener, ACTION_NOEVENTS);
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				if (notifyIfNewCalls(apiClient.getCalls(), this) > 0 ) {
+					notifyFrontend(callListener, ACTION_NEWEVENTS);
+				}
+				else {
+					notifyFrontend(callListener, ACTION_NOEVENTS);
+				}
 			}
 		} 
 		catch (Exception e) {
@@ -816,11 +832,19 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(voiceMailListener, ACTION_GETEVENTS);
 		
 		try {
-			if (notifyIfNewVoiceMails(apiClient.getVoiceMails(), this) > 0 ) {
-				notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
+			try {
+				Thread.sleep(2000);
 			}
-			else {
-				notifyFrontend(voiceMailListener, ACTION_NOEVENTS);
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				if (notifyIfNewVoiceMails(apiClient.getVoiceMails(), this) > 0 ) {
+					notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
+				}
+				else {
+					notifyFrontend(voiceMailListener, ACTION_NOEVENTS);
+				}
 			}
 		} 
 		catch (Exception e) {
