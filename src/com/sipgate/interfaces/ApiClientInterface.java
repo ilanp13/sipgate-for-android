@@ -3,7 +3,6 @@ package com.sipgate.interfaces;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Vector;
 
 import com.sipgate.api.types.MobileExtension;

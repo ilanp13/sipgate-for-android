@@ -140,7 +140,6 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 			Log.d(TAG, "getting " + urlString);
 			urlString = appendUrlParameters(urlString, params);
 			request = new HttpGet(urlString);
-			request.addHeader("Accept-Encoding", "gzip");
 		} 
 		else if (httpMethod.equals("PUT")) {
 			urlString = appendUrlParameters(urlString, params);
@@ -152,6 +151,8 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface {
 		else {
 			throw new AccessProtectedResourceException("unknown method");	
 		}
+		
+		request.addHeader("Accept-Encoding", "gzip");
 		
 		HttpResponse response = null;
 		

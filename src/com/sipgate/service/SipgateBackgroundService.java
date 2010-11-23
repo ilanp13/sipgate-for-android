@@ -46,7 +46,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 
-	private static final long CONTACT_REFRESH_INTERVAL = 86400000; // every day
+	private static final long CONTACT_REFRESH_INTERVAL = 30000; // every day
 	private static final long CALL_REFRESH_INTERVAL = 60000; // every min
 	private static final long VOICEMAIL_REFRESH_INTERVAL = 300000; // every 5 min
 		
@@ -132,6 +132,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	public void registerOnContactsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 	{
 		Log.d(TAG, "registering on contact events intent");
+		
 		newIntents = new HashMap<String, PendingIntent>();
 		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
 		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
@@ -156,6 +157,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	public void registerOnCallsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
 	{
 		Log.d(TAG, "registering on call events intent");
+		
 		newIntents = new HashMap<String, PendingIntent>();
 		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
 		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
@@ -181,6 +183,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	public void registerOnVoiceMailsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
 	{
 		Log.d(TAG, "registering on voice events intent");
+		
 		newIntents = new HashMap<String, PendingIntent>();
 		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
 		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);

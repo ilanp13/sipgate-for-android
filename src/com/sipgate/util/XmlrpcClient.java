@@ -110,7 +110,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		
 			apiResult = this.doXmlrpcCall("samurai.ClientIdentify", parameters);
 		
-			return (((String)apiResult.get("StatusCode")).equals("200"));
+			return ("200".equals(apiResult.get("StatusCode").toString()));
 		}
 		catch (XMLRPCException e)
 		{

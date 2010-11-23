@@ -38,7 +38,7 @@ import com.sipgate.util.SipgateApplication;
  * @author Karsten Knuth
  * @version 1.2
  */
-public class ContactListActivity extends Activity implements OnItemClickListener 
+public class ContactListActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "ContactListActivity";
 	
@@ -107,7 +107,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
         
         application = (SipgateApplication) getApplication();
     }
-	
+		
 	/**
 	 * This function is called every time the activity comes back to the foreground.
 	 * 
@@ -189,10 +189,10 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	public void onPause()
 	{
 		super.onPause();
-	
+		
 		unregisterFromBackgroungIntents();
 	}
-		
+	
 	/**
 	 * This function is called right before the activity is killed.
 	 * 
@@ -266,7 +266,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		Intent intent = new Intent(this, SipgateBackgroundService.class);
 		context.startService(intent);
 
-		if (serviceConnection == null) {
+		//if (serviceConnection == null) {
 			Log.d(TAG, "service connection is null -> create new");
 			
 			serviceConnection = new ServiceConnection() 
@@ -300,10 +300,10 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			
 			boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
-		} 
-		else {
-			Log.d(TAG, "service connection is not null -> already running");
-		}
+		//} 
+		//else {
+		//	Log.d(TAG, "service connection is not null -> already running");
+		//}
 	}
 	
 	/**
@@ -313,7 +313,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	 * @since 1.2
 	 */
 	private void unregisterFromBackgroungIntents()
-	{
+	{	
 		if (serviceConnection != null) {
 			try {
 				if (serviceBinding != null) {
