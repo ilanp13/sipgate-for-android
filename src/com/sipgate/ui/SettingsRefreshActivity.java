@@ -1,90 +1,71 @@
 package com.sipgate.ui;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-import org.sipdroid.codecs.Codecs;
-
 import com.sipgate.R;
-import com.sipgate.sipua.ui.Checkin;
-import com.sipgate.sipua.ui.InstantAutoCompleteTextView;
-import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.service.EventService;
+import com.sipgate.service.SipgateBackgroundService;
 
-import org.zoolu.sip.provider.SipStack;
-
-import android.R.array;
-import android.app.AlertDialog;
-import android.content.ContentResolver;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnClickListener;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.text.InputType;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.Toast;
 
+
+/**
+ * 
+ * 
+ * @author niepel
+ * @author Karsten Knuth
+ * @version 1.0
+ */
 public class SettingsRefreshActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
 	private static String TAG = "SettingsRefreshActivity";
 	
-	// Current settings handler
-	private static SharedPreferences settings;
-	// Context definition
-	private Context context = null;
+	private static SharedPreferences settings = null;
+	private Intent intent = null;
+	private ServiceConnection serviceConnection = null;
+	private EventService serviceBinding = null;
 
-	// Path where to store all profiles - !!!should be replaced by some system variable!!!
-	private final static String profilePath = "/sdcard/Sipgate/";
-	// Path where is stored the shared preference file - !!!should be replaced by some system variable!!!
-	private final String sharedPrefsPath = "/data/data/com.sipgate/shared_prefs/";
-	// Shared preference file name - !!!should be replaced by some system variable!!!
 	private final String sharedPrefsFile = "com.sipgate_preferences";
-	// List of profile files available on the SD card
-	private String[] profileFiles = null;
-	// Which profile file to delete
-	private int profileToDelete;
 
-	// Name of the keys in the Preferences XML file
 	public static final String PREF_REFRESH_EVENTS = "refresh_events";
 	public static final String PREF_REFRESH_CONTACTS = "refresh_contacts";
 
-	// Default values of the preferences
 	public static final String DEFAULT_REFRESH_EVENTS = "5";
 	public static final String DEFAULT_REFRESH_CONTACTS = "1440";
-	
-	
-
 	
 	/**
 	 * onCreate-Method for SettingsRefreshActivity
 	 * 
-	 * @author niepel	
+	 * @since 1.0
 	 */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setSettingsTitle();
 		addPreferencesFromResource(R.xml.sipgate_preferences_refresh);
 		settings = getSharedPreferences(sharedPrefsFile, MODE_PRIVATE);
-		settings.registerOnSharedPreferenceChangeListener(this);
 		updateSummaries(settings.getString(PREF_REFRESH_EVENTS, DEFAULT_REFRESH_EVENTS),settings.getString(PREF_REFRESH_CONTACTS, DEFAULT_REFRESH_CONTACTS));
+	}
+	
+	/**
+	 * 
+	 */
+	public void onResume(){
+		settings.registerOnSharedPreferenceChangeListener(this);
 	}
 
 	/**
 	 * Sets the settings title
 	 * 
-	 * @author niepel	
+	 * @since 1.0
 	 */
 	private void setSettingsTitle() {
 		setTitle(R.string.simple_settings_refresh_timers);
@@ -95,7 +76,7 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	 * 
 	 * @param element
 	 * @param time
-	 * @author niepel
+	 * @since 1.0
 	 */
 	private void setHumanTimeAsSummary(Preference element, String elementName, String time) {
 		Integer intTime = Integer.valueOf(time);
@@ -117,7 +98,7 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	/**
 	 * Sets the summaries so that you can see what you've chosen
 	 * 
-	 * @author niepel	
+	 * @since 1.0
 	 */
 	private void updateSummaries(String time_events, String time_contacts) {
 		Log.d(TAG, "Events: " + time_events + " / Contacts: " + time_contacts);
@@ -126,35 +107,57 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	}
 	
 	/**
-	 * onDestroy-Method to unregister the changelistener
 	 * 
-	 * @author niepel	
 	 */
-	@Override
-	public void onDestroy()	{
-		super.onDestroy();
-
+	public void onPause() {
 		settings.unregisterOnSharedPreferenceChangeListener(this);
 	}
-
+	
 	/**
 	 * Listener for Changes to the Preferences
 	 * 
-	 * @author niepel	
+	 * @since 1.0
 	 */
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
     	Log.d(TAG, "onSharedPreferenceChanged");
     	Log.d(TAG, key);
     	updateSummaries(sharedPreferences.getString(PREF_REFRESH_EVENTS, DEFAULT_REFRESH_EVENTS),sharedPreferences.getString(PREF_REFRESH_CONTACTS, DEFAULT_REFRESH_CONTACTS));
+    	
+		intent = new Intent(this, SipgateBackgroundService.class);
+		Context appContext = getApplicationContext();
+		appContext.startService(intent);
+
+		if (serviceConnection == null) {
+			serviceConnection = new ServiceConnection() {
+
+				public void onServiceConnected(ComponentName name, IBinder binder)
+				{
+					Log.v(TAG, "service " + name + " connected -> bind");
+					try {
+						serviceBinding = (EventService) binder;
+						try {
+							serviceBinding.initContactRefreshTimer();
+							serviceBinding.initCallRefreshTimer();
+							serviceBinding.initVoicemailRefreshTimer();
+						}
+						catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+					catch (ClassCastException e) {
+						e.printStackTrace();
+					}
+					
+				}
+
+				public void onServiceDisconnected(ComponentName name)
+				{
+					serviceBinding = null;
+				}
+				
+			};
+		}
+		
+		boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
-    
-	/**
-	 * onResume-Method for SettingsRefreshActivity
-	 * 
-	 * @author niepel	
-	 */
-	protected void onResume() {
-		super.onResume();
-	}
-	
 }
