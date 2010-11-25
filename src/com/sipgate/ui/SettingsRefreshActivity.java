@@ -59,6 +59,7 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	 * 
 	 */
 	public void onResume(){
+		super.onResume();
 		settings.registerOnSharedPreferenceChangeListener(this);
 	}
 
@@ -110,6 +111,7 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	 * 
 	 */
 	public void onPause() {
+		super.onPause();
 		settings.unregisterOnSharedPreferenceChangeListener(this);
 	}
 	
@@ -158,6 +160,6 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 			};
 		}
 		
-		boolean bindret = appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+		appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 }
