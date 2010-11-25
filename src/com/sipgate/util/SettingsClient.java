@@ -6,6 +6,7 @@ import com.sipgate.sipua.ui.Settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Allows Access to the Sipgate configurations
@@ -78,7 +79,35 @@ public class SettingsClient {
 	public String getExtensionAlias() {
 		return this.preferences.getString(SettingsClient.extensionAlias, "");
 	}
+
+	/**
+	 * Returns the refresh time for events
+	 * 
+	 * @since 1.0
+	 * @return the refresh time for events in Milliseconds
+	 */
+	public Long getEventsRefreshTime() {
+		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_EVENTS, Settings.DEFAULT_REFRESH_EVENTS);
+		long timeInMillis = Long.parseLong(timeInMinutes);
+		timeInMillis = timeInMillis * 60 * 1000;		// Time in Minutes * 60 * 1000 = Time in Milliseconds
+		Log.d("EventsRefreshTime",String.valueOf(timeInMillis));
+		return timeInMillis;
+	}
 	
+	/**
+	 * Returns the refresh time for contacts
+	 * 
+	 * @since 1.0
+	 * @return the refresh time for contacts in Milliseconds
+	 */
+	public Long getContactsRefreshTime() {
+		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_CONTACTS, Settings.DEFAULT_REFRESH_CONTACTS);
+		long timeInMillis = Long.parseLong(timeInMinutes);
+		timeInMillis = timeInMillis * 60 * 1000;		// Time in Minutes * 60 * 1000 = Time in Milliseconds
+		Log.d("ContactsRefreshTime",String.valueOf(timeInMillis));
+		return timeInMillis;
+	}
+
 	/**
 	 * Saves the registration server
 	 * 
