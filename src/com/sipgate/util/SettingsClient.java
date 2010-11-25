@@ -12,6 +12,7 @@ import android.util.Log;
  * Allows Access to the Sipgate configurations
  * 
  * @author Karsten Knuth
+ * @author niepel
  * @version 1.1
  *
  */
