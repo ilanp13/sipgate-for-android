@@ -2,14 +2,12 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
@@ -24,7 +22,6 @@ import com.sipgate.api.types.MobileExtension;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
-import com.sipgate.db.ContactNumberDBObject.PhoneType;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
@@ -101,16 +98,24 @@ public class XmlrpcClient implements ApiClientInterface {
 		return apiResult;
 	}
 
-	private void clientIdentify() throws XMLRPCException, NetworkProblemException {
+	public boolean connectivityOk() throws ApiException, NetworkProblemException 
+	{
+		try
+		{
+			parameters.clear();
+			
+			parameters.put("ClientName", NAME);
+			parameters.put("ClientVersion", VERSION);
+			parameters.put("ClientVendor", VENDOR);
 		
-		parameters.clear();
+			apiResult = this.doXmlrpcCall("samurai.ClientIdentify", parameters);
 		
-		parameters.put("ClientName", NAME);
-		parameters.put("ClientVersion", VERSION);
-		parameters.put("ClientVendor", VENDOR);
-		
-		apiResult = this.doXmlrpcCall("samurai.ClientIdentify", parameters);
-		Log.d(TAG, apiResult.toString());
+			return ("200".equals(apiResult.get("StatusCode").toString()));
+		}
+		catch (XMLRPCException e)
+		{
+			return false;
+		}
 	}
 
 	private SipgateServerData serverDataGet() throws XMLRPCException, NetworkProblemException {
@@ -118,7 +123,7 @@ public class XmlrpcClient implements ApiClientInterface {
 
 		parameters.clear();
 		
-		apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.ServerdataGet", parameters);
+		apiResult = this.doXmlrpcCall("samurai.ServerdataGet", parameters);
 
 		sipgateServerData.setSipRegistrar((String) apiResult.get("SipRegistrar"));
 		sipgateServerData.setSipOutboundProxy((String) apiResult.get("SipOutboundProxy"));
@@ -342,6 +347,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		return callDataDBObjects;
@@ -459,38 +465,21 @@ public class XmlrpcClient implements ApiClientInterface {
 		throw new FeatureNotAvailableException();
 	}
 	
-	public boolean connectivityOk() throws ApiException {
-		try {
-			this.clientIdentify();
-		} catch (Exception e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	
 	public boolean featureAvailable(API_FEATURE feature) {
 		return false;
 	}
-
 	
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException, FeatureNotAvailableException {
-		throw new FeatureNotAvailableException();
+	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException 
+	{
+		return "basic/plus";
 	}
-
-	
-	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException {
-		throw new FeatureNotAvailableException();
-	}
-
 	
 	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 			throws FeatureNotAvailableException {
 		throw new FeatureNotAvailableException();
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
 	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
 	{
 		Vector<ContactDataDBObject> contactDataDBObjects = new Vector<ContactDataDBObject>();
@@ -530,6 +519,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		return contactDataDBObjects;

@@ -10,20 +10,24 @@ import android.util.Log;
 public class MobileExtension {
 	
 	private static final String TAG = "MobileExtension";
+	
 	private String extensionId;
 	private String type;
 	private String alias;
 	private String resource;
 	private String password;
+	private String registrar;
+	private String outboundProxy;
 	
-	
-	public MobileExtension(String extensionId, String type, String alias, String resource, String password) {
+	public MobileExtension(String extensionId, String type, String alias, String resource, String password, String registrar, String outboundProxy) {
 		this.extensionId = extensionId;
 		
 		this.type = type;
 		this.alias = alias;
 		this.resource = resource;
 		this.password = password;
+		this.registrar = registrar;
+		this.outboundProxy = outboundProxy;
 	}
 
 
@@ -66,7 +70,7 @@ public class MobileExtension {
 			
 			Log.d(TAG, "mobile extension from xml :)");
 			
-			return new MobileExtension(extensionId, type, alias, resource, password);
+			return new MobileExtension(extensionId, type, alias, resource, password, null, null);
 		} else {
 			return null;
 		}
@@ -109,4 +113,27 @@ public class MobileExtension {
 		return null;
 	}
 
+
+	public String getRegistrar()
+	{
+		return registrar;
+	}
+
+
+	public void setRegistrar(String registrar)
+	{
+		this.registrar = registrar;
+	}
+
+
+	public String getOutboundProxy()
+	{
+		return outboundProxy;
+	}
+
+
+	public void setOutboundProxy(String outboundProxy)
+	{
+		this.outboundProxy = outboundProxy;
+	}
 }

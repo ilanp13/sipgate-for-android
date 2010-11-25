@@ -3,8 +3,6 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -31,6 +29,7 @@ import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
+import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.interfaces.RestAuthenticationInterface;
@@ -45,7 +44,6 @@ import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 public class RestClient implements ApiClientInterface {
 	
 	private static final String TAG = "RestClient";
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
 	
 	private RestAuthenticationInterface authenticationInterface = null;
 	
@@ -63,7 +61,6 @@ public class RestClient implements ApiClientInterface {
 	private Element helperElement = null;
 	
 	private int length = 0;
-	private int subLength = 0;
 	
 	private SAXParser saxParser = null;
 	private ContactParser contactParser = null;
@@ -197,9 +194,7 @@ public class RestClient implements ApiClientInterface {
 
 		return provisioningData;
 	}
-	
-
-	
+		
 	public String getBaseProductType() throws IOException, URISyntaxException
 	{
 		try {
@@ -265,63 +260,7 @@ public class RestClient implements ApiClientInterface {
 			return null;
 		}
 		
-		try {
-			db = dbf.newDocumentBuilder();
-			doc = db.parse(inputStream);
-			
-			if (doc == null || doc.getDocumentElement() == null) {
-				Log.e(TAG, "invalid document returned by api. could not setup mobile extension");
-				return null;
-			}
-			
-			doc.getDocumentElement().normalize();
-			nodeList = doc.getChildNodes();
-			
-			String sipid = null;
-			String sippassword = null;
-			
-			length = nodeList.getLength();
-			
-			for (int i = 0; i < length; i++) {			
-				node = nodeList.item(i);
-				
-				Log.d(TAG, "setup mobile device node: " + node.getNodeName());
-				
-				if (node.getNodeName().equals("credentials")) {
-					
-					subLength = nodeList.getLength();
-					
-					for (int j = 0; j < subLength; j++) {
-						Node p = nodeList.item(j);
-						if (p.getNodeName().equals("sipId")) {
-							sipid = p.getNodeValue();
-						} else if (p.getNodeName().equals("sipPassword")) {
-							sippassword = p.getNodeValue();
-						}
-					}
-				}
-			}
-			
-			return new MobileExtension(sipid, null, null, null, sippassword);
-				
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;	
-	}
-	
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException
-	{
-		try {
-			inputStream = authenticationInterface.getMobileExtensions();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		if (inputStream == null) {
-			Log.e(TAG, "getMobileExtensions() -> inputstream is null");
-			return null;
-		}
+		MobileExtension mobileExtension = null;
 		
 		try 
 		{
@@ -329,42 +268,27 @@ public class RestClient implements ApiClientInterface {
 			doc = db.parse(inputStream);
 			doc.getDocumentElement().normalize();
 			
-			List<MobileExtension> extensions = new ArrayList<MobileExtension>();
-			
-			nodeList = doc.getElementsByTagName("extensions");
+			nodeList = doc.getElementsByTagName("credentials");
 
 			node = nodeList.item(0);
 			
-			nodeList = node.getChildNodes();
-
-			length = nodeList.getLength();
+			Element credentialsElement = (Element) node;
 			
-			Log.v(TAG,"got extension list with " + length + " nodes");
-			
-			MobileExtension e = null;
-			
-			for (int i = 0; i < length; i++) 
-			{			
-				node = nodeList.item(i);
-				
-				if (node.getNodeName().equals("extension")) {
-					e = MobileExtension.fromXMLNode(node);
-				
-					if (e != null) {
-						extensions.add(e);
-					} 	
-				}
+			String sipId = getElementById(credentialsElement, ("sipId"));
+			String sipPassword = getElementById(credentialsElement, ("sipPassword"));
+			String registerURL = getElementById(credentialsElement, ("registerURL"));
+			String proxyURL = getElementById(credentialsElement, ("proxyURL"));
+					
+			if (sipId != null && sipPassword != null){
+				mobileExtension = new  MobileExtension(sipId, null,null, null, sipPassword, registerURL, proxyURL);
 			}
-			
-			return extensions;
-		
 		}
 		catch (Exception e) 
 		{
 			e.printStackTrace();
 		}
 		
-		return null;
+		return mobileExtension;
 	}
 
 	public Vector<ContactDataDBObject> getContacts() throws ApiException
@@ -376,12 +300,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getContacts() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (contactParser != null && saxParser != null)
@@ -396,15 +321,17 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getContacts() -> saxParser or contactParser is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	
@@ -417,12 +344,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getCalls() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (callParser != null && saxParser != null)
@@ -437,15 +365,17 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getCalls() -> saxParser or callParser is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException
@@ -457,12 +387,13 @@ public class RestClient implements ApiClientInterface {
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+			throw new ApiException();
 		}
 		
 		if (inputStream == null) 
 		{
 			Log.e(TAG, "getVoiceMails() -> inputstream is null");
-			return null;
+			throw new ApiException();
 		}
 	
 		if (voiceMailParser != null && saxParser != null)
@@ -477,30 +408,38 @@ public class RestClient implements ApiClientInterface {
 			catch (SAXException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 			catch (IOException e) 
 			{
 				e.printStackTrace();
+				throw new ApiException();
 			}
 		}
 		
 		Log.e(TAG, "getVoiceMails() -> saxParser or voiceMails is null");
-		return null;
+		throw new ApiException();
 	}
 	
 	public boolean connectivityOk() throws ApiException, NetworkProblemException 
 	{
-		// TODO FIXME: We want some test that has less impact on the system!!!
-		try {
-			if (this.getProvisioningData() == null) {
-				return false;
+		try
+		{
+			if (getBaseProductType() != null)
+			{
+				return true;
 			}
-		} catch (NetworkProblemException e) {
-			throw e;
-		} catch (Exception e) {
-			return false;
 		}
-		return true;
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		catch (URISyntaxException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 	
 	public boolean featureAvailable(API_FEATURE feature) 
@@ -553,32 +492,5 @@ public class RestClient implements ApiClientInterface {
 		}
 
 		return null;
-	}
-	
-	private Element getNodeById(Element element, String id) 
-	{
-		helperNodeList = element.getElementsByTagName(id);
-		
-		if (helperNodeList != null && helperNodeList.getLength() > 0){
-			return (Element) helperNodeList.item(0);
-		}
-		
-		return null;
-	}
-	
-	private static long getCallTime(String dateString) 
-	{
-		long callTime = 0;
-		
-		try {
-			if (dateString != null) {
-				return dateformatterPretty.parse(dateString).getTime();
-			}
-		} 
-		catch (ParseException e) {
-			Log.e(TAG, "getCallTime", e);
-		}
-		
-		return callTime;
 	}
 }
