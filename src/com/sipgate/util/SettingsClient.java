@@ -82,10 +82,22 @@ public class SettingsClient {
 	}
 
 	/**
+	 * Sets the refresh time for events
+	 * 
+	 * @param time - the Time in Minutes to be set
+	 * @author niepel
+	 */
+	public void setEventsRefreshTime(String time) {
+		this.editor.putString(Settings.PREF_REFRESH_EVENTS, time);
+		this.editor.commit();
+	}
+	
+	/**
 	 * Returns the refresh time for events
 	 * 
 	 * @since 1.0
 	 * @return the refresh time for events in Milliseconds
+	 * @author niepel
 	 */
 	public Long getEventsRefreshTime() {
 		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_EVENTS, Settings.DEFAULT_REFRESH_EVENTS);
@@ -96,10 +108,22 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Sets the refresh time for contacts
+	 * 
+	 * @param time - the Time in Minutes to be set
+	 * @author niepel
+	 */
+	public void setContactsRefreshTime(String time) {
+		this.editor.putString(Settings.PREF_REFRESH_CONTACTS, time);
+		this.editor.commit();
+	}
+
+	/**
 	 * Returns the refresh time for contacts
 	 * 
 	 * @since 1.0
 	 * @return the refresh time for contacts in Milliseconds
+	 * @author niepel
 	 */
 	public Long getContactsRefreshTime() {
 		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_CONTACTS, Settings.DEFAULT_REFRESH_CONTACTS);
@@ -314,6 +338,8 @@ public class SettingsClient {
 		setUseStunServer(false);
 		setStunServer("stun.sipgate.net");
 		setStunPort("10000");
+		setEventsRefreshTime(Settings.DEFAULT_REFRESH_EVENTS);
+		setContactsRefreshTime(Settings.DEFAULT_REFRESH_CONTACTS);
 	}
 	
 	/**
