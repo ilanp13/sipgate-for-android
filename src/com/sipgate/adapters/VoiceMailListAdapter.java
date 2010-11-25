@@ -24,9 +24,10 @@ public class VoiceMailListAdapter extends BaseAdapter
 {
 	private final static String TAG = "VoiceMailListAdapter";
 
-	private LayoutInflater mInflater = null;
-	
+	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
+	
+	private LayoutInflater mInflater = null;
 	
 	private Vector<VoiceMailDataDBObject> voiceMailDataDBObjects = null;
 	
@@ -53,11 +54,12 @@ public class VoiceMailListAdapter extends BaseAdapter
 	private Drawable readIcon = null;
 	private Drawable unreadIcon = null;
 	
-	public VoiceMailListAdapter(Activity activity) 
+	public VoiceMailListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
-		mInflater = activity.getLayoutInflater();
+		this.activity = activity;
+		this.sipgateDBAdapter = sipgateDBAdapter;
 		
-		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
+		mInflater = activity.getLayoutInflater();
 		
 		voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
 				
@@ -250,6 +252,8 @@ public class VoiceMailListAdapter extends BaseAdapter
 	@Override
 	public void notifyDataSetChanged() 
 	{
+		Log.d(TAG, "notifyDataSetChanged()");
+		
 		try
 		{
 			voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
