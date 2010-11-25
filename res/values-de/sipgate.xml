@@ -81,4 +81,38 @@
    	<string name="sipgate_refresh">Aktualisieren...</string>
    	<string name="sipgate_api_error">Beim Aktualisieren ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.</string>
    	<string name="sipgate_new_entries">Liste wurde aktualisiert.</string>
+	<string name="sipgate_no_entries">Liste wurde aktualisiert. Es gab keine neuen Einträge.</string>
+	<string name="simple_settings_refresh_timers">Aktualisierungszeiten</string>
+	<string name="simple_settings_refresh_contacts">Kontakte aktualisieren</string>
+	<string name="simple_settings_refresh_events">Anrufe/Voicemails aktualisieren</string>
+    <string-array name="refresh_values_labels">
+        <item>1min</item>
+        <item>5min</item>
+        <item>15min</item>
+        <item>30min</item>
+        <item>1std</item>
+        <item>3std</item>
+        <item>6std</item>
+        <item>täglich</item>
+    </string-array>
+    <string-array name="refresh_values">
+        <item>1</item>
+        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>1440</item>
+    </string-array>
+    <string-array name="simple_settings_refresh_values">
+        <item>Jede Minute</item>
+		<item>Alle 5 Minuten</item>
+		<item>Alle 15 Minuten</item>
+		<item>Alle 30 Minuten</item>
+		<item>Jede Stunde</item>
+		<item>Alle 3 Stunden</item>
+		<item>Alle 6 Stunden</item>
+		<item>einmal Täglich</item>
+    </string-array>
 </resources>
