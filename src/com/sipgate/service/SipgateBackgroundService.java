@@ -46,9 +46,9 @@ public class SipgateBackgroundService extends Service implements EventService
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 
-	private static final long CONTACT_REFRESH_INTERVAL = 30000; // every 10mins
-	private static final long CALL_REFRESH_INTERVAL = 30000; // every min
-	private static final long VOICEMAIL_REFRESH_INTERVAL = 30000; // every min
+	private static final long CONTACT_REFRESH_INTERVAL = 30000; // every day
+	private static final long CALL_REFRESH_INTERVAL = 60000; // every min
+	private static final long VOICEMAIL_REFRESH_INTERVAL = 300000; // every 5 min
 		
 	private static final String TAG = "SipgateBackgroundService";
 	
@@ -129,9 +129,10 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void registerOnContactsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
+	public void registerOnContactsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 	{
 		Log.d(TAG, "registering on contact events intent");
+		
 		newIntents = new HashMap<String, PendingIntent>();
 		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
 		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
@@ -156,6 +157,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	public void registerOnCallsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
 	{
 		Log.d(TAG, "registering on call events intent");
+		
 		newIntents = new HashMap<String, PendingIntent>();
 		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
 		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
@@ -178,9 +180,10 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void registerOnVoiceMailsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
+	public void registerOnVoiceMailsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException 
 	{
 		Log.d(TAG, "registering on voice events intent");
+		
 		newIntents = new HashMap<String, PendingIntent>();
 		newIntents.put(ACTION_GETEVENTS, getEventsIntent);
 		newIntents.put(ACTION_NEWEVENTS, newEventsIntent);
@@ -198,7 +201,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void unregisterOnContactsIntent(String tag) throws RemoteException
+	public void unregisterOnContactsIntents(String tag) throws RemoteException
 	{
 		Log.d(TAG, "unregistering on contact events intent");
 		contactListener.remove(tag);
@@ -226,7 +229,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
-	public void unregisterOnVoiceMailsIntent(String tag) throws RemoteException 
+	public void unregisterOnVoiceMailsIntents(String tag) throws RemoteException 
 	{
 		Log.d(TAG, "unregistering on voice events intent");
 		voiceMailListener.remove(tag);
@@ -346,9 +349,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void registerOnContactsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
+			public void registerOnContactsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent) throws RemoteException
 			{
-				service.registerOnContactsIntent(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);				
+				service.registerOnContactsIntents(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);				
 			}
 			
 			/**
@@ -380,9 +383,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void registerOnVoiceMailsIntent(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent)	throws RemoteException 
+			public void registerOnVoiceMailsIntents(String tag, PendingIntent getEventsIntent, PendingIntent newEventsIntent, PendingIntent noEventsIntent, PendingIntent errorIntent)	throws RemoteException 
 			{
-				service.registerOnVoiceMailsIntent(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);
+				service.registerOnVoiceMailsIntents(tag, getEventsIntent, newEventsIntent, noEventsIntent, errorIntent);
 			}
 			
 			/**
@@ -393,9 +396,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void unregisterOnContactsIntent(String tag) throws RemoteException
+			public void unregisterOnContactsIntents(String tag) throws RemoteException
 			{
-				service.unregisterOnContactsIntent(tag);
+				service.unregisterOnContactsIntents(tag);
 			}
 			
 			/**
@@ -419,9 +422,9 @@ public class SipgateBackgroundService extends Service implements EventService
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
 			 */
-			public void unregisterOnVoiceMailsIntent(String tag) throws RemoteException 
+			public void unregisterOnVoiceMailsIntents(String tag) throws RemoteException 
 			{
-				service.unregisterOnVoiceMailsIntent(tag);
+				service.unregisterOnVoiceMailsIntents(tag);
 			}
 
 			/**
@@ -742,11 +745,19 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(contactListener, ACTION_GETEVENTS);
 		
 		try {
-			if (notifyIfNewContacts(apiClient.getContacts(), this) > 0 ) {
-				notifyFrontend(contactListener, ACTION_NEWEVENTS);
+			try {
+				Thread.sleep(2000);
 			}
-			else {
-				notifyFrontend(contactListener, ACTION_NOEVENTS);
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				if (notifyIfNewContacts(apiClient.getContacts(), this) > 0 ) {
+					notifyFrontend(contactListener, ACTION_NEWEVENTS);
+				}
+				else {
+					notifyFrontend(contactListener, ACTION_NOEVENTS);
+				}
 			}
 		} 
 		catch (Exception e) {
@@ -779,11 +790,19 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(callListener, ACTION_GETEVENTS);
 		
 		try {
-			if (notifyIfNewCalls(apiClient.getCalls(), this) > 0 ) {
-				notifyFrontend(callListener, ACTION_NEWEVENTS);
+			try {
+				Thread.sleep(2000);
 			}
-			else {
-				notifyFrontend(callListener, ACTION_NOEVENTS);
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				if (notifyIfNewCalls(apiClient.getCalls(), this) > 0 ) {
+					notifyFrontend(callListener, ACTION_NEWEVENTS);
+				}
+				else {
+					notifyFrontend(callListener, ACTION_NOEVENTS);
+				}
 			}
 		} 
 		catch (Exception e) {
@@ -816,11 +835,19 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyFrontend(voiceMailListener, ACTION_GETEVENTS);
 		
 		try {
-			if (notifyIfNewVoiceMails(apiClient.getVoiceMails(), this) > 0 ) {
-				notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
+			try {
+				Thread.sleep(2000);
 			}
-			else {
-				notifyFrontend(voiceMailListener, ACTION_NOEVENTS);
+			catch (Exception threadException) {
+				threadException.printStackTrace();
+			}
+			finally {
+				if (notifyIfNewVoiceMails(apiClient.getVoiceMails(), this) > 0 ) {
+					notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
+				}
+				else {
+					notifyFrontend(voiceMailListener, ACTION_NOEVENTS);
+				}
 			}
 		} 
 		catch (Exception e) {

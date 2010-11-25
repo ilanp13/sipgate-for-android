@@ -257,6 +257,7 @@ public class OptionsMenu {
 	{
 		try {
 			activity.findViewById(R.id.sipgateContactsListRefreshView).setVisibility(View.VISIBLE);
+			activity.findViewById(R.id.ContactsListCountView).setVisibility(View.GONE);
 			
 			intent = new Intent(activity, SipgateBackgroundService.class);
 			Context appContext = context.getApplicationContext();

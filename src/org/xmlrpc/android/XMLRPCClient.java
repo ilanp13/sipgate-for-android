@@ -1,13 +1,16 @@
 package org.xmlrpc.android;
 
 import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URL;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -120,7 +123,8 @@ public class XMLRPCClient {
 	public XMLRPCClient(final URI uri) {
 		this.postMethod = new HttpPost(uri);
 		this.postMethod.addHeader("Content-Type", "text/xml");
-
+		this.postMethod.addHeader("Accept-Encoding", "gzip");
+		
 		// WARNING
 		// I had to disable "Expect: 100-Continue" header since I had
 		// two second delay between sending http POST request and POST body
@@ -227,7 +231,7 @@ public class XMLRPCClient {
 			// set POST body
 			HttpEntity entity = new StringEntity(bodyWriter.toString());
 			this.postMethod.setEntity(entity);
-
+			
 			// execute HTTP POST request
 			HttpResponse response = this.client.execute(this.postMethod);
 
@@ -241,10 +245,23 @@ public class XMLRPCClient {
 			// parse response stuff
 			//
 			// setup pull parser
-			XmlPullParser pullParser = XmlPullParserFactory.newInstance()
-					.newPullParser();
+			XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
+			
 			entity = response.getEntity();
-			Reader reader = new InputStreamReader(new BufferedInputStream(entity.getContent(), 8192));
+			
+			Header contentEncoding = response.getFirstHeader("Content-Encoding");
+						
+			InputStream inputStream = null;
+			
+			if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+				inputStream = new GZIPInputStream(new BufferedInputStream(entity.getContent(), 8192));
+			}
+			else {
+				inputStream = new BufferedInputStream(entity.getContent(), 8192);
+			}
+			
+			Reader reader = new InputStreamReader(inputStream);
+			
 			// for testing purposes only
 			// reader = new StringReader(
 			// "<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>"

@@ -162,7 +162,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
-				showNoEntriesToast();
 				break;
 			case GET_EVENTS: 
 				refreshView.setVisibility(View.VISIBLE);
@@ -295,7 +294,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 						serviceBinding = (EventService) binder;
 						try {
 							Log.d(TAG, "service binding -> registerOnVoiceMailsIntent");
-							serviceBinding.registerOnVoiceMailsIntent(TAG, getVoiceMailsIntent(), newVoiceMailsIntent(), noVoiceMailsIntent(), errorIntent());
+							serviceBinding.registerOnVoiceMailsIntents(TAG, getVoiceMailsIntent(), newVoiceMailsIntent(), noVoiceMailsIntent(), errorIntent());
 						}
 						catch (RemoteException e) {
 							e.printStackTrace();
@@ -327,7 +326,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			try {
 				if (serviceBinding != null) {
 					Log.d(TAG, "service unbinding -> unregisterOnVoiceMailsIntent");
-					serviceBinding.unregisterOnVoiceMailsIntent(TAG);
+					serviceBinding.unregisterOnVoiceMailsIntents(TAG);
 				}
 			}
 			catch (RemoteException e) {
@@ -418,25 +417,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			{
 				Looper.prepare();
 				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_new_entries), Toast.LENGTH_LONG).show();
-				Looper.loop();
-			}
-		}).start();
-	}
-	
-	/**
-	 * This functions starts a new thread that shows a toast with the
-	 * "no new entries" message.
-	 * 
-	 * @since 1.2
-	 */
-	private void showNoEntriesToast() {
-		new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_entries), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();

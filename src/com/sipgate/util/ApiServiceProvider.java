@@ -57,10 +57,21 @@ public class ApiServiceProvider {
 		if (username.length() > 0 && password.length() > 0 && apiType != null) {
 			try {
 				this.apiClient = this.initClient(apiType, username, password);
+				
+				if (!apiClient.connectivityOk())
+				{
+					unRegister();
+				}
 			} catch (ApiException e) {
 				Log.e(TAG, "ApiServiceProvider() unregistering due to error getting api-client using settings -> "
 						+ e.getLocalizedMessage());
-				this.unRegister();
+				unRegister();
+			}
+			catch (NetworkProblemException e)
+			{
+				Log.e(TAG, "ApiServiceProvider() unregistering due to network error checking api credentials -> "
+						+ e.getLocalizedMessage());
+				unRegister();
 			}
 		}
 	}
@@ -80,12 +91,9 @@ public class ApiServiceProvider {
 	 * check whether the application was registered to an account. This is
 	 * transparent for OAuth and Basic-Auth use.
 	 */
-	public boolean isRegistered() {
-		boolean ret = false;
-		if (this.apiClient != null) {
-			ret = true;
-		}
-		return ret;
+	public boolean isRegistered() 
+	{
+		return (apiClient != null);
 	}
 
 	private ApiClientInterface initClient(API_TYPE apiType, String username, String password) throws ApiException {
@@ -153,12 +161,8 @@ public class ApiServiceProvider {
 	 * and Basic-Auth use.
 	 */
 	public void unRegister() {
-		// TODO: also remove username & pass from config?
-		synchronized (this.apiClient) {
-			this.apiClient = null;
-		}
-		// delete api-related settings
-		this.settings.purgeWebuserCredentials();
+		apiClient = null;
+		settings.purgeWebuserCredentials();
 	}
 
 	/*
@@ -233,22 +237,16 @@ public class ApiServiceProvider {
 		}
 	}
 
-	public boolean featureAvailable(API_FEATURE feature) throws ApiException {
-		if (!this.isRegistered()) {
-			Log.e(TAG, "featureAvailable() check impossible while not registered");
-			throw new ApiException();
+	public boolean featureAvailable(API_FEATURE feature) throws ApiException 
+	{
+		if (apiClient != null)
+		{
+			synchronized (this.apiClient) {
+				return apiClient.featureAvailable(feature);
+			}
 		}
-
-		synchronized (this.apiClient) {
-			return apiClient.featureAvailable(feature);
-		}
-	}
-
-	public List<MobileExtension> getMobileExtensions() throws IOException, URISyntaxException,
-	FeatureNotAvailableException {
-		synchronized (this.apiClient) {
-			return apiClient.getMobileExtensions();
-		}
+		
+		return false;
 	}
 
 	public String getBaseProductType() throws IOException, URISyntaxException,  FeatureNotAvailableException {

@@ -38,7 +38,7 @@ import com.sipgate.util.SipgateApplication;
  * @author Karsten Knuth
  * @version 1.2
  */
-public class ContactListActivity extends Activity implements OnItemClickListener 
+public class ContactListActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "ContactListActivity";
 	
@@ -49,6 +49,9 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	private ListView elementList = null;
 	private TextView emptyList = null;
 	
+	private LinearLayout contactsListCountView = null;
+	private TextView contactsCountTextView = null;
+		
 	private AnimationDrawable frameAnimation = null;
 	private Thread animationThread = null;
 	private boolean isAnimationRunning = false;
@@ -83,6 +86,9 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		elementList = (ListView) findViewById(R.id.ContactsListView);
 		emptyList = (TextView) findViewById(R.id.EmptyContactListTextView);
 
+		contactsListCountView = (LinearLayout) findViewById(R.id.ContactsListCountView);
+		contactsCountTextView = (TextView) findViewById(R.id.ContactsCountTextView);
+		
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
 		animationThread = new Thread()
 		{
@@ -101,7 +107,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
         
         application = (SipgateApplication) getApplication();
     }
-	
+		
 	/**
 	 * This function is called every time the activity comes back to the foreground.
 	 * 
@@ -119,23 +125,42 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		switch (refreshState) {
 			case NEW_EVENTS: 
 				refreshView.setVisibility(View.GONE);
+				
 				contactListAdapter.notifyDataSetChanged();
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				showNewEntriesToast();
 				break;
 			case NO_EVENTS: 
 				refreshView.setVisibility(View.GONE);
-				showNoEntriesToast();
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
 				break;
 			case GET_EVENTS: 
 				refreshView.setVisibility(View.VISIBLE);
+				
+				contactsListCountView.setVisibility(View.GONE);
+				
 				break;
 			case ERROR: 
 				refreshView.setVisibility(View.GONE);
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				showErrorToast();
 				break;
 			default:
 				refreshView.setVisibility(View.GONE);
+				
 				contactListAdapter.notifyDataSetChanged();
+				
+				contactsCountTextView.setText(String.valueOf(contactListAdapter.getCount()));
+				contactsListCountView.setVisibility(View.VISIBLE);
+				
 				break;
 		}
 		
@@ -164,10 +189,10 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	public void onPause()
 	{
 		super.onPause();
-	
+		
 		unregisterFromBackgroungIntents();
 	}
-		
+	
 	/**
 	 * This function is called right before the activity is killed.
 	 * 
@@ -241,7 +266,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		Intent intent = new Intent(this, SipgateBackgroundService.class);
 		context.startService(intent);
 
-		if (serviceConnection == null) {
+		//if (serviceConnection == null) {
 			Log.d(TAG, "service connection is null -> create new");
 			
 			serviceConnection = new ServiceConnection() 
@@ -261,7 +286,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 						
 						try {
 							Log.d(TAG, "service binding -> registerOnContactsIntent");
-							serviceBinding.registerOnContactsIntent(TAG, getContactsIntent(), newContactsIntent(), noContactsIntent(), errorIntent());
+							serviceBinding.registerOnContactsIntents(TAG, getContactsIntent(), newContactsIntent(), noContactsIntent(), errorIntent());
 						} 
 						catch (RemoteException e) {
 							e.printStackTrace();
@@ -275,10 +300,10 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			
 			boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
-		} 
-		else {
-			Log.d(TAG, "service connection is not null -> already running");
-		}
+		//} 
+		//else {
+		//	Log.d(TAG, "service connection is not null -> already running");
+		//}
 	}
 	
 	/**
@@ -288,12 +313,12 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 	 * @since 1.2
 	 */
 	private void unregisterFromBackgroungIntents()
-	{
+	{	
 		if (serviceConnection != null) {
 			try {
 				if (serviceBinding != null) {
 					Log.d(TAG, "service unbinding -> unregisterOnContactsIntent");
-					serviceBinding.unregisterOnContactsIntent(TAG);
+					serviceBinding.unregisterOnContactsIntents(TAG);
 				}
 			} 
 			catch (RemoteException e) {
@@ -386,25 +411,6 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			{
 				Looper.prepare();
 				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_new_entries), Toast.LENGTH_LONG).show();
-				Looper.loop();
-			}
-		}).start();
-	}
-	
-	/**
-	 * This functions starts a new thread that shows a toast with the
-	 * "no new entries" message.
-	 * 
-	 * @since 1.2
-	 */
-	private void showNoEntriesToast() {
-		new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_entries), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();

@@ -292,7 +292,7 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 		
 		keyList.toArray(sections);
 	}
-	
+		
 	@Override
 	public int getPositionForSection(int section)
 	{

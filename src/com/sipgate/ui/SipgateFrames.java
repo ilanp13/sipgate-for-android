@@ -23,7 +23,8 @@ import android.widget.TabHost.TabSpec;
  * @author Sipdroid
  * @version 1.2
  */
-public class SipgateFrames extends TabActivity {
+public class SipgateFrames extends TabActivity 
+{
 	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};
 	
 	private static final String TAG = "TabActivity";
@@ -48,7 +49,8 @@ public class SipgateFrames extends TabActivity {
 	 * 
 	 * @since 1.0
 	 */
-	public void onCreate(Bundle icicle) {
+	public void onCreate(Bundle icicle) 
+	{
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		Intent intent = getIntent();
