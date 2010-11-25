@@ -1,0 +1,8 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<ListPreference android:key="refresh_events" android:title="@string/simple_settings_refresh_events"
+		android:entries="@array/refresh_values_labels" android:entryValues="@array/refresh_values"
+		android:dialogTitle="@string/simple_settings_refresh_events" />
+	<ListPreference android:key="refresh_contacts" android:title="@string/simple_settings_refresh_contacts"
+		android:entries="@array/refresh_values_labels" android:entryValues="@array/refresh_values"
+		android:dialogTitle="@string/simple_settings_refresh_contacts" />
+</PreferenceScreen>

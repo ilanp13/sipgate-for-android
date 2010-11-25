@@ -18,7 +18,7 @@
 		ADDITIONAL_TERMS.txt
 		/////////////////////////////////////////////////////////////////////
 	-->
-<manifest package="com.sipgate" android:versionCode="166" android:versionName="1.6 beta 6" xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="com.sipgate" xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="171" android:versionName="1.7 internal beta 1">
 	<application android:icon="@drawable/android_app_icon" android:label="@string/app_name"
 		android:name=".util.SipgateApplication" android:debuggable="true">
 		<activity android:name=".ui.StartSipgate" android:label="@string/app_name"
@@ -96,6 +96,10 @@
         </activity>
         <activity android:name="com.sipgate.ui.SettingsActivity" android:label="@string/app_name"
 			android:configChanges="orientation|keyboardHidden"
+			android:excludeFromRecents="true" android:taskAffinity="">
+        </activity>
+        <activity android:name="com.sipgate.ui.SettingsRefreshActivity" android:label="@string/app_name"
+			android:configChanges="orientation|keyboardHidden" android:screenOrientation="portrait"
 			android:excludeFromRecents="true" android:taskAffinity="">
         </activity>
 		<activity android:name="org.sipdroid.codecs.Codecs$CodecSettings"

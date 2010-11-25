@@ -25,6 +25,7 @@ import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 import com.sipgate.util.Constants;
 import com.sipgate.util.NotificationClient;
 import com.sipgate.util.NotificationClient.NotificationType;
+import com.sipgate.util.SettingsClient;
 
 /**
  * The Background service is responsible for loading new data from the
@@ -33,6 +34,7 @@ import com.sipgate.util.NotificationClient.NotificationType;
  * @author Marcus Hunger
  * @author Karsten Knuth
  * @author graef
+ * @author niepel
  * @version 1.2
  */
 public class SipgateBackgroundService extends Service implements EventService 
@@ -47,10 +49,6 @@ public class SipgateBackgroundService extends Service implements EventService
 	public static final String ACTION_START_ON_BOOT = "com.sipgate.service.SipgateBackgroundService";
 	public static final int REQUEST_NEWEVENTS = 0;
 
-	private static final long CONTACT_REFRESH_INTERVAL = Constants.ONE_DAY_IN_MS; // every day
-	private static final long CALL_REFRESH_INTERVAL = Constants.ONE_MIN_IN_MS; // every min
-	private static final long VOICEMAIL_REFRESH_INTERVAL = 300000; // every 5 min
-		
 	private static final String TAG = "SipgateBackgroundService";
 	
 	private boolean serviceEnabled = false;
@@ -67,6 +65,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	
 	private NotificationClient notifyClient = null;
 	private ApiServiceProvider apiClient = null;
+	private SettingsClient settingsClient = null;
 	
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
@@ -101,6 +100,8 @@ public class SipgateBackgroundService extends Service implements EventService
 		notifyClient = new NotificationClient(this); 
 		
 		apiClient = ApiServiceProvider.getInstance(this);
+		
+		settingsClient = SettingsClient.getInstance(this);
 			
 		sipgateDBAdapter = new SipgateDBAdapter(this);
 		
@@ -257,7 +258,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		}
 
 		contactRefreshTimer = new Timer();  
-
+		
 		contactRefreshTimer.scheduleAtFixedRate(new TimerTask() 
 		{
 			public void run() 
@@ -269,7 +270,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				}
 			}
 
-		}, 1000, CONTACT_REFRESH_INTERVAL);
+		}, 1000, settingsClient.getContactsRefreshTime());
 	}
 	
 	/**
@@ -298,7 +299,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				}
 			}
 
-		}, 1000, CALL_REFRESH_INTERVAL);
+		}, 1000, settingsClient.getEventsRefreshTime());
 	}
 	
 	/**
@@ -326,7 +327,7 @@ public class SipgateBackgroundService extends Service implements EventService
 					refreshVoicemailEvents();
 				}
 			}
-		}, 1000, VOICEMAIL_REFRESH_INTERVAL);
+		}, 1000, settingsClient.getEventsRefreshTime());
 	}
 	
 	/**

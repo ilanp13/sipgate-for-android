@@ -6,11 +6,13 @@ import com.sipgate.sipua.ui.Settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Allows Access to the Sipgate configurations
  * 
  * @author Karsten Knuth
+ * @author niepel
  * @version 1.1
  *
  */
@@ -78,7 +80,59 @@ public class SettingsClient {
 	public String getExtensionAlias() {
 		return this.preferences.getString(SettingsClient.extensionAlias, "");
 	}
+
+	/**
+	 * Sets the refresh time for events
+	 * 
+	 * @param time - the Time in Minutes to be set
+	 * @author niepel
+	 */
+	public void setEventsRefreshTime(String time) {
+		this.editor.putString(Settings.PREF_REFRESH_EVENTS, time);
+		this.editor.commit();
+	}
 	
+	/**
+	 * Returns the refresh time for events
+	 * 
+	 * @since 1.0
+	 * @return the refresh time for events in Milliseconds
+	 * @author niepel
+	 */
+	public Long getEventsRefreshTime() {
+		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_EVENTS, Settings.DEFAULT_REFRESH_EVENTS);
+		long timeInMillis = Long.parseLong(timeInMinutes);
+		timeInMillis = timeInMillis * 60 * 1000;		// Time in Minutes * 60 * 1000 = Time in Milliseconds
+		Log.d("EventsRefreshTime",String.valueOf(timeInMillis));
+		return timeInMillis;
+	}
+	
+	/**
+	 * Sets the refresh time for contacts
+	 * 
+	 * @param time - the Time in Minutes to be set
+	 * @author niepel
+	 */
+	public void setContactsRefreshTime(String time) {
+		this.editor.putString(Settings.PREF_REFRESH_CONTACTS, time);
+		this.editor.commit();
+	}
+
+	/**
+	 * Returns the refresh time for contacts
+	 * 
+	 * @since 1.0
+	 * @return the refresh time for contacts in Milliseconds
+	 * @author niepel
+	 */
+	public Long getContactsRefreshTime() {
+		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_CONTACTS, Settings.DEFAULT_REFRESH_CONTACTS);
+		long timeInMillis = Long.parseLong(timeInMinutes);
+		timeInMillis = timeInMillis * 60 * 1000;		// Time in Minutes * 60 * 1000 = Time in Milliseconds
+		Log.d("ContactsRefreshTime",String.valueOf(timeInMillis));
+		return timeInMillis;
+	}
+
 	/**
 	 * Saves the registration server
 	 * 
@@ -284,6 +338,8 @@ public class SettingsClient {
 		setUseStunServer(false);
 		setStunServer("stun.sipgate.net");
 		setStunPort("10000");
+		setEventsRefreshTime(Settings.DEFAULT_REFRESH_EVENTS);
+		setContactsRefreshTime(Settings.DEFAULT_REFRESH_CONTACTS);
 	}
 	
 	/**
