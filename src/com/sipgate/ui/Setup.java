@@ -66,35 +66,26 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		
 		context = this;
 		
+		settingsClient = SettingsClient.getInstance(getApplicationContext());
+		
+		showWait();
+			
+		if ((isVoiceAccount = isVoiceAccount()))
+		{
+			prepareVoiceSetup();
+		} 
+		else 
+		{
+			prepareNonVoiceSetup();
+		}
+			
+		hideWait();
+	
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 		
 		formatter = new PhoneNumberFormatter();
-		locale = Locale.getDefault();
-		
-		settingsClient = SettingsClient.getInstance(getApplicationContext());
-		
-		if (!settingsClient.isProvisioned()) 
-		{
-			showWait();
-			
-			if ((isVoiceAccount = isVoiceAccount()))
-			{
-				prepareVoiceSetup();
-			} 
-			else 
-			{
-				prepareNonVoiceSetup();
-			}
-			
-			hideWait();
-		}
-		else 
-		{
-			Intent intent = new Intent(this, com.sipgate.ui.SipgateFrames.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-		}
+		locale = Locale.getDefault();	
 	}
 	
 	private void setNonVoiceLayoutVisible(boolean visible) 
@@ -328,8 +319,6 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 
 	private void finishExtensionConfiguration(String username, String password, String outboundproxy, String registrar, String alias) 
 	{
-		SettingsClient settingsClient = SettingsClient.getInstance(getApplicationContext());
-		
 		if(settingsClient.isFirstRegistration()){
 			settingsClient.registerExtension(username, password, alias, outboundproxy, registrar);
 		} else {

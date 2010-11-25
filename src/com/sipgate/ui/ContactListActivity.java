@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.sipgate.R;
 import com.sipgate.adapters.ContactListAdapter;
 import com.sipgate.db.ContactDataDBObject;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.SipgateApplication;
@@ -42,6 +43,7 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "ContactListActivity";
 	
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	private ContactListAdapter contactListAdapter = null;
 	
 	private ImageView refreshSpinner = null;
@@ -100,7 +102,8 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		
 		context = getApplicationContext();
 		
-		contactListAdapter = new ContactListAdapter(this);
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		contactListAdapter = new ContactListAdapter(this, sipgateDBAdapter);
         
         elementList.setAdapter(contactListAdapter);
         elementList.setOnItemClickListener(this);
@@ -203,6 +206,11 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		super.onDestroy();
 		
 		unregisterFromBackgroungIntents();
+		
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
 	}
 	
 	/**

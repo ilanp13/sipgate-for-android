@@ -56,8 +56,9 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 {
 	private static final String TAG = "VoiceMailListActivity";
 	
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	private VoiceMailListAdapter voiceMailListAdapter = null;
-	
+
 	private ImageView refreshSpinner = null;
 	private LinearLayout refreshView = null;
 	private ListView elementList = null;
@@ -86,8 +87,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	private ApiServiceProvider apiClient = null;
 	private Activity activity = this;
 	
-	private SipgateDBAdapter sipgateDBAdapter = null;
-
 	private String loadingString = null;
 	private String failedString = null;
 	
@@ -102,8 +101,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		super.onCreate(bundle);
 		
 		setContentView(R.layout.sipgate_voicemail_list);
-		
-		sipgateDBAdapter = SipgateDBAdapter.getInstance(this);
 		
 		refreshSpinner = (ImageView) findViewById(R.id.sipgateVoiceMailListRefreshImage);
 		refreshView = (LinearLayout) findViewById(R.id.sipgateVoiceMailListRefreshView);
@@ -122,7 +119,8 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		appContext = getApplicationContext();
 		apiClient = ApiServiceProvider.getInstance(activity);
 		
-		voiceMailListAdapter = new VoiceMailListAdapter(this);
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		voiceMailListAdapter = new VoiceMailListAdapter(this, sipgateDBAdapter);
         
         elementList.setAdapter(voiceMailListAdapter);
         elementList.setOnItemClickListener(this);  
@@ -212,6 +210,11 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		super.onDestroy();
 		
 		unregisterFromBackgroungIntents();
+		
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
 	}
 
 	/**

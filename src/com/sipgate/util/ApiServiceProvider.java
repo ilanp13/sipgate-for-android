@@ -85,7 +85,12 @@ public class ApiServiceProvider {
 
 		return singleton;
 	}
-
+	
+	synchronized public static void destroy()
+	{
+		singleton = null;
+	}
+	
 	/*
 	 * check whether the application was registered to an account. This is
 	 * transparent for OAuth and Basic-Auth use.

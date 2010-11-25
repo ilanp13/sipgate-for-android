@@ -28,6 +28,7 @@ import com.sipgate.util.SettingsClient;
 
 public class SimpleSettingsActivity extends Activity implements OnClickListener, OnTouchListener {
 	private static final String TAG = "SimpleSettingsActivity";
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,7 +37,9 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		setContentView(R.layout.sipgate_simple_preferences);
 
 		Log.i(TAG, "AuthorizationActivity onCreate Call");
-
+		
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		
 		SettingsClient settings = SettingsClient.getInstance(getApplicationContext());
 
 		// Account Selection Row
@@ -117,6 +120,16 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		super.onResume();
 	}
 
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
+	}
 /**
  * Handler for OnTouch-Events (needed for optic feedback on menu items to imitate the native behaviour)
  * 
@@ -171,9 +184,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 					        SettingsClient.getInstance(getApplicationContext()).unRegisterExtension();
 							
 							ApiServiceProvider.getInstance(getApplicationContext()).unRegister();
-            		
-							SipgateDBAdapter sipgateDBAdapter = SipgateDBAdapter.getInstance(getApplicationContext());
-							
+            				
 							sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
 							sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
 							
