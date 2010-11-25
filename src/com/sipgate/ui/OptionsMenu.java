@@ -24,6 +24,7 @@ import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.sipua.ui.Settings;
+import com.sipgate.util.ApiServiceProvider;
 
 /**
  * This class functions as an options menu and is used in every activity
@@ -207,14 +208,15 @@ public class OptionsMenu {
 	 */
 	private void shutDownProgram(Context context, Activity activity)
 	{
-		Receiver.reRegister(0);
 		Receiver.engine(context).unregister();
+		
 		try {
 			Thread.sleep(2000);
 		}
 		catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
+						
 		on(context,false);
 		Receiver.pos(true);
 		Receiver.engine(context).halt();
@@ -224,6 +226,9 @@ public class OptionsMenu {
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
 		context.stopService(new Intent(context,SipgateBackgroundService.class));
+		
+		ApiServiceProvider.destroy();
+		
 		activity.finish();
 	}
 	

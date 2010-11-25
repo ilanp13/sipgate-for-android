@@ -4,7 +4,6 @@ package com.sipgate.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import com.sipgate.util.SettingsClient;
 
 public class SimpleSettingsActivity extends Activity implements OnClickListener {
 	private static final String TAG = "SimpleSettingsActivity";
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,7 +35,9 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
 		setContentView(R.layout.sipgate_simple_preferences);
 
 		Log.i(TAG, "AuthorizationActivity onCreate Call");
-
+		
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		
 		SettingsClient settings = SettingsClient.getInstance(getApplicationContext());
 		
 		TableRow accountSettings = (TableRow) findViewById(R.id.sipgateSettingsAccountRow);
@@ -108,6 +110,17 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
 
 	}
 
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
+	}
+	
 	public void onClick(View v) {
 		int id = v.getId();
 		SettingsClient settingsClient = SettingsClient
@@ -141,9 +154,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener 
 					        SettingsClient.getInstance(getApplicationContext()).unRegisterExtension();
 							
 							ApiServiceProvider.getInstance(getApplicationContext()).unRegister();
-            		
-							SipgateDBAdapter sipgateDBAdapter = SipgateDBAdapter.getInstance(getApplicationContext());
-							
+            				
 							sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
 							sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
 							

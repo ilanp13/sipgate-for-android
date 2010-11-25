@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.sipgate.R;
 import com.sipgate.adapters.CallListAdapter;
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
@@ -45,7 +46,9 @@ public class CallListActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "CallListActivity";
 	
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	private CallListAdapter callListAdapter = null;
+	
 	private AlertDialog m_AlertDlg = null;
 	
 	private ImageView refreshSpinner = null;
@@ -98,7 +101,8 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		
 		context = getApplicationContext();
 		
-		callListAdapter = new CallListAdapter(this);
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		callListAdapter = new CallListAdapter(this, sipgateDBAdapter);
         
         elementList.setAdapter(callListAdapter);
         elementList.setOnItemClickListener(this);
@@ -178,6 +182,11 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		super.onDestroy();
 		
 		unregisterFromBackgroungIntents();
+		
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
 	}
 	
 	/**

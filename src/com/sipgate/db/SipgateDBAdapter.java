@@ -27,7 +27,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	 * @param context The application context
 	 * @since 1.0
 	 */
-	private SipgateDBAdapter(Context context)
+	public SipgateDBAdapter(Context context)
 	{
 		super(context, "sipgateDB.sqlite");
 	}
@@ -983,26 +983,6 @@ public class SipgateDBAdapter extends BaseDBAdapter
 					rollbackTransaction();
 				}
 			}
-		}
-	}
-	
-	public static SipgateDBAdapter getInstance(Context context)
-	{
-		if (sipgateDBAdapter == null)
-		{
-			sipgateDBAdapter = new SipgateDBAdapter(context);
-		}
-
-		return sipgateDBAdapter;
-	}
-
-	public static void destroy()
-	{
-		if (sipgateDBAdapter != null)
-		{
-			sipgateDBAdapter.close();
-			
-			sipgateDBAdapter = null;
 		}
 	}
 	
