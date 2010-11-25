@@ -2,91 +2,142 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:background="#000000">
-	<ScrollView android:id="@+id/sipgateSimpleSettingsScroller" android:layout_width="fill_parent"
-			android:layout_height="fill_parent">
-		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			android:id="@+id/sipgateSimpleSettings" android:layout_width="fill_parent"
-			android:layout_height="fill_parent" android:stretchColumns="1">
+	<ScrollView android:id="@+id/sipgateSimpleSettingsScroller"
+		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:orientation="vertical" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:background="#000000">
 
-			<View android:layout_height="1px" android:background="#888888" />
+			<!-- ####################### -->
+			<!-- Main Layout starts here -->
+			<!-- ####################### -->
 
-			<TableRow android:id="@+id/sipgateSettingsAccountRow"
-				android:layout_marginTop="10dp">
-				<TextView android:layout_column="1"
-					android:text="@string/simple_settings_account" android:padding="3dip"
-					android:textSize="20dip" android:textColor="#FFFFFF" />
-			</TableRow>
-			<TableRow android:id="@+id/sipgateSettingsAccountRowValue">
-				<TextView android:text="x" android:layout_column="1"
-					android:padding="3dip" android:id="@+id/sipgateSettingsAccount"
-					android:textSize="15dip" />
-			</TableRow>
+			<!-- Spacer Line -->
+			<View android:layout_height="1px" android:layout_width="fill_parent"
+				android:background="#888888" />
 
-			<View android:layout_height="1px" android:background="#888888" />
+			<!-- Account Settings Row -->
+			<LinearLayout android:id="@+id/sipgateSettingsAccountRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<TextView android:text="@string/simple_settings_account"
+					android:padding="3dip" android:layout_marginTop="5dip"
+					android:textSize="20dip" android:textColor="#FFFFFF"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" />
+				<TextView android:text="x" android:padding="3dip"
+					android:layout_marginBottom="5dip" android:id="@+id/sipgateSettingsAccount"
+					android:textSize="15dip" android:layout_width="fill_parent"
+					android:layout_height="wrap_content" />
+			</LinearLayout>
 
-			<TableRow android:id="@+id/sipgateSettingsExtensionRow"
-				android:layout_marginTop="10dip">
-				<TextView android:layout_column="1"
+			<!-- Spacer Line -->
+			<View android:layout_height="1px" android:layout_width="fill_parent"
+				android:background="#888888" />
+
+			<!-- Telephone Chooser Row -->
+			<LinearLayout android:id="@+id/sipgateSettingsExtensionRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<TextView android:layout_marginTop="5dip"
 					android:text="@string/simple_settings_extension" android:padding="3dip"
-					android:textSize="20dip" android:textColor="#FFFFFF" />
-			</TableRow>
-			<TableRow android:id="@+id/sipgateSettingsExtensionRowValue">
-				<TextView android:text="x" android:layout_column="1"
+					android:textSize="20dip" android:textColor="#FFFFFF"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" />
+				<TextView android:text="x" android:layout_marginBottom="5dip"
 					android:padding="3dip" android:id="@+id/sipgateSettingsExtension"
-					android:textSize="15dip" />
-			</TableRow>
+					android:textSize="15dip" android:layout_width="fill_parent"
+					android:layout_height="wrap_content" />
+			</LinearLayout>
 
-			<View android:layout_height="2px" android:background="#888888" />
+			<!-- Spacer Line -->
+			<View android:layout_height="2px" android:layout_width="fill_parent"
+				android:background="#888888" />
 
-			<TableLayout android:id="@+id/sipgateSettingsBalanceTable"
-				android:layout_width="fill_parent" android:stretchColumns="1"
-				android:layout_height="wrap_content">
-				<TableRow android:id="@+id/sipgateSettingsBalanceRow">
+			<!-- Account Balance Row -->
+			<LinearLayout android:id="@+id/sipgateSettingsBalanceGroup"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<TextView android:layout_column="1"
+					android:text="@string/simple_settings_balance" android:padding="3dip"
+					android:textSize="20dip" android:textColor="#FFFFFF"
+					android:layout_marginTop="5dip" android:layout_width="fill_parent"
+					android:layout_height="wrap_content" />
+				<TextView android:text="x" android:layout_column="1"
+					android:padding="3dip" android:layout_marginBottom="5dip"
+					android:id="@+id/sipgateSettingsBalance" android:textSize="15dip"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" />
+
+				<!-- Spacer Line -->
+				<View android:layout_height="2px" android:layout_width="fill_parent"
+					android:background="#888888" />
+			</LinearLayout>
+
+			<!-- VoIP over WLAN Row -->
+			<TableLayout android:id="@+id/sipgateSettingsWirelessRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:stretchColumns="1">
+				<TableRow android:layout_height="wrap_content"
+					android:layout_width="fill_parent">
 					<TextView android:layout_column="1"
-						android:text="@string/simple_settings_balance" android:padding="3dip"
-						android:textSize="20dip" android:textColor="#FFFFFF"
-						android:layout_marginTop="10dp" />
+						android:text="@string/simple_settings_wlan" android:padding="3dip"
+						android:textSize="20dip" android:textColor="#FFFFFF" android:layout_marginTop="10dip" android:layout_marginBottom="10dip"/>
+					<CheckBox android:id="@+id/sipgateSettingsWireless"
+						android:layout_column="2" android:layout_width="wrap_content"
+						android:layout_height="wrap_content" android:layout_marginTop="10dip" android:layout_marginBottom="10dip" />
 				</TableRow>
-				<TableRow android:id="@+id/sipgateSettingsBalanceRowValue">
-					<TextView android:text="x" android:layout_column="1"
-						android:padding="3dip" android:id="@+id/sipgateSettingsBalance"
-						android:textSize="15dip" />
-				</TableRow>
-
-				<View android:layout_height="2px" android:background="#888888" />
 			</TableLayout>
 
-			<TableRow android:id="@+id/sipgateSettingsWirelessRow"
-				android:layout_marginTop="10dip" android:layout_marginBottom="10dp">
-				<TextView android:layout_column="1"
-					android:text="@string/simple_settings_wlan" android:padding="3dip"
-					android:textSize="20dip" android:textColor="#FFFFFF" />
-				<CheckBox android:id="@+id/sipgateSettingsWireless"
-					android:layout_width="wrap_content" android:layout_height="wrap_content" />
-			</TableRow>
+			<!-- Spacer Line -->
+			<View android:layout_height="1px" android:layout_width="fill_parent"
+				android:background="#888888" />
 
-			<View android:layout_height="1px" android:background="#888888" />
+			<!-- VoIP over 3G Row -->
+			<TableLayout android:id="@+id/sipgateSettings3GRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:stretchColumns="1">
 
-			<TableRow android:id="@+id/sipgateSettings3GRow"
-				android:layout_marginTop="10dip" android:layout_marginBottom="10dp">
-				<TextView android:layout_column="1"
-					android:text="@string/simple_settings_3g" android:padding="3dip"
-					android:textSize="20dip" android:textColor="#FFFFFF" />
-				<CheckBox android:id="@+id/sipgateSettings3G"
-					android:layout_width="wrap_content" android:layout_height="wrap_content" />
-			</TableRow>
+				<TableRow android:layout_height="wrap_content"
+					android:layout_width="fill_parent">
+					<TextView android:layout_column="1"
+						android:text="@string/simple_settings_3g" android:padding="3dip"
+						android:textSize="20dip" android:textColor="#FFFFFF" android:layout_marginTop="10dip" android:layout_marginBottom="10dip" />
+					<CheckBox android:id="@+id/sipgateSettings3G"
+						android:layout_column="2" android:layout_width="wrap_content"
+						android:layout_height="wrap_content" android:layout_marginTop="10dip" android:layout_marginBottom="10dip" />
+				</TableRow>
+			</TableLayout>
 
-			<View android:layout_height="2px" android:background="#888888" />
+			<!-- Spacer Line -->
+			<View android:layout_height="2px" android:layout_width="fill_parent"
+				android:background="#888888" />
 
-			<TableRow android:id="@+id/sipgateSettingsAdvancedRow"
-				android:layout_marginTop="10dip" android:layout_marginBottom="10dp">
-				<TextView android:layout_column="1"
+			<!-- Advanced Settings Row -->
+			<LinearLayout android:id="@+id/sipgateSettingsAdvancedRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<TextView android:layout_marginTop="15dip" android:layout_marginBottom="15dip"
 					android:text="@string/simple_settings_advanced" android:padding="3dip"
-					android:textSize="20dip" android:textColor="#FFFFFF" />
-				<TextView android:layout_column="1" android:text=""
-					android:padding="3dip" android:textSize="20dip" android:textColor="#FFFFFF" />
-			</TableRow>
+					android:textSize="20dip" android:textColor="#FFFFFF"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			</LinearLayout>
 
-		</TableLayout>
+			<!-- Spacer Line -->
+			<View android:layout_height="2px" android:layout_width="fill_parent"
+				android:background="#888888" />
+
+			<!-- Event Refresh Settings Row -->
+			<LinearLayout android:id="@+id/sipgateSettingsRefreshRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:orientation="vertical">
+				<TextView android:layout_marginTop="15dip" android:layout_marginBottom="15dip"
+					android:text="@string/simple_settings_refresh_timers"
+					android:padding="3dip" android:textSize="20dip" android:textColor="#FFFFFF"
+					android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			</LinearLayout>
+
+			<!-- ##################### -->
+			<!-- Main Layout ends here -->
+			<!-- ##################### -->
+
+		</LinearLayout>
 	</ScrollView>
 </LinearLayout>
