@@ -99,7 +99,6 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	 */
 	private void setHumanTimeAsSummary(Preference element, String elementName, String time) {
 		Integer intTime = Integer.valueOf(time);
-		Resources res = getResources();
 		Log.d(TAG, element.toString() + " (" + elementName + ") Set to " + intTime.toString() + " Minutes");
 		int i = 0;
 		switch(intTime) {
