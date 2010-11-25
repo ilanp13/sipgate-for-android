@@ -52,7 +52,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private static final String TAG = "SipgateBackgroundService";
 	
 	private boolean serviceEnabled = false;
-	
+		
 	private Timer contactRefreshTimer = null;
 	private Timer callRefreshTimer = null;
 	private Timer voiceMailRefreshTimer = null;
@@ -87,6 +87,9 @@ public class SipgateBackgroundService extends Service implements EventService
 	private int updatedVoiceMails = 0;
 	private int insertedVoiceMails = 0;
 	
+	private long lastRefreshContacts = 0;
+	private long lastRefreshVoiceMails = 0;
+		
 	/**
 	 * The onCreate function of the service, which is called at every
 	 * first start and is used to instantiate several other classes.

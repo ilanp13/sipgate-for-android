@@ -66,9 +66,15 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		
 		context = this;
 		
-		settingsClient = SettingsClient.getInstance(getApplicationContext());
+		okButton = (Button) findViewById(id.okButton);
+		okButton.setOnClickListener(this);
+		
+		formatter = new PhoneNumberFormatter();
+		locale = Locale.getDefault();	
 		
 		showWait();
+		
+		settingsClient = SettingsClient.getInstance(getApplicationContext());
 			
 		if ((isVoiceAccount = isVoiceAccount()))
 		{
@@ -80,12 +86,6 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		}
 			
 		hideWait();
-	
-		okButton = (Button) findViewById(id.okButton);
-		okButton.setOnClickListener(this);
-		
-		formatter = new PhoneNumberFormatter();
-		locale = Locale.getDefault();	
 	}
 	
 	private void setNonVoiceLayoutVisible(boolean visible) 
@@ -176,9 +176,9 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		
 		String lineNumber = tm.getLine1Number();
 		
-		lineNumber = formatter.formattedPhoneNumberFromStringWithCountry(lineNumber, locale.getCountry());
-		
 		if (lineNumber != null) {
+			lineNumber = formatter.formattedPhoneNumberFromStringWithCountry(lineNumber, locale.getCountry());
+			
 			numberText.setText(lineNumber);
 			numberText.setSelection(lineNumber.length());
 		}
