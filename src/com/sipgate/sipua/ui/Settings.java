@@ -167,6 +167,8 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final String	DEFAULT_DNS = "";
 	public static final String  DEFAULT_VQUALITY = "low";
 	public static final boolean DEFAULT_MESSAGE = false;
+	public static final String DEFAULT_REFRESH_EVENTS = "5";
+	public static final String DEFAULT_REFRESH_CONTACTS = "1440";
 
 	// An other preference keys (not in the Preferences XML file)
 	public static final String PREF_OLDVALID = "oldvalid";

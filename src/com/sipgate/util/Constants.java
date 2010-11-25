@@ -11,7 +11,7 @@ public abstract class Constants
 	//public static final String API_20_HOSTNAME = "telegraf.netzquadrat.de:8082";
 	//public static final String API_20_BASEURL =  "http://" + API_20_HOSTNAME;
 
-	public static final String API_10_HOSTNAME = "samurai.sipgate.net";
+	public static final String API_10_HOSTNAME = "samurai.dev.sipgate.net";
 	public static final String API_10_BASEURL =  "https://" + API_10_HOSTNAME;
 
 	public static final String API_20_HOSTNAME = "api.dev.sipgate.net";
