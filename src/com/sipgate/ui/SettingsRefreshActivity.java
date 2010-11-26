@@ -1,40 +1,12 @@
 package com.sipgate.ui;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-
-import org.sipdroid.codecs.Codecs;
-
 import com.sipgate.R;
-import com.sipgate.sipua.ui.Checkin;
-import com.sipgate.sipua.ui.InstantAutoCompleteTextView;
-import com.sipgate.sipua.ui.Receiver;
-
-import org.zoolu.sip.provider.SipStack;
-
-import android.R.array;
-import android.app.AlertDialog;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnClickListener;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.text.InputType;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.Toast;
 
 public class SettingsRefreshActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
@@ -42,19 +14,8 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	
 	// Current settings handler
 	private static SharedPreferences settings;
-	// Context definition
-	private Context context = null;
-
-	// Path where to store all profiles - !!!should be replaced by some system variable!!!
-	private final static String profilePath = "/sdcard/Sipgate/";
-	// Path where is stored the shared preference file - !!!should be replaced by some system variable!!!
-	private final String sharedPrefsPath = "/data/data/com.sipgate/shared_prefs/";
 	// Shared preference file name - !!!should be replaced by some system variable!!!
 	private final String sharedPrefsFile = "com.sipgate_preferences";
-	// List of profile files available on the SD card
-	private String[] profileFiles = null;
-	// Which profile file to delete
-	private int profileToDelete;
 
 	// Name of the keys in the Preferences XML file
 	public static final String PREF_REFRESH_EVENTS = "refresh_events";
