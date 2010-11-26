@@ -18,25 +18,23 @@ public class ContactDetailAdapter extends BaseAdapter
 {
 	private final static String TAG = "ContactDetailAdapter";
 
-	private LayoutInflater mInflater = null;
-	
+	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
+	
+	private LayoutInflater mInflater = null;
 	
 	private ContactDataDBObject contactDataDBObject = null;
 	private ContactDetailViewHolder holder = null;
 	private ContactNumberDBObject currentContactNumberDBObject = null;
 	
-	private Activity activity = null;
-	
 	private String displayName = "";
 	
-	public ContactDetailAdapter(Activity activity, String uuid) 
+	public ContactDetailAdapter(Activity activity, String uuid, SipgateDBAdapter sipgateDBAdapter) 
 	{
 		this.activity = activity;
+		this.sipgateDBAdapter = sipgateDBAdapter;
 		
 		mInflater = activity.getLayoutInflater();
-		
-		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
 		
 		contactDataDBObject = sipgateDBAdapter.getContactDataDBObjectWithContactNumbersByUuid(uuid);
 		

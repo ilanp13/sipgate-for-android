@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 import android.content.Context;
@@ -86,7 +85,12 @@ public class ApiServiceProvider {
 
 		return singleton;
 	}
-
+	
+	synchronized public static void destroy()
+	{
+		singleton = null;
+	}
+	
 	/*
 	 * check whether the application was registered to an account. This is
 	 * transparent for OAuth and Basic-Auth use.

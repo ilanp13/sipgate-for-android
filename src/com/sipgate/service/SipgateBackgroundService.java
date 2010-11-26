@@ -22,6 +22,7 @@ import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.StoreDataException;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.Constants;
 import com.sipgate.util.NotificationClient;
 import com.sipgate.util.NotificationClient.NotificationType;
 import com.sipgate.util.SettingsClient;
@@ -51,7 +52,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private static final String TAG = "SipgateBackgroundService";
 	
 	private boolean serviceEnabled = false;
-	
+		
 	private Timer contactRefreshTimer = null;
 	private Timer callRefreshTimer = null;
 	private Timer voiceMailRefreshTimer = null;
@@ -86,6 +87,9 @@ public class SipgateBackgroundService extends Service implements EventService
 	private int updatedVoiceMails = 0;
 	private int insertedVoiceMails = 0;
 	
+	private long lastRefreshContacts = 0;
+	private long lastRefreshVoiceMails = 0;
+		
 	/**
 	 * The onCreate function of the service, which is called at every
 	 * first start and is used to instantiate several other classes.
@@ -102,6 +106,8 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		settingsClient = SettingsClient.getInstance(this);
 			
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		
 		startService();
 	}
 	
@@ -113,8 +119,13 @@ public class SipgateBackgroundService extends Service implements EventService
 	public void onDestroy() 
 	{
 		Log.d(TAG,"onDestroy");
-		
+				
 		stopService();
+		
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
 	}
 	
 	/**
@@ -501,7 +512,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		try {
 			if (sipgateDBAdapter == null) {
-				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
+				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
 			Vector<ContactDataDBObject> oldContactDataDBObjects = sipgateDBAdapter.getAllContactData();
@@ -558,7 +569,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		try {
 			if (sipgateDBAdapter == null) {
-				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
+				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
 			Vector<CallDataDBObject> oldCallDataDBObjects = sipgateDBAdapter.getAllCallData();
@@ -624,7 +635,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		try {
 			if (sipgateDBAdapter == null) {
-				sipgateDBAdapter = SipgateDBAdapter.getInstance(context);
+				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
 			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
