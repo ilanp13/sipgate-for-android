@@ -19,6 +19,7 @@ import com.sipgate.db.ContactNumberDBObject;
 import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.sipua.ui.Receiver;
 
+@SuppressWarnings("unused")
 public class ContactDetailsActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "ContactDetailsActivity";

@@ -87,17 +87,17 @@
 	<string name="sipgate_api_error">An error occurred during the refresh. Please try again later.</string>
 	<string name="sipgate_new_entries">List has been refreshed.</string>
 	<string name="sipgate_no_entries">List has been refreshed. There were no new entries.</string>
-	<string name="simple_settings_refresh_timers">Refresh timers</string>
-	<string name="simple_settings_refresh_contacts">Refresh contacts</string>
-	<string name="simple_settings_refresh_events">Refresh events</string>
+	<string name="simple_settings_refresh_timers">Refresh intervals</string>
+	<string name="simple_settings_refresh_contacts">contacts</string>
+	<string name="simple_settings_refresh_events">events</string>
     <string-array name="refresh_values_labels">
-        <item>1min</item>
-        <item>5min</item>
-        <item>15min</item>
-        <item>30min</item>
-        <item>1hr</item>
-        <item>3hr</item>
-        <item>6hr</item>
+        <item>every minute</item>
+        <item>every 5 minutes</item>
+        <item>every 15 minutes</item>
+        <item>every 30 minutes</item>
+        <item>every hour</item>
+        <item>every 3 hours</item>
+        <item>every 6 hours</item>
         <item>daily</item>
     </string-array>
     <string-array name="refresh_values">

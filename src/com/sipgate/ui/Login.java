@@ -26,6 +26,7 @@ import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.SettingsClient;
 
+@SuppressWarnings("unused")
 public class Login extends Activity implements OnClickListener 
 {
 	private final String TAG = "Login";
