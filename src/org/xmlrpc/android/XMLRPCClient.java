@@ -345,7 +345,7 @@ public class XMLRPCClient {
 
 	/**
 	 * Convenience method call with two parameters
-	 * 
+	 * voice
 	 * @param method
 	 *            name of method to call
 	 * @param p0

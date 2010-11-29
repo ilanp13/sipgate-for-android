@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Vector;
 
 import android.content.Context;
@@ -190,9 +191,18 @@ public class ApiServiceProvider {
 	/*
 	 * voice mail list
 	 */
+	public Vector<VoiceMailDataDBObject> getVoiceMails(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException {
+		synchronized (this.apiClient) {
+			return apiClient.getVoiceMails(periodStart, periodEnd);
+		}
+	}
+	
+	/*
+	 * voice mail list
+	 */
 	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
-			return apiClient.getVoiceMails();
+			return apiClient.getVoiceMails(-1, -1);
 		}
 	}
 
@@ -235,9 +245,18 @@ public class ApiServiceProvider {
 	/*
 	 * calls list
 	 */
+	public Vector<CallDataDBObject> getCalls(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException {
+		synchronized (this.apiClient) {
+			return apiClient.getCalls(periodStart, periodEnd);
+		}
+	}
+	
+	/*
+	 * calls list
+	 */
 	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException {
 		synchronized (this.apiClient) {
-			return apiClient.getCalls();
+			return apiClient.getCalls(-1, -1);
 		}
 	}
 

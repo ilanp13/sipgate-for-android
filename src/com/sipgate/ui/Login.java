@@ -174,10 +174,12 @@ public class Login extends Activity implements OnClickListener
 				
 				if (progressDialog != null)
 				{
-					progressDialog.cancel();
+					progressDialog.show();
 				}
-				
-				progressDialog = ProgressDialog.show(context, "", getResources().getString(R.string.sipgate_wait), true);
+				else
+				{
+					progressDialog = ProgressDialog.show(context, "", getResources().getString(R.string.sipgate_wait), true);
+				}
 				
 				Looper.loop();
 			}

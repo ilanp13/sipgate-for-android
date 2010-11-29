@@ -288,6 +288,11 @@ public class RestClient implements ApiClientInterface {
 		return mobileExtension;
 	}
 
+	/**
+	 * This method calls the Rest-api and request contact data.
+	 * 
+	 * @return a Vector filled with ContactDataDBObject
+	 */
 	public Vector<ContactDataDBObject> getContacts() throws ApiException
 	{
 		try 
@@ -331,12 +336,21 @@ public class RestClient implements ApiClientInterface {
 		throw new ApiException();
 	}
 	
-	
-	public Vector<CallDataDBObject> getCalls() throws ApiException
+	/**
+	 * This method calls the Rest-api and request call data.
+	 * If one of the params is <= 0 a full list is requested, otherwise a list 
+	 * with data in the given period. 
+	 * 
+	 * @param periodStart a periodStart value in unix timestamp
+	 * @param periodEnd a periodEnd value in unix timestamp 
+	 * @return a Vector filled with CallDataDBObjects
+	 * @throws ApiException 
+	 */
+	public Vector<CallDataDBObject> getCalls(long periodStart, long periodEnd) throws ApiException
 	{
 		try 
 		{
-			inputStream = authenticationInterface.getCalls();
+			inputStream = authenticationInterface.getCalls(periodStart, periodEnd);
 		}
 		catch (Exception e) 
 		{
@@ -375,11 +389,20 @@ public class RestClient implements ApiClientInterface {
 		throw new ApiException();
 	}
 	
-	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException
+	/**
+	 * This method calls the Rest-api and request voicemail data.
+	 * If one of the params is <= 0 a full list is requested, otherwise a list 
+	 * with data in the given period. 
+	 * 
+	 * @param periodStart a periodStart value in unix timestamp
+	 * @param periodEnd a periodEnd value in unix timestamp
+	 * @return a Vector filled with VoiceMailDataDBObject
+	 */
+	public Vector<VoiceMailDataDBObject> getVoiceMails(long periodStart, long periodEnd) throws ApiException
 	{
 		try 
 		{
-			inputStream = authenticationInterface.getVoiceMails();
+			inputStream = authenticationInterface.getVoiceMails(periodStart, periodEnd);
 		}
 		catch (Exception e) 
 		{
@@ -418,6 +441,11 @@ public class RestClient implements ApiClientInterface {
 		throw new ApiException();
 	}
 	
+	/**
+	 * Check if the login credentials still valid with a getBaseProductType call
+	 * 
+	 * @return a boolean it the connectivity is ok
+	 */
 	public boolean connectivityOk() throws ApiException, NetworkProblemException 
 	{
 		try

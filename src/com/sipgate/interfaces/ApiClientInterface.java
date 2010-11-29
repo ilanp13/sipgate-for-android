@@ -21,8 +21,8 @@ public interface ApiClientInterface {
 	public SipgateBalanceData getBillingBalance() throws ApiException, FeatureNotAvailableException, NetworkProblemException;
 	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException, AuthenticationErrorException, NetworkProblemException;
 	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException;
-	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException;
-	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException;
+	public Vector<CallDataDBObject> getCalls(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException;
+	public Vector<VoiceMailDataDBObject> getVoiceMails(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException;
 	public boolean connectivityOk() throws ApiException, NetworkProblemException;
 	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException;
 	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException;

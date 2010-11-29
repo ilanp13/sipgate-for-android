@@ -87,9 +87,17 @@ public class SipgateBackgroundService extends Service implements EventService
 	private int updatedVoiceMails = 0;
 	private int insertedVoiceMails = 0;
 	
-	private long lastRefreshContacts = 0;
+	private long currentRefreshCalls = 0;
+	private long lastRefreshCalls = 0;
+	private long lastFullRefreshCalls = 0;
+	
+	private long currentRefreshVoiceMails = 0;
 	private long lastRefreshVoiceMails = 0;
-		
+	private long lastFullRefreshVoiceMails = 0;
+	
+	private Vector<CallDataDBObject> calls = null;
+	private Vector<VoiceMailDataDBObject> voiceMails = null;
+			
 	/**
 	 * The onCreate function of the service, which is called at every
 	 * first start and is used to instantiate several other classes.
@@ -248,7 +256,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This function resets the timer that triggers the refreshing
+	 * This function resets the timer and triggers a refresh
 	 * of contacts.
 	 * 
 	 * @since 1.1
@@ -277,7 +285,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This function resets the timer that triggers the refreshing
+	 * This function resets the timer and triggers a full refresh
 	 * of calls.
 	 * 
 	 * @since 1.1
@@ -291,6 +299,9 @@ public class SipgateBackgroundService extends Service implements EventService
 
 		callRefreshTimer = new Timer();
 		
+		lastFullRefreshCalls = 0;
+		lastRefreshCalls = 0;
+	
 		callRefreshTimer.scheduleAtFixedRate(new TimerTask() 
 		{
 			public void run() 
@@ -306,7 +317,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This function resets the timer that triggers the refreshing
+	 * This function resets the timer and triggers a full refresh
 	 * of voice mails.
 	 * 
 	 * @since 1.1
@@ -319,7 +330,10 @@ public class SipgateBackgroundService extends Service implements EventService
 		} 
 
 		voiceMailRefreshTimer = new Timer();
-		
+	
+		lastFullRefreshVoiceMails = 0;
+		lastRefreshVoiceMails = 0;
+			
 		voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() 
 		{
 			public void run() 
@@ -548,11 +562,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newCallDataDBObjects The Vector with the new call data.
 	 * @param context The application context.
+	 * @param fullRefresh Indicator if newCallDataDBObjects contains a full or delta refresh
 	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
 	 * @return The number of newly added calls.
 	 * @since 1.1
 	 */
-	public int notifyIfNewCalls(Vector<CallDataDBObject> newCallDataDBObjects, Context context) throws StoreDataException 
+	public int notifyIfNewCalls(Vector<CallDataDBObject> newCallDataDBObjects, Context context, boolean fullRefresh) throws StoreDataException 
 	{
 		Log.d(TAG, "notifyIfUnreadsCalls");
 		
@@ -576,7 +591,10 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			sipgateDBAdapter.startTransaction();
 			
-			deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
+			if (fullRefresh) {
+				deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
+			}
+			
 			updateCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
 
 			Log.d(TAG, "CallDataDBObject deleted: " + deletedCalls);
@@ -614,11 +632,12 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newVoiceMailDataDBObjects A Vector of the new voice mails.
 	 * @param context The Application context.
+	 * @param fullRefresh Indicator if newCallDataDBObjects contains a full or delta refresh
 	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
 	 * @return The number of newly added voice mails.
 	 * @since 1.0
 	 */
-	public int notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context) throws StoreDataException 
+	public int notifyIfNewVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Context context, boolean fullRefresh) throws StoreDataException 
 	{
 		Log.d(TAG, "notifyIfUnreadVoiceMails");
 		
@@ -642,7 +661,10 @@ public class SipgateBackgroundService extends Service implements EventService
 			
 			sipgateDBAdapter.startTransaction();
 			
-			deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects, sipgateDBAdapter);
+			if (fullRefresh) {
+				deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects, sipgateDBAdapter);
+			}
+			
 			updateVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects, sipgateDBAdapter);
 			
 			Log.d(TAG, "VoiceMailDataDBObject deleted: " + deletedVoiceMails);
@@ -790,14 +812,16 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This function loads the last 100 (2.0) / 3 months worth of (1.0)
-	 * calls from the api and syncs them into the database.
+	 * This function loads the last 100 (2.0, full) / 3 months worth of (1.0, full) or the last calls in a period (delta)
+	 * from the api and syncs them into the database.
 	 * 
 	 * @since 1.1
 	 */
 	private void refreshCallEvents() 
-	{
+	{		
 		Log.v(TAG, "refreshCallEvents() -> start");
+		
+		currentRefreshCalls = System.currentTimeMillis();
 		
 		notifyFrontend(callListener, ACTION_GETEVENTS);
 		
@@ -809,7 +833,21 @@ public class SipgateBackgroundService extends Service implements EventService
 				threadException.printStackTrace();
 			}
 			finally {
-				if (notifyIfNewCalls(apiClient.getCalls(), this) > 0 ) {
+				
+				if (lastFullRefreshCalls == 0 || lastFullRefreshCalls + Constants.ONE_DAY_IN_MS < currentRefreshCalls ||
+					lastFullRefreshCalls + Constants.ONE_DAY_IN_MS < currentRefreshCalls + settingsClient.getEventsRefreshTime()) 
+				{
+					calls = apiClient.getCalls();
+					
+					lastFullRefreshCalls = currentRefreshCalls;
+				}
+				else {
+					calls = apiClient.getCalls(lastRefreshCalls, currentRefreshCalls);
+				}
+				
+				lastRefreshCalls = currentRefreshCalls;
+				
+				if (notifyIfNewCalls(calls, this, (lastFullRefreshCalls == currentRefreshCalls)) > 0 ) {
 					notifyFrontend(callListener, ACTION_NEWEVENTS);
 				}
 				else {
@@ -835,7 +873,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This function loads the last 100 voice mails from the api and
+	 * This function loads the last 100 voice mails (full) or the new voice mails (delta) in a period and
 	 * syncs them into the database.
 	 * 
 	 * @since 1.1
@@ -843,6 +881,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	private void refreshVoicemailEvents() 
 	{
 		Log.v(TAG, "refreshVoicemailEvents() -> start");
+
+		currentRefreshVoiceMails = System.currentTimeMillis();
 		
 		notifyFrontend(voiceMailListener, ACTION_GETEVENTS);
 		
@@ -854,7 +894,21 @@ public class SipgateBackgroundService extends Service implements EventService
 				threadException.printStackTrace();
 			}
 			finally {
-				if (notifyIfNewVoiceMails(apiClient.getVoiceMails(), this) > 0 ) {
+				
+				if (lastFullRefreshVoiceMails == 0 || lastFullRefreshVoiceMails + Constants.ONE_DAY_IN_MS < currentRefreshVoiceMails ||
+					lastFullRefreshVoiceMails + Constants.ONE_DAY_IN_MS < currentRefreshVoiceMails + settingsClient.getEventsRefreshTime()) 
+				{	
+					voiceMails = apiClient.getVoiceMails();
+					
+					lastFullRefreshVoiceMails = currentRefreshVoiceMails; 
+				}
+				else {
+					voiceMails = apiClient.getVoiceMails(lastRefreshVoiceMails, currentRefreshVoiceMails);
+				}
+				
+				lastRefreshVoiceMails = currentRefreshVoiceMails;
+								
+				if (notifyIfNewVoiceMails(voiceMails, this, (lastFullRefreshVoiceMails == currentRefreshVoiceMails)) > 0 ) {
 					notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
 				}
 				else {
@@ -875,7 +929,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				notifyFrontend(voiceMailListener, ACTION_ERROR);
 			}
 		}
-		
+						
 		Log.v(TAG, "refreshVoicemailEvents() -> finish");
 	}
 	
