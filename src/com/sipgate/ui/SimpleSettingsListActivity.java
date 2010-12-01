@@ -134,8 +134,7 @@ public class SimpleSettingsListActivity extends Activity implements OnItemClickL
 			} else {
 				settingsClient.setUseWireless(true);
 			}
-			CheckBox wirelessCheckBox = (CheckBox) findViewById(R.id.sipgateSettingsWireless);
-			wirelessCheckBox.setChecked(settingsClient.getUseWireless());
+			settingsListAdapter.notifyDataSetChanged();
 			Receiver.engine(this).halt();
 			Receiver.engine(this).StartEngine();
 			break;
@@ -151,8 +150,7 @@ public class SimpleSettingsListActivity extends Activity implements OnItemClickL
 					.show();
 				settingsClient.setUse3G(true);
 			}
-			CheckBox threeGCheckBox = (CheckBox) findViewById(R.id.sipgateSettings3G);
-			threeGCheckBox.setChecked(settingsClient.getUse3G());
+			settingsListAdapter.notifyDataSetChanged();
 			Receiver.engine(this).halt();
 			Receiver.engine(this).StartEngine();
 			break;

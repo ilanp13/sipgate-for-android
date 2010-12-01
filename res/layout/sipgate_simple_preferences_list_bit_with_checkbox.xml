@@ -9,9 +9,9 @@
 			android:layout_column="1" android:padding="3dip" android:textSize="20dip"
 			android:textColor="#FFFFFF" android:layout_marginTop="10dip"
 			android:layout_marginBottom="10dip" />
-		<CheckBox android:id="@+id/sipgateSettingsCheckboxBox"
+		<ImageView android:id="@+id/sipgateSettingsCheckboxBox"
 			android:layout_column="2" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:layout_marginTop="10dip"
-			android:layout_marginBottom="10dip" />
+			android:layout_marginBottom="10dip" android:src="@drawable/btn_check_off"/>
 	</TableRow>
 </TableLayout>

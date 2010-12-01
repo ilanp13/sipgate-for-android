@@ -48,6 +48,9 @@ public class SimpleSettingsAdapter extends BaseAdapter
 	private String refresh = null;
 	private String experts = null;
 	
+	private Drawable checkboxOff = null;
+	private Drawable checkboxOn = null;
+	
 	private SimpleSettingsInfoViewHolder infoHolder = null;
 	private SimpleSettingsStandardViewHolder standardHolder = null;
 	private SimpleSettingsCheckboxViewHolder checkboxHolder = null;
@@ -73,6 +76,9 @@ public class SimpleSettingsAdapter extends BaseAdapter
 		
 		refresh = activity.getResources().getString(R.string.simple_settings_refresh_timers);
 		experts = activity.getResources().getString(R.string.simple_settings_advanced);
+		
+		checkboxOff = activity.getResources().getDrawable(R.drawable.icon_incoming);
+		checkboxOn = activity.getResources().getDrawable(R.drawable.icon_missed);
 		
 		settings = SettingsClient.getInstance(activity.getApplicationContext());
 		apiServiceProvider = ApiServiceProvider.getInstance(activity.getApplicationContext());
@@ -196,6 +202,7 @@ public class SimpleSettingsAdapter extends BaseAdapter
 			convertView = mInflater.inflate(R.layout.sipgate_simple_preferences_list_bit_with_checkbox, null);
 			checkboxHolder = new SimpleSettingsCheckboxViewHolder();
 			checkboxHolder.textView = (TextView) convertView.findViewById(R.id.sipgateSettingsCheckboxName);
+			checkboxHolder.imageView = (ImageView) convertView.findViewById(R.id.sipgateSettingsCheckboxBox);
 			convertView.setTag(checkboxHolder);
 		} 
 		else {
@@ -205,9 +212,21 @@ public class SimpleSettingsAdapter extends BaseAdapter
 		switch(position) {
 			case 3:
 				checkboxHolder.textView.setText(overWireless);
+				if (settings.getUseWireless()) {
+					checkboxHolder.imageView.setBackgroundDrawable(checkboxOn);
+				}
+				else {
+					checkboxHolder.imageView.setBackgroundDrawable(checkboxOff);
+				}
 				break;
 			case 4:
 				checkboxHolder.textView.setText(over3G);
+				if (settings.getUse3G()) {
+					checkboxHolder.imageView.setBackgroundDrawable(checkboxOn);
+				}
+				else {
+					checkboxHolder.imageView.setBackgroundDrawable(checkboxOff);
+				}
 				break;
 			default:
 				break;
