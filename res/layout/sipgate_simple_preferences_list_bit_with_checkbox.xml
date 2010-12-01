@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sipgateSettingsCheckbox" android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:stretchColumns="1">
+	<TableRow android:layout_height="wrap_content"
+		android:layout_width="fill_parent">
+		<TextView android:id="@+id/sipgateSettingsCheckboxName"
+			android:layout_column="1" android:padding="3dip" android:textSize="20dip"
+			android:textColor="#FFFFFF" android:layout_marginTop="10dip"
+			android:layout_marginBottom="10dip" />
+		<CheckBox android:id="@+id/sipgateSettingsCheckboxBox"
+			android:layout_column="2" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_marginTop="10dip"
+			android:layout_marginBottom="10dip" />
+	</TableRow>
+</TableLayout>
