@@ -17,7 +17,6 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.util.Log;
 
-
 /**
  * 
  * 
@@ -113,18 +112,7 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 	public void onPause() {
 		super.onPause();
 		settings.unregisterOnSharedPreferenceChangeListener(this);
-	}
-	
-	/**
-	 * Listener for Changes to the Preferences
-	 * 
-	 * @since 1.0
-	 */
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-    	Log.d(TAG, "onSharedPreferenceChanged");
-    	Log.d(TAG, key);
-    	updateSummaries(sharedPreferences.getString(PREF_REFRESH_EVENTS, DEFAULT_REFRESH_EVENTS),sharedPreferences.getString(PREF_REFRESH_CONTACTS, DEFAULT_REFRESH_CONTACTS));
-    	
+		
 		intent = new Intent(this, SipgateBackgroundService.class);
 		Context appContext = getApplicationContext();
 		appContext.startService(intent);
@@ -161,5 +149,16 @@ public class SettingsRefreshActivity extends PreferenceActivity implements OnSha
 		}
 		
 		appContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+	}
+	
+	/**
+	 * Listener for Changes to the Preferences
+	 * 
+	 * @since 1.0
+	 */
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    	Log.d(TAG, "onSharedPreferenceChanged");
+    	Log.d(TAG, key);
+    	updateSummaries(sharedPreferences.getString(PREF_REFRESH_EVENTS, DEFAULT_REFRESH_EVENTS),sharedPreferences.getString(PREF_REFRESH_CONTACTS, DEFAULT_REFRESH_CONTACTS));
     }
 }
