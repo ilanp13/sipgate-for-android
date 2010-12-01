@@ -632,7 +632,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * 
 	 * @param newVoiceMailDataDBObjects A Vector of the new voice mails.
 	 * @param context The Application context.
-	 * @param fullRefresh Indicator if newCallDataDBObjects contains a full or delta refresh
+	 * @param fullRefresh Indicator if newVoiceMailDataDBObjects contains a full or delta refresh
 	 * @throws StoreDataException This exception is thrown when the data can not be stored in the database.
 	 * @return The number of newly added voice mails.
 	 * @since 1.0

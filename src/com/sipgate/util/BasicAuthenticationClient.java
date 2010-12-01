@@ -67,13 +67,14 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 		return accessProtectedResource(httpMethod, url, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	private String appendUrlParameters(String url, Collection<? extends Entry> params)
 	{
 		StringBuilder sb = new StringBuilder(url);
+		
 		if (params != null)
 		{
 			Iterator<? extends Entry> i = params.iterator();
+		
 			while (i.hasNext())
 			{
 				Entry entry = (Entry) i.next();
@@ -81,20 +82,22 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 				sb.append("=" + entry.getValue());
 			}
 		}
+		
 		return sb.toString();
 	}
 
-	@SuppressWarnings("unchecked")
 	private HttpPost createPostRequest(String url, Collection<? extends Entry> params)
 	{
 		HttpPost httpPost = new HttpPost(url);
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(params.size());
 		Iterator<? extends Entry> i = params.iterator();
+		
 		while (i.hasNext())
 		{
 			Entry e = i.next();
 			nameValuePairs.add(new BasicNameValuePair((String) e.getKey(), (String) e.getValue()));
 		}
+	
 		try
 		{
 			httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -103,11 +106,12 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 		{
 			e.printStackTrace();
 		}
+		
 		httpPost.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+		
 		return httpPost;
 	}
 
-	@SuppressWarnings("unchecked")
 	private InputStream accessProtectedResource(String httpMethod, String urlString, Collection<? extends Entry> params) throws AccessProtectedResourceException, NetworkProblemException
 	{
 		URL url;
@@ -200,6 +204,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 			{
 				inputStream = entity.getContent();
 				Header contentEncoding = response.getFirstHeader("Content-Encoding");
+				
 				if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip"))
 				{
 					inputStream = new GZIPInputStream(inputStream);

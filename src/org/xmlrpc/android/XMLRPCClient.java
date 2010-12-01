@@ -190,7 +190,8 @@ public class XMLRPCClient {
 	/**
 	 * Call method with optional parameters. This is general method. If you want
 	 * to call your method with 0-8 parameters, you can use more convenience
-	 * call() methods
+	 * call() methodsnt = new XMLRPCClient(ApiUrl);
+		clie
 	 * 
 	 * @param method
 	 *            name of method to call
