@@ -1,7 +1,6 @@
 package com.sipgate.ui;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -17,27 +16,21 @@ import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.R.id;
-import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.service.SipgateBackgroundService;
-import com.sipgate.sipua.ui.Receiver;
-import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.SettingsClient;
 
 @SuppressWarnings("unused")
 public class Login extends Activity implements OnClickListener 
 {
 	private final String TAG = "Login";
-	private Button okButton;
+	
+	private Button okButton = null;
 
 	private ApiServiceProvider apiServiceProvider = null;
 	private ProgressDialog progressDialog = null;
 	
 	private Context context = this;
-	
-	boolean purged = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -46,55 +39,10 @@ public class Login extends Activity implements OnClickListener
 
 		setContentView(R.layout.sipgate_setup_login);
 
-		context = this;
-
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 		
-		showWait();
-
-		SettingsClient settingsClient = SettingsClient.getInstance(this);
-		
-		apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
-	
-		if (apiServiceProvider.isRegistered()) 
-		{
-			if (settingsClient.isProvisioned()) 
-			{
-				Intent intent = new Intent(this, com.sipgate.ui.SipgateFrames.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-			}
-			else
-			{
-				Intent authorizationIntent = new Intent(this, Setup.class);
-				startActivity(authorizationIntent);
-			}
-		}
-		else
-		{
-			settingsClient.purgeWebuserCredentials();
-			settingsClient.unRegisterExtension();
-			
-			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-	        notificationManager.cancelAll();
-
-			stopService(new Intent(getApplicationContext(),SipgateBackgroundService.class));
-			stopService(new Intent(getApplicationContext(),RegisterService.class));
-		
-			Receiver.engine(getApplicationContext()).halt();
-						
-			SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(this);
-
-			sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
-			sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
-	
-			sipgateDBAdapter.close();
-			
-			showNoCredentialsToast();
-		}
-		
-		hideWait();	
+		apiServiceProvider = ApiServiceProvider.getInstance(this);
 	}
 	
 	@Override
@@ -112,6 +60,7 @@ public class Login extends Activity implements OnClickListener
 	public boolean onOptionsItemSelected(MenuItem item) 
 	{
 		boolean result = super.onOptionsItemSelected(item);
+		
 		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
@@ -135,8 +84,8 @@ public class Login extends Activity implements OnClickListener
 				apiServiceProvider.register(user, pass);
 
 				if (apiServiceProvider.isRegistered()) {
-					Intent authorizationIntent = new Intent(this, Setup.class);
-					startActivity(authorizationIntent);
+					Intent setupIntent = new Intent(this, Setup.class);
+					startActivity(setupIntent);
 				}
 				else {
 					showWrongCredentialsToast();
@@ -151,9 +100,6 @@ public class Login extends Activity implements OnClickListener
 		} 
 		catch (ApiException e) {
 			showWrongCredentialsToast();
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
 		} 
 		finally
 		{
@@ -172,16 +118,7 @@ public class Login extends Activity implements OnClickListener
 			public void run()
 			{
 				Looper.prepare();
-				
-				if (progressDialog != null)
-				{
-					progressDialog.show();
-				}
-				else
-				{
-					progressDialog = ProgressDialog.show(context, "", getResources().getString(R.string.sipgate_wait), true);
-				}
-				
+				progressDialog = ProgressDialog.show(context, "", getResources().getString(R.string.sipgate_wait), true);
 				Looper.loop();
 			}
 		}).start();
@@ -206,7 +143,7 @@ public class Login extends Activity implements OnClickListener
 			public void run()
 			{
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_wrong_credentials), Toast.LENGTH_LONG).show();
+				Toast.makeText(context, getResources().getString(R.string.sipgate_wrong_credentials), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();
@@ -220,7 +157,7 @@ public class Login extends Activity implements OnClickListener
 			public void run()
 			{
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_network_problem), Toast.LENGTH_LONG).show();
+				Toast.makeText(context, getResources().getString(R.string.sipgate_network_problem), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();
@@ -234,7 +171,7 @@ public class Login extends Activity implements OnClickListener
 			public void run()
 			{
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_credentials), Toast.LENGTH_LONG).show();
+				Toast.makeText(context, getResources().getString(R.string.sipgate_no_credentials), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();

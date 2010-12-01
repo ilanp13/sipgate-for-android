@@ -331,9 +331,8 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		Receiver.engine(this).StartEngine();
 		
 		try {
-			Intent intent = new Intent(this, com.sipgate.ui.SipgateFrames.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
+			Intent sipgateFramesIntent = new Intent(this, SipgateFrames.class);
+			startActivity(sipgateFramesIntent);
 		} catch (ActivityNotFoundException e) {
 			Log.e(TAG, e.getLocalizedMessage());
 		}
