@@ -178,4 +178,10 @@ public class SimpleSettingsListActivity extends Activity implements OnItemClickL
 				.show();
 		}
 	}
+	
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		sipgateDBAdapter.close();
+	}
 }

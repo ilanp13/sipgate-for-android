@@ -77,8 +77,8 @@ public class SimpleSettingsAdapter extends BaseAdapter
 		refresh = activity.getResources().getString(R.string.simple_settings_refresh_timers);
 		experts = activity.getResources().getString(R.string.simple_settings_advanced);
 		
-		checkboxOff = activity.getResources().getDrawable(R.drawable.icon_incoming);
-		checkboxOn = activity.getResources().getDrawable(R.drawable.icon_missed);
+		checkboxOff = activity.getResources().getDrawable(R.drawable.btn_check_off);
+		checkboxOn = activity.getResources().getDrawable(R.drawable.btn_check_on);
 		
 		settings = SettingsClient.getInstance(activity.getApplicationContext());
 		apiServiceProvider = ApiServiceProvider.getInstance(activity.getApplicationContext());
@@ -102,6 +102,10 @@ public class SimpleSettingsAdapter extends BaseAdapter
 	public long getItemId(int position) 
 	{
 		return position;
+	}
+	
+	public int getViewTypeCount() {
+		return 3;
 	}
 	
 	public int getItemViewType(int position) 
@@ -150,6 +154,7 @@ public class SimpleSettingsAdapter extends BaseAdapter
 			convertView.setTag(infoHolder);
 		} 
 		else {
+			Log.d(TAG, convertView.getTag().getClass().toString());
 			infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag();
 		}
 		
@@ -212,20 +217,21 @@ public class SimpleSettingsAdapter extends BaseAdapter
 		switch(position) {
 			case 3:
 				checkboxHolder.textView.setText(overWireless);
+				Log.e(TAG, settings.getUseWireless().toString());
 				if (settings.getUseWireless()) {
-					checkboxHolder.imageView.setBackgroundDrawable(checkboxOn);
+					checkboxHolder.imageView.setImageDrawable(checkboxOn);
 				}
 				else {
-					checkboxHolder.imageView.setBackgroundDrawable(checkboxOff);
+					checkboxHolder.imageView.setImageDrawable(checkboxOff);
 				}
 				break;
 			case 4:
 				checkboxHolder.textView.setText(over3G);
 				if (settings.getUse3G()) {
-					checkboxHolder.imageView.setBackgroundDrawable(checkboxOn);
+					checkboxHolder.imageView.setImageDrawable(checkboxOn);
 				}
 				else {
-					checkboxHolder.imageView.setBackgroundDrawable(checkboxOff);
+					checkboxHolder.imageView.setImageDrawable(checkboxOff);
 				}
 				break;
 			default:
