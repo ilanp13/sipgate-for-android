@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -28,6 +29,8 @@ import android.widget.Toast;
 import com.sipgate.R;
 import com.sipgate.R.id;
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
+import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
@@ -175,8 +178,30 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		
 		String lineNumber = tm.getLine1Number();
+	
+		if (lineNumber == null)
+		{
+			try 
+			{
+				Vector<RegisteredMobileDevice> registeredMobileDevices = ApiServiceProvider.getInstance(this).getRegisteredMobileDevices();
 		
-		if (lineNumber != null) {
+				if (registeredMobileDevices != null && registeredMobileDevices.size() > 0)
+				{
+					lineNumber = registeredMobileDevices.get(0).getDeviceNumberE164();
+				}
+			} 
+			catch (FeatureNotAvailableException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (ApiException e)
+			{
+				e.printStackTrace();
+			}			
+		}
+		
+		if (lineNumber != null && lineNumber.length() > 0) 
+		{	
 			lineNumber = formatter.formattedPhoneNumberFromStringWithCountry(lineNumber, locale.getCountry());
 			
 			numberText.setText(lineNumber);
@@ -186,18 +211,22 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 	
 	private boolean isVoiceAccount() 
 	{
-		try {
+		try 
+		{
 			String baseProducType = ApiServiceProvider.getInstance(this).getBaseProductType();
 			
 			return (baseProducType != null && baseProducType.equals("voice"));
 		} 
-		catch (IOException e) {
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		} 
-		catch (URISyntaxException e) {
+		catch (URISyntaxException e)
+		{
 			e.printStackTrace();
 		} 
-		catch (FeatureNotAvailableException e) {
+		catch (FeatureNotAvailableException e) 
+		{
 			e.printStackTrace();
 		}			
 		
@@ -220,6 +249,15 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 
 	private void hideWait() 
 	{
+		try
+		{
+			Thread.sleep(250);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
 		if (progressDialog != null && progressDialog.isShowing())
 		{
 			progressDialog.cancel();
@@ -239,7 +277,14 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		MobileExtension mobileExtension = null;
 		
 		String model = android.os.Build.MODEL;
-		String vendor = android.os.Build.PRODUCT;
+		
+		String vendor = "unknown";
+		
+		if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.CUPCAKE)
+		{
+			vendor = android.os.Build.MANUFACTURER;
+		}
+		
 		String firmware = android.os.Build.VERSION.RELEASE;
 
 		try

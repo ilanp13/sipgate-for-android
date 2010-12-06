@@ -21,12 +21,14 @@ import org.xml.sax.SAXException;
 import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.AccessProtectedResourceException;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
+import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.interfaces.RestAuthenticationInterface;
@@ -35,6 +37,7 @@ import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
 import com.sipgate.parser.CallParser;
 import com.sipgate.parser.ContactParser;
+import com.sipgate.parser.RegisteredMobileDeviceParser;
 import com.sipgate.parser.VoiceMailParser;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
@@ -63,6 +66,7 @@ public class RestClient implements ApiClientInterface {
 	private ContactParser contactParser = null;
 	private CallParser callParser = null;
 	private VoiceMailParser voiceMailParser = null;
+	private RegisteredMobileDeviceParser registeredMobileDeviceParser = null;
 	
 	public RestClient(String username, String password) 
 	{
@@ -78,6 +82,7 @@ public class RestClient implements ApiClientInterface {
 			contactParser = new ContactParser();
 			callParser = new CallParser();
 			voiceMailParser = new VoiceMailParser();
+			registeredMobileDeviceParser = new RegisteredMobileDeviceParser();
 		}
 		catch (ParserConfigurationException e) 
 		{
@@ -109,7 +114,6 @@ public class RestClient implements ApiClientInterface {
 		
 		SipgateBalanceData balanceData = new SipgateBalanceData();
 		
-		// process stream from API
 		try {
 			db = dbf.newDocumentBuilder();
 			doc = db.parse(inputStream);
@@ -194,31 +198,39 @@ public class RestClient implements ApiClientInterface {
 		
 	public String getBaseProductType() throws IOException, URISyntaxException
 	{
-		try {
+		try 
+		{
 			inputStream = authenticationInterface.getBaseProductType();
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 			return null;
 		}
 		
-		if (inputStream == null) {
+		if (inputStream == null) 
+		{
 			Log.e(TAG, "getBaseProductType() -> inputstream is null");
 			return null;
 		}
 		
-		try {
+		try 
+		{
 			db = dbf.newDocumentBuilder();
 			doc = db.parse(inputStream);
 			doc.getDocumentElement().normalize();
 			
 			nodeList = doc.getElementsByTagName("BaseProductType");
 			
-			if (nodeList == null) {
+			if (nodeList == null) 
+			{
 				return null;
 			}
 			
 			node  = nodeList.item(0);
-			if (node == null) {
+			
+			if (node == null) 
+			{
 				return null;
 			}
 			
@@ -228,31 +240,42 @@ public class RestClient implements ApiClientInterface {
 			
 			Log.v(TAG, "parseBasePT " + length + " nodes");
 			
-			for (int i = 0; i < length; i++) {			
+			for (int i = 0; i < length; i++) 
+			{			
 				node = nodeList.item(i);				
 				
-				if (node.getNodeName().equals("baseproducttype")) {
+				if (node.getNodeName().equals("baseproducttype")) 
+				{
 					Log.v(TAG, "parseBasePT found baseproducttype");
 					return node.getFirstChild().getNodeValue();
-				} else {
+				} 
+				else 
+				{
 					Log.v(TAG, "parseBasePT nodename: " + node.getNodeName());
 				}
 			}
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
+		
 		return null;
 	}
 
 	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
 	{
-		try {
+		try 
+		{
 			inputStream = authenticationInterface.setupMobileExtension(phoneNumber, model, vendor, firmware);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 		}
 		
-		if (inputStream == null) {
+		if (inputStream == null) 
+		{
 			Log.e(TAG, "setupMobileExtension() -> inputstream is null");
 			return null;
 		}
@@ -276,8 +299,9 @@ public class RestClient implements ApiClientInterface {
 			String registerURL = getElementById(credentialsElement, ("registerURL"));
 			String proxyURL = getElementById(credentialsElement, ("proxyURL"));
 					
-			if (sipId != null && sipPassword != null){
-				mobileExtension = new  MobileExtension(sipId, null,null, null, sipPassword, registerURL, proxyURL);
+			if (sipId != null && sipPassword != null)
+			{
+				mobileExtension = new  MobileExtension(sipId, null, "+" + phoneNumber, null, sipPassword, registerURL, proxyURL);
 			}
 		}
 		catch (Exception e) 
@@ -488,9 +512,12 @@ public class RestClient implements ApiClientInterface {
 	
 	public void setVoiceMailRead(String voicemail) throws ApiException, NetworkProblemException
 	{
-		try {
+		try 
+		{
 			authenticationInterface.setVoicemailRead(voicemail);
-		} catch (AccessProtectedResourceException e) {
+		} 
+		catch (AccessProtectedResourceException e) 
+		{
 			e.printStackTrace();
 			throw new ApiException();
 		}
@@ -498,9 +525,12 @@ public class RestClient implements ApiClientInterface {
 	
 	public void setCallRead(String call) throws ApiException, NetworkProblemException 
 	{
-		try {
+		try 
+		{
 			authenticationInterface.setCallRead(call);
-		} catch (AccessProtectedResourceException e) {
+		} 
+		catch (AccessProtectedResourceException e) 
+		{
 			e.printStackTrace();
 			throw new ApiException();
 		}
@@ -517,5 +547,48 @@ public class RestClient implements ApiClientInterface {
 		}
 
 		return null;
+	}
+
+	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices() throws FeatureNotAvailableException, ApiException
+	{
+		try 
+		{
+			inputStream = authenticationInterface.getRegisteredMobileDevices();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+			throw new ApiException();
+		}
+		
+		if (inputStream == null) 
+		{
+			Log.e(TAG, "getRegisteredMobileDevices() -> inputstream is null");
+			throw new ApiException();
+		}
+	
+		if (registeredMobileDeviceParser != null && saxParser != null)
+		{
+			registeredMobileDeviceParser.init();
+			
+			try 
+			{
+				saxParser.parse(inputStream, registeredMobileDeviceParser);
+				return registeredMobileDeviceParser.getRegisteredMobileDevices();
+			}
+			catch (SAXException e) 
+			{
+				e.printStackTrace();
+				throw new ApiException();
+			}
+			catch (IOException e) 
+			{
+				e.printStackTrace();
+				throw new ApiException();
+			}
+		}
+		
+		Log.e(TAG, "getRegisteredMobileDevices() -> saxParser or registeredMobileDeviceParser is null");
+		throw new ApiException();
 	}
 }

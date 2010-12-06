@@ -55,7 +55,7 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	private Context context = null;
 
 	// Path where to store all profiles - !!!should be replaced by some system variable!!!
-	private final static String profilePath = "/sdcard/Sipgate/";
+	private final static String profilePath = "/data/data/com.sipgate/";
 	// Path where is stored the shared preference file - !!!should be replaced by some system variable!!!
 	private final String sharedPrefsPath = "/data/data/com.sipgate/shared_prefs/";
 	// Shared preference file name - !!!should be replaced by some system variable!!!

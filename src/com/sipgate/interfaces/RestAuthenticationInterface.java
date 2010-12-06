@@ -29,4 +29,5 @@ public interface RestAuthenticationInterface {
 	
 	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware) throws AccessProtectedResourceException, NetworkProblemException;
 
+	public InputStream getRegisteredMobileDevices() throws AccessProtectedResourceException, NetworkProblemException;
 }

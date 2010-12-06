@@ -3,7 +3,6 @@ package com.sipgate.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,16 +18,18 @@ import android.widget.TextView;
 
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.exceptions.ApiException;
+import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
-import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.SettingsClient;
 
 public class SimpleSettingsActivity extends Activity implements OnClickListener, OnTouchListener {
 	private static final String TAG = "SimpleSettingsActivity";
 	private SipgateDBAdapter sipgateDBAdapter = null;
+	private SettingsClient settingsClient = null;
+	
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -39,22 +40,21 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		Log.i(TAG, "AuthorizationActivity onCreate Call");
 		
 		sipgateDBAdapter = new SipgateDBAdapter(this);
-		
-		SettingsClient settings = SettingsClient.getInstance(getApplicationContext());
+		settingsClient = SettingsClient.getInstance(this);
 
 		// Account Selection Row
 		LinearLayout accountSettings = (LinearLayout) findViewById(R.id.sipgateSettingsAccountRow);
 		accountSettings.setOnClickListener(this);
 		accountSettings.setOnTouchListener(this);
 		TextView account = (TextView) findViewById(R.id.sipgateSettingsAccount);
-		account.setText(settings.getWebusername());
+		account.setText(settingsClient.getWebusername());
 
 		// Extension Chooser Row
 		LinearLayout extensionSettings = (LinearLayout) findViewById(R.id.sipgateSettingsExtensionRow);
 		extensionSettings.setOnClickListener(this);
 		extensionSettings.setOnTouchListener(this);
 		TextView extension = (TextView) findViewById(R.id.sipgateSettingsExtension);
-		extension.setText(settings.getExtensionAlias());
+		extension.setText(settingsClient.getExtensionAlias());
 
 		// Balance Row
 		LinearLayout balanceTable = (LinearLayout) findViewById(R.id.sipgateSettingsBalanceGroup);
@@ -92,7 +92,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		wirelessSettings.setOnClickListener(this);
 		wirelessSettings.setOnTouchListener(this);
 		CheckBox wirelessCheckBox = (CheckBox) findViewById(R.id.sipgateSettingsWireless);
-		wirelessCheckBox.setChecked(settings.getUseWireless());
+		wirelessCheckBox.setChecked(settingsClient.getUseWireless());
 		wirelessCheckBox.setOnClickListener(this);
 		wirelessCheckBox.setOnTouchListener(this);
 		
@@ -101,7 +101,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		threeGSettings.setOnClickListener(this);
 		threeGSettings.setOnTouchListener(this);
 		CheckBox threeGCheckBox = (CheckBox) findViewById(R.id.sipgateSettings3G);
-		threeGCheckBox.setChecked(settings.getUse3G());
+		threeGCheckBox.setChecked(settingsClient.getUse3G());
 		threeGCheckBox.setOnClickListener(this);
 		threeGCheckBox.setOnTouchListener(this);
 
@@ -154,8 +154,6 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 	public void onClick(View v) {
 		int id = v.getId();
 		v.setBackgroundColor(0xFF000000);
-		SettingsClient settingsClient = SettingsClient
-				.getInstance(getApplicationContext());
 		Intent intent = null;
 
 		TextView extension = (TextView) findViewById(R.id.sipgateSettingsExtension);
@@ -163,57 +161,80 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 		switch (id) {
 		case R.id.sipgateSettingsAccountRow:
 
-			if (ApiServiceProvider.getInstance(getApplicationContext()).isRegistered()){
-				new AlertDialog.Builder(this)
-					.setMessage(R.string.alert_unregister)
-					.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int whichButton) {
-							TextView account = (TextView) findViewById(R.id.sipgateSettingsAccount);
-							account.setText("");
-							TextView extension = (TextView) findViewById(R.id.sipgateSettingsExtension);
-							extension.setText("");
-							
-							NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-					        notificationManager.cancelAll();
-
-							Receiver.engine(getApplicationContext()).halt();
-							
-							stopService(new Intent(getApplicationContext(),SipgateBackgroundService.class));
-							stopService(new Intent(getApplicationContext(),RegisterService.class));
-							
-					        SettingsClient.getInstance(getApplicationContext()).unRegisterExtension();
-							
-							ApiServiceProvider.getInstance(getApplicationContext()).unRegister();
-            				
-							sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
-							sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
-							
-							Intent intent = new Intent(getApplicationContext(), Login.class);
-							startActivity(intent);
-						}
-					})
-					.setNegativeButton(R.string.no, null)
-					.show();
-			} else {
-				Receiver.engine(getApplicationContext()).halt();
-				intent = new Intent(getApplicationContext(), Login.class);
-				startActivity(intent);
-			}
+				try
+				{
+					if (ApiServiceProvider.getInstance(getApplicationContext()).isRegistered()){
+						new AlertDialog.Builder(this)
+							.setMessage(R.string.alert_unregister)
+							.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int whichButton) {
+									TextView account = (TextView) findViewById(R.id.sipgateSettingsAccount);
+									account.setText("");
+									TextView extension = (TextView) findViewById(R.id.sipgateSettingsExtension);
+									extension.setText("");
+									
+									settingsClient.cleanAllCredentials();
+									
+									Intent intent = new Intent(getApplicationContext(), Login.class);
+									startActivity(intent);
+								}
+							})
+							.setNegativeButton(R.string.no, null)
+							.show();
+					} 
+					else 
+					{
+						ApiServiceProvider.getInstance(getApplicationContext()).register(settingsClient.getWebusername(), settingsClient.getWebpassword());
+						
+						intent = new Intent(this, Setup.class);
+						startActivity(intent);
+					}
+				}
+				catch (ApiException aex)
+				{
+					settingsClient.cleanAllCredentials();
+					
+					intent = new Intent(getApplicationContext(), Login.class);
+					startActivity(intent);
+				}
+				catch (NetworkProblemException nex)
+				{
+					intent = new Intent(getApplicationContext(), Login.class);
+					startActivity(intent);
+				}
 			break;
 		case R.id.sipgateSettingsExtensionRow:
 			extension.setText("");
 			
 			settingsClient.unRegisterExtension();
 			Receiver.engine(getApplicationContext()).halt();
-
-			if (ApiServiceProvider.getInstance(getApplicationContext()).isRegistered()){
-				intent = new Intent(this, Setup.class);
-				startActivity(intent);
-			}
-			else {
-				intent = new Intent(this, Login.class);
-				startActivity(intent);
-			}
+				try
+				{
+					if (ApiServiceProvider.getInstance(getApplicationContext()).isRegistered())
+					{
+						intent = new Intent(this, Setup.class);
+						startActivity(intent);
+					}
+					else
+					{
+						ApiServiceProvider.getInstance(getApplicationContext()).register(settingsClient.getWebusername(), settingsClient.getWebpassword());
+						
+						intent = new Intent(this, Setup.class);
+						startActivity(intent);
+					}
+				}
+				catch (ApiException e)
+				{
+					settingsClient.cleanAllCredentials();
+										
+					intent = new Intent(this, Login.class);
+					startActivity(intent);
+				}
+				catch (NetworkProblemException e)
+				{
+					intent = new Intent(this, Login.class);
+					startActivity(intent);
+				}
 			break;
 		case R.id.sipgateSettingsWireless:
 		case R.id.sipgateSettingsWirelessRow:
@@ -261,7 +282,6 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 	}
 	
 	private void checkAvailability(){
-		SettingsClient settingsClient = SettingsClient.getInstance(getApplicationContext());
 		Log.i(TAG, "foo");
 		Log.i(TAG, settingsClient.getUse3G().toString() + " " + settingsClient.getUseWireless());
 		if (!settingsClient.getUse3G() && !settingsClient.getUseWireless()){

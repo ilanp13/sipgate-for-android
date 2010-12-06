@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.Vector;
 
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
@@ -30,4 +31,5 @@ public interface ApiClientInterface {
 	public boolean featureAvailable(API_FEATURE feature);
 	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException;
 	public MobileExtension setupMobileExtension(String phoneNumber,	String model, String vendor, String firmware) throws FeatureNotAvailableException;
+	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices() throws ApiException, FeatureNotAvailableException;
 }
