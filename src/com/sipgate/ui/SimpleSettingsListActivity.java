@@ -88,19 +88,8 @@ public class SimpleSettingsListActivity extends Activity implements OnItemClickL
 					.setMessage(R.string.alert_unregister)
 					.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
-							settingsClient.unRegisterExtension();
+							settingsClient.cleanAllCredentials();
 							apiServiceProvider.unRegister();
-							
-							NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-					        notificationManager.cancelAll();
-
-							Receiver.engine(getApplicationContext()).halt();
-							
-							stopService(new Intent(getApplicationContext(),SipgateBackgroundService.class));
-							stopService(new Intent(getApplicationContext(),RegisterService.class));
-            				
-							sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
-							sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
 							
 							intent = new Intent(getApplicationContext(), Login.class);
 							startActivity(intent);
