@@ -242,7 +242,7 @@ public class OptionsMenu {
 	private void openSettings(Intent intent, Activity activity)
 	{
 		try {
-			intent = new Intent(activity, SimpleSettingsActivity.class);
+			intent = new Intent(activity, SimpleSettingsListActivity.class);
 			activity.startActivity(intent);
 		}
 		catch (ActivityNotFoundException e) {
