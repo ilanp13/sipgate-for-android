@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +20,7 @@ import com.sipgate.R.id;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.SettingsClient;
 
 @SuppressWarnings("unused")
 public class Login extends Activity implements OnClickListener 
@@ -26,8 +28,12 @@ public class Login extends Activity implements OnClickListener
 	private final String TAG = "Login";
 	
 	private Button okButton = null;
+	private EditText username = null;
+	private EditText password = null;
 
+	private SettingsClient settingsClient = null;
 	private ApiServiceProvider apiServiceProvider = null;
+	
 	private ProgressDialog progressDialog = null;
 	
 	private Context context = this;
@@ -42,7 +48,14 @@ public class Login extends Activity implements OnClickListener
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 		
+		username = (EditText) findViewById(R.id.inputUsername);
+		password = (EditText) findViewById(R.id.inputPassword);
+		
+		settingsClient = SettingsClient.getInstance(this);
 		apiServiceProvider = ApiServiceProvider.getInstance(this);
+		
+		username.setText(settingsClient.getWebusername());
+		password.setText(settingsClient.getWebpassword());
 	}
 	
 	@Override
@@ -69,49 +82,49 @@ public class Login extends Activity implements OnClickListener
 
 	public void onClick(View v) 
 	{
-		EditText username = (EditText) findViewById(R.id.inputUsername);
-		EditText password = (EditText) findViewById(R.id.inputPassword);
+		showWait();
+		
+		String user = username.getText().toString();
+		String pass = password.getText().toString();
 
-		try 
+		if ((user.length()) > 0 && (pass.length() > 0)) 
 		{
-			String user = username.getText().toString();
-			String pass = password.getText().toString();
-
-			if ((user.length()) > 0 && (pass.length() > 0)) 
+			try
 			{
-				showWait();
-				
 				apiServiceProvider.register(user, pass);
-
-				if (apiServiceProvider.isRegistered()) {
-					Intent setupIntent = new Intent(this, Setup.class);
+				
+				if (apiServiceProvider.isRegistered()) 
+				{
+					Intent setupIntent = new Intent(context, Setup.class);
 					startActivity(setupIntent);
 				}
-				else {
+				else 
+				{
 					showWrongCredentialsToast();
 				}
-			} 
-			else {
-				showNoCredentialsToast();
 			}
-		} 
-		catch (NetworkProblemException e) {
-			showNetworkProblemToast();
-		} 
-		catch (ApiException e) {
-			showWrongCredentialsToast();
-		} 
-		finally
-		{
-			hideWait();
+			catch (NetworkProblemException e) 
+			{
+				showNetworkProblemToast();
+			} 
+			catch (ApiException e) 
+			{
+				showWrongCredentialsToast();
+			} 
 		}
+		else 
+		{
+			showNoCredentialsToast();
+		}
+		
+		hideWait();
 	}
 		
 	private void showWait() 
 	{
 		okButton.setClickable(false);
 		okButton.setEnabled(false);
-		
+	
 		new Thread(new Runnable()
 		{
 			@Override
@@ -129,10 +142,19 @@ public class Login extends Activity implements OnClickListener
 		okButton.setClickable(true);
 		okButton.setEnabled(true);
 
+		try
+		{
+			Thread.sleep(250);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
 		if (progressDialog != null && progressDialog.isShowing())
 		{
 			progressDialog.cancel();
-		}	
+		}
 	}
 
 	private void showWrongCredentialsToast() 

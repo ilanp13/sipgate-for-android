@@ -48,7 +48,7 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 	private final String TAG = "BasicAuthenticationClient";
 	private String user = null;
 	private String pass = null;
-	private final static SimpleDateFormat periodFormatter  = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+	private final static SimpleDateFormat periodFormatter  = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 	public BasicAuthenticationClient(String user, String pass)
 	{
@@ -243,6 +243,8 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 	 * If one of the params is <= 0 a full list is requested, otherwise a list 
 	 * with data in the given period. 
 	 * 
+	 * @author graef
+	 * 
 	 * @param periodStart a periodStart value in unix timestamp
 	 * @param periodEnd a periodEnd value in unix timestamp 
 	 * @return an InputStream containing a xml with call data
@@ -264,6 +266,8 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 	 * This method calls the Rest-api and request voicemail data.
 	 * If one of the params is <= 0 a full list is requested, otherwise a list 
 	 * with data in the given period. 
+	 * 
+	 * @author graef
 	 * 
 	 * @param periodStart a periodStart value in unix timestamp
 	 * @param periodEnd a periodEnd value in unix timestamp
@@ -314,6 +318,8 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 	/**
 	 * This method calls the rest-api to create a mobile extension
 	 * 
+	 * @author graef
+	 * 
 	 * @param phoneNumber the phoneNumber of this device
 	 * @param model the model of this device
 	 * @param vendor the vendor of this device
@@ -333,9 +339,24 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 	}
 	
 	/**
+	 * This method calls the rest-api to get all registered mobile devices
+	 *
+	 * @author graef
+	 * 
+	 * @return an InputStream containing an array of registered mobile devices
+	 */
+	public InputStream getRegisteredMobileDevices() throws AccessProtectedResourceException, NetworkProblemException
+	{
+		return accessProtectedResource(Constants.API_20_BASEURL + "/my/settings/registeredmobiledevices/");
+	}
+	
+	/**
 	 * This method created a human readable String of a time in millis (unix timestamp)
+	 *
+	 * @author graef
+	 * 
 	 * @param timeInMillis unix timestamp in millis to format
-	 * @return a formatted date time string in (yyyy-MM-dd'T'hh:mm:ss'Z')
+	 * @return a formatted date time string in (yyyy-MM-dd'T'HH:mm:ss'Z')
 	 */
 	private String getDateTimeString(long timeInMillis)
 	{

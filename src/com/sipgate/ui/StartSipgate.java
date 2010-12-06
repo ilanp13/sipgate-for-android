@@ -3,15 +3,12 @@ package com.sipgate.ui;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.sipgate.R;
-import com.sipgate.db.SipgateDBAdapter;
-import com.sipgate.service.SipgateBackgroundService;
-import com.sipgate.sipua.ui.Receiver;
-import com.sipgate.sipua.ui.RegisterService;
+import com.sipgate.exceptions.ApiException;
+import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.PhoneNumberFormatter;
 import com.sipgate.util.SettingsClient;
@@ -43,9 +40,6 @@ public class StartSipgate extends Activity
 		PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 		Locale locale = Locale.getDefault();
 		formatter.formattedPhoneNumberFromStringWithCountry("0", locale.getCountry());
-		
-		settingsClient = SettingsClient.getInstance(this);
-		apiServiceProvider = ApiServiceProvider.getInstance(this);
 	}
 
 	public void onStart()
@@ -61,39 +55,41 @@ public class StartSipgate extends Activity
 		{
 			public void run()
 			{
-				if (apiServiceProvider.isRegistered()) 
+				try
 				{
+					settingsClient = SettingsClient.getInstance(getApplicationContext());
+					apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
+					
 					if (settingsClient.isProvisioned()) 
 					{
-						Intent sipgateFramesIntent = new Intent(getApplicationContext(), SipgateFrames.class);
-						startActivity(sipgateFramesIntent);
+						if (apiServiceProvider.isRegistered()) 
+						{
+							Intent sipgateFramesIntent = new Intent(getApplicationContext(), SipgateFrames.class);
+							startActivity(sipgateFramesIntent);
+						}
+						else
+						{
+							apiServiceProvider.register(settingsClient.getWebusername(), settingsClient.getWebpassword());
+							
+							Intent setupIntent = new Intent(getApplicationContext(), SipgateFrames.class);
+							startActivity(setupIntent);
+						}
 					}
 					else
 					{
-						Intent setupIntent = new Intent(getApplicationContext(), Setup.class);
+						Intent setupIntent = new Intent(getApplicationContext(), Login.class);
 						startActivity(setupIntent);
 					}
 				}
-				else
+				catch (ApiException e)
 				{
-					settingsClient.purgeWebuserCredentials();
-					settingsClient.unRegisterExtension();
+					settingsClient.cleanAllCredentials();
 					
-					NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-			        notificationManager.cancelAll();
-
-					stopService(new Intent(getApplicationContext(),SipgateBackgroundService.class));
-					stopService(new Intent(getApplicationContext(),RegisterService.class));
-				
-					Receiver.engine(getApplicationContext()).halt();
-								
-					SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(getApplicationContext());
-
-					sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
-					sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
-			
-					sipgateDBAdapter.close();
-					
+					Intent loginIntent = new Intent(getApplicationContext(), Login.class);
+					startActivity(loginIntent);
+				}
+				catch (NetworkProblemException e)
+				{
 					Intent loginIntent = new Intent(getApplicationContext(), Login.class);
 					startActivity(loginIntent);
 				}

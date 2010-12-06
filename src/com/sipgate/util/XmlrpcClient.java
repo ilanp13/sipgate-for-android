@@ -2,6 +2,7 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -20,6 +21,7 @@ import org.zoolu.sip.address.SipURL;
 import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
@@ -54,7 +56,7 @@ public class XmlrpcClient implements ApiClientInterface {
 	
 	private XMLRPCClient client = null;
 	
-	private static final SimpleDateFormat periodFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private static final SimpleDateFormat periodFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 	private static final Locale locale = Locale.getDefault();
@@ -93,7 +95,11 @@ public class XmlrpcClient implements ApiClientInterface {
 			Throwable cause = e.getCause();
 			if (cause.getClass().equals(UnknownHostException.class)) {
 				throw new NetworkProblemException();
-			} else {
+			} 
+			else if (cause.getClass().equals(SocketException.class)) {
+				throw new NetworkProblemException();
+			}
+			else {
 				throw e;
 			}
 		}
@@ -472,16 +478,19 @@ public class XmlrpcClient implements ApiClientInterface {
 		return callTime;
 	}
 		
-	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException
+	{
 		throw new FeatureNotAvailableException();
 	}
 
 	
-	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException 
+	{
 		throw new FeatureNotAvailableException();
 	}
 	
-	public void setCallRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public void setCallRead(String voicemail) throws ApiException, FeatureNotAvailableException
+	{
 		throw new FeatureNotAvailableException();
 	}
 	
@@ -494,8 +503,8 @@ public class XmlrpcClient implements ApiClientInterface {
 		return "basic/plus";
 	}
 	
-	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
-			throws FeatureNotAvailableException {
+	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware) throws FeatureNotAvailableException 
+	{
 		throw new FeatureNotAvailableException();
 	}
 
@@ -668,6 +677,11 @@ public class XmlrpcClient implements ApiClientInterface {
 	    {
 	        return inString;
 	    }
+	}
+
+	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices() throws FeatureNotAvailableException, ApiException
+	{
+		throw new FeatureNotAvailableException();
 	}
 }
 

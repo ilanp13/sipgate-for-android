@@ -153,12 +153,15 @@ public class VoiceMailParser extends DefaultHandler
 	{
 		long callTime = 0;
 		
-		try {
-			if (dateString != null) {
+		try 
+		{
+			if (dateString != null) 
+			{
 				return dateformatterPretty.parse(dateString).getTime();
 			}
 		} 
-		catch (ParseException e) {
+		catch (ParseException e) 
+		{
 			Log.e("VoiceMailParser", "getCallTime", e);
 		}
 		

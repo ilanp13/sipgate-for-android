@@ -1,12 +1,18 @@
 package com.sipgate.util;
 
 
-import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
-import com.sipgate.sipua.ui.Settings;
-
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
+import com.sipgate.service.SipgateBackgroundService;
+import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.sipua.ui.RegisterService;
+import com.sipgate.sipua.ui.Settings;
 
 /**
  * Allows Access to the Sipgate configurations
@@ -424,6 +430,27 @@ public class SettingsClient {
 		this.editor.remove("sipgate_webpass");
 		this.editor.remove("sipgate_api-type");
 		this.editor.commit();
+	}
+	
+	public void cleanAllCredentials()
+	{
+		purgeWebuserCredentials();
+		unRegisterExtension();
+
+		Receiver.engine(context).halt();
+		
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	    notificationManager.cancelAll();
+	    
+		context.stopService(new Intent(context,SipgateBackgroundService.class));
+		context.stopService(new Intent(context,RegisterService.class));
+					
+		SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(context);
+
+		sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
+		sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
+
+		sipgateDBAdapter.close();
 	}
 	
 	/**

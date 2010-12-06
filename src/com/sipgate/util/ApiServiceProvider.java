@@ -10,6 +10,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
@@ -166,7 +167,6 @@ public class ApiServiceProvider {
 	 */
 	public void unRegister() {
 		apiClient = null;
-		settings.purgeWebuserCredentials();
 	}
 
 	/*
@@ -277,10 +277,36 @@ public class ApiServiceProvider {
 		}
 	}
 
+	/**
+	 * This methods calls the api to create a mobile extension and returns it
+	 *
+	 * @author graef
+	 * 
+	 * @param phoneNumber a given phonenumber
+	 * @param model the model of the device
+	 * @param vendor the vendor of the device
+	 * @param firmware the firmware of the device
+	 * @return a fresh MobileExtension with credentials
+	 * @throws FeatureNotAvailableException
+	 */
 	public MobileExtension setupMobileExtension(String phoneNumber,
 			String model, String vendor, String firmware) throws FeatureNotAvailableException {
 		synchronized (this.apiClient) {
 			return apiClient.setupMobileExtension(phoneNumber, model, vendor, firmware);
+		}
+	}
+	
+	/**
+	 * This method calls the api and requests all registered mobile devices
+	 *
+	 * @author graef
+	 * 
+	 * @return a Vector with all registered mobile devices
+	 * @throws FeatureNotAvailableException
+	 */
+	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices() throws FeatureNotAvailableException, ApiException {
+		synchronized (this.apiClient) {
+			return apiClient.getRegisteredMobileDevices();
 		}
 	}
 }
