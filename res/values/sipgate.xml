@@ -40,9 +40,9 @@
    	<string name="sipgate_voicemail_from">from</string>
    	<string name="sipgate_seconds">seconds</string>
 	<string name="sipgate_tab_dialpad">Dialpad</string>   	
-	<string name="sipgate_tab_voicemail">Voicemail</string>   		
+	<string name="sipgate_tab_voicemail">Voicemails</string>   		
 	<string name="sipgate_tab_contacts">Contacts</string>
-	<string name="sipgate_tab_calllist">Calllist</string>   	
+	<string name="sipgate_tab_calllist">Calls</string>   	
 	<string name="sipgate_decimal_separator">.</string>
    	<string name="sipgate_empty_contactlist">Your contactlist is empty.</string>
    	<string name="sipgate_phonetype_home">Home</string>

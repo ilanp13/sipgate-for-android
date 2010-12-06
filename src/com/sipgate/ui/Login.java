@@ -198,4 +198,9 @@ public class Login extends Activity implements OnClickListener
 			}
 		}).start();
 	}
+	
+	@Override
+	public void onBackPressed()
+	{
+	}
 }
