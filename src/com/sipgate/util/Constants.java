@@ -5,7 +5,7 @@ public abstract class Constants
 {
 	//MoyHymIbr4
 	
-	public static final String API_VERSION_SUFFIX = "version=2.20";
+	public static final String API_VERSION_SUFFIX = "version=2.21";
 		
 	//public static final String API_10_HOSTNAME = "telegraf.netzquadrat.de:3333";
 	//public static final String API_10_BASEURL =  "http://" + API_10_HOSTNAME;
