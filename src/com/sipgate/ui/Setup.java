@@ -363,6 +363,11 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 	{
 		
 	}
+	
+	@Override
+	public void onBackPressed()
+	{
+	}
 }
 
 
