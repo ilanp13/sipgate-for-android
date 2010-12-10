@@ -174,7 +174,6 @@ public class SimpleSettingsAdapter extends BaseAdapter
 					balanceData = apiServiceProvider.getBillingBalance();
 				} catch (Exception e) {
 					e.printStackTrace();
-					//Log.e(TAG, e.getLocalizedMessage());
 				}
 				if (balanceData != null) {
 					double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());

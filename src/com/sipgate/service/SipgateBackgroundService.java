@@ -1,5 +1,6 @@
 package com.sipgate.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -8,10 +9,15 @@ import java.util.Vector;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.Service;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderOperation.Builder;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.sipgate.R;
@@ -760,7 +766,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			return ApiServiceProvider.getInstance(getApplicationContext()).featureAvailable(API_FEATURE.VM_LIST);
 		} 
 		catch (Exception e) {
-			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
+			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.toString());
 		}
 		
 		return false;
@@ -959,17 +965,14 @@ public class SipgateBackgroundService extends Service implements EventService
 	}
 	
 	/**
-	 * This function deletes all old contacts from the database.
+	 * This function deletes all old contacts from the sipgate database and from android adressbook
 	 * 
 	 * @param newContactDataDBObjects The vector containing the new contacts.
 	 * @param oldContactDataDBObjects The vector containing the old contacts.
 	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void deleteOldContacts(
-			Vector<ContactDataDBObject> newContactDataDBObjects,
-			Vector<ContactDataDBObject> oldContactDataDBObjects,
-			SipgateDBAdapter sipgateDBAdapter)
+	private void deleteOldContacts(Vector<ContactDataDBObject> newContactDataDBObjects, Vector<ContactDataDBObject> oldContactDataDBObjects, SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (ContactDataDBObject oldContactDataDBObject : oldContactDataDBObjects) {
 			if (!newContactDataDBObjects.contains(oldContactDataDBObject)) {
@@ -987,10 +990,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void deleteOldCalls(
-			Vector<CallDataDBObject> newCallDataDBObjects,
-			Vector<CallDataDBObject> oldCallDataDBObjects,
-			SipgateDBAdapter sipgateDBAdapter)
+	private void deleteOldCalls(Vector<CallDataDBObject> newCallDataDBObjects, Vector<CallDataDBObject> oldCallDataDBObjects, SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (CallDataDBObject oldCallDataDBObject : oldCallDataDBObjects) {
 			if (!newCallDataDBObjects.contains(oldCallDataDBObject)) {
@@ -1008,10 +1008,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * @param sipgateDBAdapter An instance of the sipgate database adapter.
 	 * @since 1.2
 	 */
-	private void deleteOldVoiceMails(
-			Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects,
-			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects,
-			SipgateDBAdapter sipgateDBAdapter)
+	private void deleteOldVoiceMails(Vector<VoiceMailDataDBObject> newVoiceMailDataDBObjects, Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects, SipgateDBAdapter sipgateDBAdapter)
 	{
 		for (VoiceMailDataDBObject oldVoiceMailDataDBObject : oldVoiceMailDataDBObjects) {
 			if (!newVoiceMailDataDBObjects.contains(oldVoiceMailDataDBObject)) {
@@ -1048,11 +1045,42 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter.insert(newContactDataDBObject);
 				sipgateDBAdapter.insertAllContactNumberDBObjects(newContactDataDBObject.getContactNumberDBObjects());
 				
+				//addAndroidContact(newContactDataDBObject);
+				
 				insertedContacts++;
 			}
 		}
 	}
 	
+	private void addAndroidContact(ContactDataDBObject contactDataDBObject)
+	{
+		Builder builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+		.withValue(ContactsContract.Data.MIMETYPE,"ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE")
+		.withValue(ContactsContract.CommonDataKinds.Im.DATA, contactDataDBObject.getUuid())
+		.withValue(ContactsContract.CommonDataKinds.Im.TYPE,ContactsContract.CommonDataKinds.Im.TYPE_WORK)
+		.withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL,ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL)
+		.withValue(ContactsContract.Data.DISPLAY_NAME, contactDataDBObject.getDisplayName())
+		.withValue(ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL,"sipgate");
+		
+		ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+		
+		operationList.add(builder.build());
+		
+		ContentResolver resolver = getContentResolver();
+		
+		try 
+		{
+			resolver.applyBatch(ContactsContract.AUTHORITY, operationList);
+		} 
+		catch (RemoteException e) 
+		{
+			Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+		} 
+		catch (OperationApplicationException e) 
+		{
+			Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+		}	
+	}
 	/**
 	 * This functions inserts new and updates already existing calls
 	 * in the database.

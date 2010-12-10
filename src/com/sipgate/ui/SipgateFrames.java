@@ -198,7 +198,7 @@ public class SipgateFrames extends TabActivity
 			hasVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
 		}
 		catch (Exception e) {
-			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
+			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.toString());
 		}
 		
 		return hasVmListFeature;
@@ -232,7 +232,7 @@ public class SipgateFrames extends TabActivity
 			tabs.addTab(tabSpecCallList);
 		}
 		catch (NullPointerException e) {
-			Log.i(TAG, "removeVmTab() -> "+e.getLocalizedMessage());
+			Log.i(TAG, "removeVmTab() -> "+e.toString());
 		}
 		
 		this.vmTabVisible = false;

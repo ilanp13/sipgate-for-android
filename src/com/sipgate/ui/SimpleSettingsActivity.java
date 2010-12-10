@@ -65,7 +65,7 @@ public class SimpleSettingsActivity extends Activity implements OnClickListener,
 			accountBalance = apiClient.getBillingBalance();
 		} catch (Exception e) {
 			e.printStackTrace();
-			//Log.e(TAG, e.getLocalizedMessage());
+			//Log.e(TAG, toString());
 		}
 		if (accountBalance != null) {
 			double balanceAmount = (double) Double.parseDouble(accountBalance.getTotal());

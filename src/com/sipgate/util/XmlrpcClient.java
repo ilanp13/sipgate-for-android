@@ -70,7 +70,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			init(Constants.XMLRPC_API_10_SERVER_URL, ApiUser, ApiPassword);
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "XMLRPCExceptin in XmlrpcClient(): " + e.getLocalizedMessage());
+			Log.e(TAG, "XMLRPCExceptin in XmlrpcClient(): " + e.toString());
 			throw new ApiException();
 		}
 	}
@@ -91,7 +91,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			apiResult = (HashMap<String, Object>) this.client.call(method, param);
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "XMLRPCExceptin in clientIdentify(): " + e.getLocalizedMessage());
+			Log.e(TAG, "XMLRPCExceptin in clientIdentify(): " + e.toString());
 			Throwable cause = e.getCause();
 			if (cause.getClass().equals(UnknownHostException.class)) {
 				throw new NetworkProblemException();
@@ -243,7 +243,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			}
 
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "XMLRPC call to 'samurai.BalanceGet' failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "XMLRPC call to 'samurai.BalanceGet' failed with " + e.toString());
 			throw new ApiException();
 		}
 
@@ -401,7 +401,7 @@ public class XmlrpcClient implements ApiClientInterface {
 				}
 			}
 
-			Log.e(TAG, "serverDataGet() failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "serverDataGet() failed with " + e.toString());
 			throw new ApiException();
 		}
 
@@ -416,7 +416,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			ownUris = ownUriListGet();
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "ownUriListGet() failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "ownUriListGet() failed with " + e.toString());
 			throw new ApiException();
 		}
 
@@ -437,7 +437,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			sipUserdataList = userdataSipGet(requestedUris);
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "userdataSipGet() failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "userdataSipGet() failed with " + e.toString());
 			throw new ApiException();
 		}
 

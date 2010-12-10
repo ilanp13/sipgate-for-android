@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.sipgate.R;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.util.ApiServiceProvider;

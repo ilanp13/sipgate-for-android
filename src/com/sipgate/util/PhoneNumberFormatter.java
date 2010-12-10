@@ -138,7 +138,30 @@ public class PhoneNumberFormatter {
 		 * define known sipgate prefixes
 		 */
 		if (PhoneNumberFormatter.allSipgatePrefix == null) {
-			String[] tempSipgatePrefix = {"1100", "1000", "1200", "2100", "2000", "2001", "2200", "2300", "2400", "3000", "3100", "1020", "4000"};
+			
+			String[] tempSipgatePrefix = {
+					"1000",
+					"1020",
+					"1100", 
+					"1200", 
+					"2000", 
+					"2001", 
+					"2002",
+					"2010",
+					"2100", 
+					"2200", 
+					"2300", 
+					"2301",
+					"2400", 
+					"2401", 
+					"2500",
+					"3000", 
+					"3100", 
+					"3200",
+					"4000",
+					"5111",
+					"5222"
+					};
 			PhoneNumberFormatter.allSipgatePrefix = new ArrayList<String>();
 			for (String prefix : tempSipgatePrefix) {
 				PhoneNumberFormatter.allSipgatePrefix.add(prefix);
@@ -298,7 +321,7 @@ public class PhoneNumberFormatter {
 		 * check whether we have a sipgate prefix
 		 */
 		if (theNum.length() >= 4 && PhoneNumberFormatter.allSipgatePrefix.contains(theNum.substring(0, 4))){
-			theNum = theNum.substring(0,4);
+			theNum = theNum.substring(4);
 		}
 		
 		/*
@@ -394,7 +417,7 @@ public class PhoneNumberFormatter {
 			}
 			
 			if (num.length() >= 4 && PhoneNumberFormatter.allSipgatePrefix.contains(num.substring(0, 4))) {
-				num = num.substring(0, 4);
+				num = num.substring(4);
 			}
 			
 			num = String.format("+%s", num);

@@ -12,6 +12,8 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
@@ -161,7 +163,7 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 			provisioningData = ApiServiceProvider.getInstance(this).getProvisioningData();
 		}
 		catch(Exception e){
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 		return provisioningData;
 	}
@@ -280,7 +282,7 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		
 		String vendor = "unknown";
 		
-		if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.CUPCAKE)
+		if (VERSION.SDK_INT > Build.VERSION_CODES.CUPCAKE)
 		{
 			vendor = android.os.Build.MANUFACTURER;
 		}
@@ -379,7 +381,7 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 			Intent sipgateFramesIntent = new Intent(this, SipgateFrames.class);
 			startActivity(sipgateFramesIntent);
 		} catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}
 

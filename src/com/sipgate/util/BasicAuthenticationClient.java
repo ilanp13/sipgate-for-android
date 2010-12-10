@@ -213,14 +213,14 @@ public class BasicAuthenticationClient implements RestAuthenticationInterface
 		}
 		catch (UnknownHostException e)
 		{
-			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): " + e.getLocalizedMessage());
+			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): " + e.toString());
 			
 			throw new NetworkProblemException();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): " + e.getLocalizedMessage());
+			Log.e(this.getClass().getSimpleName(), "accessProtectedResource(): " + e.toString());
 			
 			throw new AccessProtectedResourceException();
 		}

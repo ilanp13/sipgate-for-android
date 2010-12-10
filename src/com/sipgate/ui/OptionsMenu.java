@@ -304,7 +304,7 @@ public class OptionsMenu {
 			Log.v(TAG, "bind service -> " + bindret);
 		}
 		catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}
 	
@@ -361,7 +361,7 @@ public class OptionsMenu {
 			Log.v(TAG, "bind service -> " + bindret);
 		}
 		catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}
 	
@@ -418,7 +418,7 @@ public class OptionsMenu {
 			Log.v(TAG, "bind service -> " + bindret);
 		}
 		catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}	
 }

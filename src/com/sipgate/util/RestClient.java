@@ -103,7 +103,7 @@ public class RestClient implements ApiClientInterface {
 		try {
 			inputStream = authenticationInterface.getBillingBalance();
 		} catch (Exception e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 			return null;
 		}
 		
@@ -145,7 +145,7 @@ public class RestClient implements ApiClientInterface {
 		} catch (NetworkProblemException e) {
 			throw e;
 		} catch (Exception e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 		
 		if (inputStream == null) {
