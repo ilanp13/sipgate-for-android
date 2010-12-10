@@ -2,11 +2,13 @@ package com.sipgate.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Vector;
@@ -19,6 +21,7 @@ import org.zoolu.sip.address.SipURL;
 import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
@@ -53,7 +56,8 @@ public class XmlrpcClient implements ApiClientInterface {
 	
 	private XMLRPCClient client = null;
 	
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+	private static final SimpleDateFormat periodFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
 	private static final Locale locale = Locale.getDefault();
 	
@@ -66,7 +70,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			init(Constants.XMLRPC_API_10_SERVER_URL, ApiUser, ApiPassword);
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "XMLRPCExceptin in XmlrpcClient(): " + e.getLocalizedMessage());
+			Log.e(TAG, "XMLRPCExceptin in XmlrpcClient(): " + e.toString());
 			throw new ApiException();
 		}
 	}
@@ -87,11 +91,15 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			apiResult = (HashMap<String, Object>) this.client.call(method, param);
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "XMLRPCExceptin in clientIdentify(): " + e.getLocalizedMessage());
+			Log.e(TAG, "XMLRPCExceptin in clientIdentify(): " + e.toString());
 			Throwable cause = e.getCause();
 			if (cause.getClass().equals(UnknownHostException.class)) {
 				throw new NetworkProblemException();
-			} else {
+			} 
+			else if (cause.getClass().equals(SocketException.class)) {
+				throw new NetworkProblemException();
+			}
+			else {
 				throw e;
 			}
 		}
@@ -235,21 +243,39 @@ public class XmlrpcClient implements ApiClientInterface {
 			}
 
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "XMLRPC call to 'samurai.BalanceGet' failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "XMLRPC call to 'samurai.BalanceGet' failed with " + e.toString());
 			throw new ApiException();
 		}
 
 		return balance;
 	}
 
-	
+	/**
+	 * This method calls the xmlrpc-api and request call data.
+	 * If one of the params is <= 0 a full list is requested, otherwise a list 
+	 * with data in the given period. 
+	 * 
+	 * @param periodStart a periodStart value in unix timestamp
+	 * @param periodEnd a periodEnd value in unix timestamp 
+	 * @return a Vector filled with CallDataDBObjects or 
+	 */
 	@SuppressWarnings("unchecked")
-	public Vector<CallDataDBObject> getCalls() throws ApiException {
+	public Vector<CallDataDBObject> getCalls(long periodStart, long periodEnd) throws ApiException {
 		
 		Vector<CallDataDBObject> callDataDBObjects = new Vector<CallDataDBObject>();
 
 		parameters.clear();
 
+		if (periodStart > 0)
+		{
+			parameters.put("PeriodStart", periodFormatter.format(new Date(periodStart)));
+		}
+		
+		if (periodStart > 0)
+		{
+			parameters.put("PeriodEnd", periodFormatter.format(new Date(periodEnd)));
+		}
+		
 		try {
 			
 			apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.HistoryGetByDate", parameters);
@@ -354,7 +380,7 @@ public class XmlrpcClient implements ApiClientInterface {
 	}
 
 	@Override
-	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException
+	public Vector<VoiceMailDataDBObject> getVoiceMails(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException
 	{
 		throw new FeatureNotAvailableException();
 	}
@@ -375,7 +401,7 @@ public class XmlrpcClient implements ApiClientInterface {
 				}
 			}
 
-			Log.e(TAG, "serverDataGet() failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "serverDataGet() failed with " + e.toString());
 			throw new ApiException();
 		}
 
@@ -390,7 +416,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			ownUris = ownUriListGet();
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "ownUriListGet() failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "ownUriListGet() failed with " + e.toString());
 			throw new ApiException();
 		}
 
@@ -411,7 +437,7 @@ public class XmlrpcClient implements ApiClientInterface {
 		try {
 			sipUserdataList = userdataSipGet(requestedUris);
 		} catch (XMLRPCException e) {
-			Log.e(TAG, "userdataSipGet() failed with " + e.getLocalizedMessage());
+			Log.e(TAG, "userdataSipGet() failed with " + e.toString());
 			throw new ApiException();
 		}
 
@@ -452,16 +478,19 @@ public class XmlrpcClient implements ApiClientInterface {
 		return callTime;
 	}
 		
-	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException
+	{
 		throw new FeatureNotAvailableException();
 	}
 
 	
-	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException 
+	{
 		throw new FeatureNotAvailableException();
 	}
 	
-	public void setCallRead(String voicemail) throws ApiException, FeatureNotAvailableException {
+	public void setCallRead(String voicemail) throws ApiException, FeatureNotAvailableException
+	{
 		throw new FeatureNotAvailableException();
 	}
 	
@@ -474,11 +503,15 @@ public class XmlrpcClient implements ApiClientInterface {
 		return "basic/plus";
 	}
 	
-	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware)
-			throws FeatureNotAvailableException {
+	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware) throws FeatureNotAvailableException 
+	{
 		throw new FeatureNotAvailableException();
 	}
 
+	/**
+	 * This method fetchs all sipgate contacts from the account
+	 * @return a Vector with ContactDataDBObjects
+	 */
 	@SuppressWarnings("unchecked")
 	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
 	{
@@ -525,6 +558,12 @@ public class XmlrpcClient implements ApiClientInterface {
 		return contactDataDBObjects;
 	}
 	
+	/**
+	 * This function created a ContactDataDBObject with ContactNumberDBObjects from the given String in vCard-format
+	 * @param entryId the unique entry uuid
+	 * @param vCard a String filled with vCard-Data
+	 * @return a ContactDataDBObject with all ContactNumberDBObjects of the vCard
+	 */
 	public ContactDataDBObject getContactDataDBObjectFromVCard(String entryId, String vCard)
 	{
 		ContactDataDBObject contactDataDBObject = new ContactDataDBObject();
@@ -565,16 +604,16 @@ public class XmlrpcClient implements ApiClientInterface {
 					value = currentRow.substring(0, currentRow.indexOf(":")).toUpperCase();
 				}
 								
-				if (value.equals("CELL"))
+				if (value.equalsIgnoreCase("CELL"))
 				{
 					if (currentRow.indexOf(";") > -1)
 					{
 						value = currentRow.substring(0, currentRow.indexOf(";")).toUpperCase();
 					}
 					
-					contactNumberDBObject.setType(value);
+					contactNumberDBObject.setType(value.toUpperCase());
 				} 
-				else if (value.equals("VOICE"))
+				else if (value.equalsIgnoreCase("VOICE"))
 				{
 					if (currentRow.indexOf(";") > -1)
 					{
@@ -585,7 +624,7 @@ public class XmlrpcClient implements ApiClientInterface {
 						value = "WORK";
 					}
 					
-					contactNumberDBObject.setType(value);
+					contactNumberDBObject.setType(value.toUpperCase());
 				}
 				else
 				{
@@ -604,6 +643,11 @@ public class XmlrpcClient implements ApiClientInterface {
 		return contactDataDBObject;
 	}
 	
+	/**
+	 * This methoded decodes a string from quoted-printable to plain text 
+	 * @param inString the input String
+	 * @returnthe decoded plain text string
+	 */
 	public String decodeQuotedPrintable(String inString)
 	{
 		if (inString.contains("=")) 
@@ -633,6 +677,11 @@ public class XmlrpcClient implements ApiClientInterface {
 	    {
 	        return inString;
 	    }
+	}
+
+	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices() throws FeatureNotAvailableException, ApiException
+	{
+		throw new FeatureNotAvailableException();
 	}
 }
 

@@ -55,7 +55,7 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	private Context context = null;
 
 	// Path where to store all profiles - !!!should be replaced by some system variable!!!
-	private final static String profilePath = "/sdcard/Sipgate/";
+	private final static String profilePath = "/data/data/com.sipgate/";
 	// Path where is stored the shared preference file - !!!should be replaced by some system variable!!!
 	private final String sharedPrefsPath = "/data/data/com.sipgate/shared_prefs/";
 	// Shared preference file name - !!!should be replaced by some system variable!!!
@@ -124,6 +124,8 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final String PREF_DNS = "dns";
 	public static final String PREF_VQUALITY = "vquality";
 	public static final String PREF_MESSAGE = "vmessage";
+	public static final String PREF_REFRESH_EVENTS = "refresh_events";
+	public static final String PREF_REFRESH_CONTACTS = "refresh_contacts";
 
 	// Default values of the preferences
 	public static final String	DEFAULT_USERNAME = "";
@@ -165,6 +167,8 @@ public class Settings extends PreferenceActivity implements OnSharedPreferenceCh
 	public static final String	DEFAULT_DNS = "";
 	public static final String  DEFAULT_VQUALITY = "low";
 	public static final boolean DEFAULT_MESSAGE = false;
+	public static final String DEFAULT_REFRESH_EVENTS = "5";
+	public static final String DEFAULT_REFRESH_CONTACTS = "1440";
 
 	// An other preference keys (not in the Preferences XML file)
 	public static final String PREF_OLDVALID = "oldvalid";

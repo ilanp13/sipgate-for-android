@@ -40,9 +40,9 @@
    	<string name="sipgate_voicemail_from">from</string>
    	<string name="sipgate_seconds">seconds</string>
 	<string name="sipgate_tab_dialpad">Dialpad</string>   	
-	<string name="sipgate_tab_voicemail">Voicemail</string>   		
+	<string name="sipgate_tab_voicemail">Voicemails</string>   		
 	<string name="sipgate_tab_contacts">Contacts</string>
-	<string name="sipgate_tab_calllist">Calllist</string>   	
+	<string name="sipgate_tab_calllist">Calls</string>   	
 	<string name="sipgate_decimal_separator">.</string>
    	<string name="sipgate_empty_contactlist">Your contactlist is empty.</string>
    	<string name="sipgate_phonetype_home">Home</string>
@@ -86,4 +86,38 @@
 	<string name="sipgate_refresh">Refreshing...</string>
 	<string name="sipgate_api_error">An error occurred during the refresh. Please try again later.</string>
 	<string name="sipgate_new_entries">List has been refreshed.</string>
+	<string name="sipgate_no_entries">List has been refreshed. There were no new entries.</string>
+	<string name="simple_settings_refresh_timers">Refresh intervals</string>
+	<string name="simple_settings_refresh_contacts">contacts</string>
+	<string name="simple_settings_refresh_events">events</string>
+    <string-array name="refresh_values_labels">
+        <item>every minute</item>
+        <item>every 5 minutes</item>
+        <item>every 15 minutes</item>
+        <item>every 30 minutes</item>
+        <item>every hour</item>
+        <item>every 3 hours</item>
+        <item>every 6 hours</item>
+        <item>daily</item>
+    </string-array>
+    <string-array name="refresh_values">
+        <item>1</item>
+        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>1440</item>
+    </string-array>
+    <string-array name="simple_settings_refresh_values">
+        <item>every minute</item>
+		<item>every 5 minutes</item>
+		<item>every 15 minutes</item>
+		<item>every 30 minutes</item>
+		<item>every hour</item>
+		<item>every 3 hours</item>
+		<item>every 6 hours</item>
+		<item>once per day</item>
+    </string-array>
 </resources>

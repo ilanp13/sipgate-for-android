@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/sipgateSettingsStandard" android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:orientation="vertical">
+	<TextView android:id="@+id/sipgateSettingsStandardName"
+		android:layout_marginTop="15dip" android:layout_marginBottom="15dip"
+		android:padding="3dip" android:textSize="20dip" android:textColor="#FFFFFF"
+		android:layout_width="fill_parent" android:layout_height="wrap_content" />
+</LinearLayout>

@@ -1,16 +1,24 @@
 package com.sipgate.util;
 
 
-import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
-import com.sipgate.sipua.ui.Settings;
-
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
+import com.sipgate.service.SipgateBackgroundService;
+import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.sipua.ui.RegisterService;
+import com.sipgate.sipua.ui.Settings;
 
 /**
  * Allows Access to the Sipgate configurations
  * 
  * @author Karsten Knuth
+ * @author niepel
  * @version 1.1
  *
  */
@@ -78,7 +86,59 @@ public class SettingsClient {
 	public String getExtensionAlias() {
 		return this.preferences.getString(SettingsClient.extensionAlias, "");
 	}
+
+	/**
+	 * Sets the refresh time for events
+	 * 
+	 * @param time - the Time in Minutes to be set
+	 * @author niepel
+	 */
+	public void setEventsRefreshTime(String time) {
+		this.editor.putString(Settings.PREF_REFRESH_EVENTS, time);
+		this.editor.commit();
+	}
 	
+	/**
+	 * Returns the refresh time for events
+	 * 
+	 * @since 1.0
+	 * @return the refresh time for events in Milliseconds
+	 * @author niepel
+	 */
+	public Long getEventsRefreshTime() {
+		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_EVENTS, Settings.DEFAULT_REFRESH_EVENTS);
+		long timeInMillis = Long.parseLong(timeInMinutes);
+		timeInMillis = timeInMillis * 60 * 1000;		// Time in Minutes * 60 * 1000 = Time in Milliseconds
+		Log.d("EventsRefreshTime",String.valueOf(timeInMillis));
+		return timeInMillis;
+	}
+	
+	/**
+	 * Sets the refresh time for contacts
+	 * 
+	 * @param time - the Time in Minutes to be set
+	 * @author niepel
+	 */
+	public void setContactsRefreshTime(String time) {
+		this.editor.putString(Settings.PREF_REFRESH_CONTACTS, time);
+		this.editor.commit();
+	}
+
+	/**
+	 * Returns the refresh time for contacts
+	 * 
+	 * @since 1.0
+	 * @return the refresh time for contacts in Milliseconds
+	 * @author niepel
+	 */
+	public Long getContactsRefreshTime() {
+		String timeInMinutes = this.preferences.getString(Settings.PREF_REFRESH_CONTACTS, Settings.DEFAULT_REFRESH_CONTACTS);
+		long timeInMillis = Long.parseLong(timeInMinutes);
+		timeInMillis = timeInMillis * 60 * 1000;		// Time in Minutes * 60 * 1000 = Time in Milliseconds
+		Log.d("ContactsRefreshTime",String.valueOf(timeInMillis));
+		return timeInMillis;
+	}
+
 	/**
 	 * Saves the registration server
 	 * 
@@ -284,6 +344,8 @@ public class SettingsClient {
 		setUseStunServer(false);
 		setStunServer("stun.sipgate.net");
 		setStunPort("10000");
+		setEventsRefreshTime(Settings.DEFAULT_REFRESH_EVENTS);
+		setContactsRefreshTime(Settings.DEFAULT_REFRESH_CONTACTS);
 	}
 	
 	/**
@@ -368,6 +430,27 @@ public class SettingsClient {
 		this.editor.remove("sipgate_webpass");
 		this.editor.remove("sipgate_api-type");
 		this.editor.commit();
+	}
+	
+	public void cleanAllCredentials()
+	{
+		purgeWebuserCredentials();
+		unRegisterExtension();
+
+		Receiver.engine(context).halt();
+		
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	    notificationManager.cancelAll();
+	    
+		context.stopService(new Intent(context,SipgateBackgroundService.class));
+		context.stopService(new Intent(context,RegisterService.class));
+					
+		SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(context);
+
+		sipgateDBAdapter.dropTables(sipgateDBAdapter.getDatabase());
+		sipgateDBAdapter.createTables(sipgateDBAdapter.getDatabase());
+
+		sipgateDBAdapter.close();
 	}
 	
 	/**

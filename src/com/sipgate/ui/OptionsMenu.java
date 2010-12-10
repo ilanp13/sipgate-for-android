@@ -242,7 +242,7 @@ public class OptionsMenu {
 	private void openSettings(Intent intent, Activity activity)
 	{
 		try {
-			intent = new Intent(activity, SimpleSettingsActivity.class);
+			intent = new Intent(activity, SimpleSettingsListActivity.class);
 			activity.startActivity(intent);
 		}
 		catch (ActivityNotFoundException e) {
@@ -304,7 +304,7 @@ public class OptionsMenu {
 			Log.v(TAG, "bind service -> " + bindret);
 		}
 		catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}
 	
@@ -361,7 +361,7 @@ public class OptionsMenu {
 			Log.v(TAG, "bind service -> " + bindret);
 		}
 		catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}
 	
@@ -418,7 +418,7 @@ public class OptionsMenu {
 			Log.v(TAG, "bind service -> " + bindret);
 		}
 		catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}	
 }

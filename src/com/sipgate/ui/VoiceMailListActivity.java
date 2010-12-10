@@ -529,7 +529,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 				}
 			}					
 			catch (Exception e) {
-				Log.e(TAG, e.getLocalizedMessage(), e);
+				Log.e(TAG, e.toString(), e);
 			
 				if (waitDialog.isShowing()) {
 					waitDialog.dismiss();
@@ -542,7 +542,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 					}
 				}
 				catch (IOException e) {
-					Log.e(TAG, e.getLocalizedMessage(), e);
+					Log.e(TAG, e.toString(), e);
 				}
 				
 				try {
@@ -551,7 +551,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 					}
 				}
 				catch (IOException e) {
-					Log.e(TAG, e.getLocalizedMessage(), e);
+					Log.e(TAG, e.toString(), e);
 				}
 			}
 			

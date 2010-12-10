@@ -5,12 +5,15 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Vector;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
@@ -28,6 +31,8 @@ import android.widget.Toast;
 import com.sipgate.R;
 import com.sipgate.R.id;
 import com.sipgate.api.types.MobileExtension;
+import com.sipgate.api.types.RegisteredMobileDevice;
+import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
@@ -66,9 +71,15 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		
 		context = this;
 		
-		settingsClient = SettingsClient.getInstance(getApplicationContext());
+		okButton = (Button) findViewById(id.okButton);
+		okButton.setOnClickListener(this);
+		
+		formatter = new PhoneNumberFormatter();
+		locale = Locale.getDefault();	
 		
 		showWait();
+		
+		settingsClient = SettingsClient.getInstance(getApplicationContext());
 			
 		if ((isVoiceAccount = isVoiceAccount()))
 		{
@@ -80,12 +91,6 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		}
 			
 		hideWait();
-	
-		okButton = (Button) findViewById(id.okButton);
-		okButton.setOnClickListener(this);
-		
-		formatter = new PhoneNumberFormatter();
-		locale = Locale.getDefault();	
 	}
 	
 	private void setNonVoiceLayoutVisible(boolean visible) 
@@ -158,7 +163,7 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 			provisioningData = ApiServiceProvider.getInstance(this).getProvisioningData();
 		}
 		catch(Exception e){
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 		return provisioningData;
 	}
@@ -175,10 +180,32 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		
 		String lineNumber = tm.getLine1Number();
+	
+		if (lineNumber == null)
+		{
+			try 
+			{
+				Vector<RegisteredMobileDevice> registeredMobileDevices = ApiServiceProvider.getInstance(this).getRegisteredMobileDevices();
 		
-		lineNumber = formatter.formattedPhoneNumberFromStringWithCountry(lineNumber, locale.getCountry());
+				if (registeredMobileDevices != null && registeredMobileDevices.size() > 0)
+				{
+					lineNumber = registeredMobileDevices.get(0).getDeviceNumberE164();
+				}
+			} 
+			catch (FeatureNotAvailableException e) 
+			{
+				e.printStackTrace();
+			}
+			catch (ApiException e)
+			{
+				e.printStackTrace();
+			}			
+		}
 		
-		if (lineNumber != null) {
+		if (lineNumber != null && lineNumber.length() > 0) 
+		{	
+			lineNumber = formatter.formattedPhoneNumberFromStringWithCountry(lineNumber, locale.getCountry());
+			
 			numberText.setText(lineNumber);
 			numberText.setSelection(lineNumber.length());
 		}
@@ -186,18 +213,22 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 	
 	private boolean isVoiceAccount() 
 	{
-		try {
+		try 
+		{
 			String baseProducType = ApiServiceProvider.getInstance(this).getBaseProductType();
 			
 			return (baseProducType != null && baseProducType.equals("voice"));
 		} 
-		catch (IOException e) {
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		} 
-		catch (URISyntaxException e) {
+		catch (URISyntaxException e)
+		{
 			e.printStackTrace();
 		} 
-		catch (FeatureNotAvailableException e) {
+		catch (FeatureNotAvailableException e) 
+		{
 			e.printStackTrace();
 		}			
 		
@@ -220,6 +251,15 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 
 	private void hideWait() 
 	{
+		try
+		{
+			Thread.sleep(250);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
 		if (progressDialog != null && progressDialog.isShowing())
 		{
 			progressDialog.cancel();
@@ -239,7 +279,14 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		MobileExtension mobileExtension = null;
 		
 		String model = android.os.Build.MODEL;
-		String vendor = android.os.Build.PRODUCT;
+		
+		String vendor = "unknown";
+		
+		if (VERSION.SDK_INT > Build.VERSION_CODES.CUPCAKE)
+		{
+			vendor = android.os.Build.MANUFACTURER;
+		}
+		
 		String firmware = android.os.Build.VERSION.RELEASE;
 
 		try
@@ -331,11 +378,10 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 		Receiver.engine(this).StartEngine();
 		
 		try {
-			Intent intent = new Intent(this, com.sipgate.ui.SipgateFrames.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
+			Intent sipgateFramesIntent = new Intent(this, SipgateFrames.class);
+			startActivity(sipgateFramesIntent);
 		} catch (ActivityNotFoundException e) {
-			Log.e(TAG, e.getLocalizedMessage());
+			Log.e(TAG, e.toString());
 		}
 	}
 
@@ -363,6 +409,11 @@ public class Setup extends Activity implements OnClickListener, TextWatcher
 	public void onTextChanged(CharSequence s, int start, int before, int count)
 	{
 		
+	}
+	
+	@Override
+	public void onBackPressed()
+	{
 	}
 }
 
