@@ -29,11 +29,12 @@ public class CallListAdapter extends BaseAdapter
 {
 	private final static String TAG = "CallListAdapter";
 
+	private Activity activity = null;
+	private SipgateDBAdapter sipgateDBAdapter = null;
+
 	private LayoutInflater mInflater = null;
 	
 	private ApiServiceProvider apiClient = null;
-		
-	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private Vector<CallDataDBObject> callDataDBObjects = null;
 
@@ -67,13 +68,14 @@ public class CallListAdapter extends BaseAdapter
 	
 	private HashMap<String, String> nameCache = null;
 	
-	public CallListAdapter(Activity activity) 
+	public CallListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
+		this.activity = activity;
+		this.sipgateDBAdapter = sipgateDBAdapter;
+		
 		mInflater = activity.getLayoutInflater();
 		
 		apiClient = ApiServiceProvider.getInstance(activity);
-		
-		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
 		
 		callDataDBObjects = sipgateDBAdapter.getAllCallData();
 				

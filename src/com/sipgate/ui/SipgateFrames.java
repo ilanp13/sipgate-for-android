@@ -1,29 +1,9 @@
-/*
- * Copyright (C) 2009 The Sipdroid Open Source Project
- * Copyright (C) 2008 Hughes Systique Corporation, USA (http://www.hsc.com)
- * 
- * This file is part of Sipdroid (http://www.sipdroid.org)
- * 
- * Sipdroid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This source code is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this source code; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 package com.sipgate.ui;
 
 import com.sipgate.R;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.SipgateApplication;
 import com.sipgate.util.ApiServiceProvider.API_FEATURE;
 
 import android.app.TabActivity;
@@ -35,13 +15,17 @@ import android.view.Window;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 
-/////////////////////////////////////////////////////////////////////
-// this the main activity of Sipdroid
-// for modifying it additional terms according to section 7, GPL apply
-// see ADDITIONAL_TERMS.txt
-/////////////////////////////////////////////////////////////////////
-public class SipgateFrames extends TabActivity {
-	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};  // FIXME: replace by class integrating the TAB_-constants
+/**
+ * This class holds the frame view and functions as dispatcher for
+ * the content activities.
+ * 
+ * @author Karsten Knuth
+ * @author Sipdroid
+ * @version 1.2
+ */
+public class SipgateFrames extends TabActivity 
+{
+	public enum SipgateTab { DIALPAD, CONTACTS, CALLS, VM};
 	
 	private static final String TAG = "TabActivity";
 	private static final int TAB_DIAL = 0;
@@ -59,8 +43,14 @@ public class SipgateFrames extends TabActivity {
 	private TabSpec tabSpecCallList = null;
 	private TabSpec tabSpecVmList = null;
 
-	@Override
-	public void onCreate(Bundle icicle) {
+	/**
+	 * This function is called right after the activity gets started
+	 * and is used to initiate several variables.
+	 * 
+	 * @since 1.0
+	 */
+	public void onCreate(Bundle icicle) 
+	{
 		super.onCreate(icicle);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		Intent intent = getIntent();
@@ -91,7 +81,8 @@ public class SipgateFrames extends TabActivity {
 			this.vmTabVisible = false;
 			
 			Log.i(TAG, "used API is NOT capable of 'VM_LIST' feature; background-service disabled ...");
-		} else {
+		}
+		else {
 			Log.i(TAG, "used API is capable of 'VM_LIST' feature ...");
 
 			this.addVmTab();
@@ -102,36 +93,122 @@ public class SipgateFrames extends TabActivity {
 		Log.d(TAG, "calling setcurrenttab from oncreate");
 		this.setCurrentTab(bundle);
 	}
+	
+	/**
+	 * This function is called every time the activity comes to the
+	 * foreground and executed code.
+	 */
+	public void onResume() {
+		super.onResume();
+		
+		// do we need to hide the VM tab?
+		if (!this.vmTabVisible && hasVmListFeature()) {
+			this.addVmTab();
+		}
+		else if (vmTabVisible && !hasVmListFeature()) {
+			this.removeVmTab();
+		}
+		
+		this.startService(new Intent(this, SipgateBackgroundService.class));
+	}
+	
+	/**
+	 * This function gets called each time the activity recieves an
+	 * intent while it is already in memory.
+	 * 
+	 * @param intent The intent that reactivated the activity.
+	 * @since 1.1
+	 */
+	public void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		String action = intent.getAction();
+		SipgateApplication application = (SipgateApplication) getApplication();
+		
+		if (action != null && action.equals(SipgateBackgroundService.ACTION_NEWEVENTS)) {
+			application.setRefreshState(SipgateApplication.RefreshState.NEW_EVENTS);
+			tabs.setCurrentTab(tabs.getCurrentTab());
+		}
+		else if (action != null && action.equals(SipgateBackgroundService.ACTION_NOEVENTS)) {
+			application.setRefreshState(SipgateApplication.RefreshState.NO_EVENTS);
+			tabs.setCurrentTab(tabs.getCurrentTab());
+		}
+		else if (action != null && action.equals(SipgateBackgroundService.ACTION_GETEVENTS)) {
+			application.setRefreshState(SipgateApplication.RefreshState.GET_EVENTS);
+			tabs.setCurrentTab(tabs.getCurrentTab());
+		}
+		else if (action != null && action.equals(SipgateBackgroundService.ACTION_ERROR)) {
+			application.setRefreshState(SipgateApplication.RefreshState.ERROR);
+			tabs.setCurrentTab(tabs.getCurrentTab());
+		}
+		else {
+			application.setRefreshState(SipgateApplication.RefreshState.NONE);
+			Bundle bundle = intent.getExtras();
+			Log.d(TAG, "calling setcurrenttab from onNewIntent");
+			this.setCurrentTab(bundle);
+		}
+	}
 
+	/**
+	 * This function sets the current tab according to the "view"
+	 * parameter in the intents extra data.
+	 * 
+	 * @param bundle The bundle containing all the extra data that was provided with the intent.
+	 * @since 1.0
+	 */
 	private void setCurrentTab(Bundle bundle) {
 		if (bundle != null) {
 			this.currentTab = (SipgateTab) bundle.getSerializable("view");
 			Log.d("bundle", this.currentTab.toString());
-		} else {
-			Log.e("bundle", "Not provided");
+		}
+		else {
+			Log.d("bundle", "Not provided");
 			this.currentTab = SipgateTab.DIALPAD;
 		}
 
 		switch (this.currentTab) {
-		case CALLS:
-			tabs.setCurrentTab(TAB_CALLLIST);
-			break;
-		
-		case VM:
-			tabs.setCurrentTab(TAB_VMLIST);
-			break;
-
-		case CONTACTS:
-			tabs.setCurrentTab(TAB_CONTACTS);
-			break;
-
-		// dialpad is our default:
-		default:
-			tabs.setCurrentTab(TAB_DIAL);
-			break;
+			case CALLS:
+				tabs.setCurrentTab(TAB_CALLLIST);
+				break;
+			
+			case VM:
+				tabs.setCurrentTab(TAB_VMLIST);
+				break;
+	
+			case CONTACTS:
+				tabs.setCurrentTab(TAB_CONTACTS);
+				break;
+	
+			// dialpad is our default:
+			default:
+				tabs.setCurrentTab(TAB_DIAL);
+				break;
 		}
 	}
 	
+	/**
+	 * This function checks the api client for the availability
+	 * of the voice mail list featue. 
+	 * 
+	 * @return A boolen that holds whether the feature is available.
+	 * @since 1.0
+	 */
+	private boolean hasVmListFeature() {
+		boolean hasVmListFeature = false;
+		try {
+			hasVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
+		}
+		catch (Exception e) {
+			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.toString());
+		}
+		
+		return hasVmListFeature;
+	}
+	
+	/**
+	 * This function adds the voice mail tab to the tab view.
+	 * 
+	 * @since 1.0
+	 */
 	private void addVmTab() {
 		Resources res = getResources();
 		this.tabSpecVmList = tabs.newTabSpec("Voicemails");
@@ -142,48 +219,22 @@ public class SipgateFrames extends TabActivity {
 		this.vmTabVisible = true;
 	}
 
+	/**
+	 * This function removes the voice mail tab from the tab view.
+	 * 
+	 * @since 1.0
+	 */
 	private void removeVmTab() {
 		try {
 			this.tabs.clearAllTabs();
 			tabs.addTab(tabSpecDial);
 			tabs.addTab(tabSpecContacts);
 			tabs.addTab(tabSpecCallList);
-		} catch (NullPointerException e) {
-			Log.i(TAG, "removeVmTab() -> "+e.getLocalizedMessage());
+		}
+		catch (NullPointerException e) {
+			Log.i(TAG, "removeVmTab() -> "+e.toString());
 		}
 		
 		this.vmTabVisible = false;
-	}
-	
-	private boolean hasVmListFeature() {
-		boolean hasVmListFeature = false;
-		try {
-			hasVmListFeature = apiClient.featureAvailable(API_FEATURE.VM_LIST);
-		} catch (Exception e) {
-			Log.w(TAG, "startScanService() exception in call to featureAvailable() -> " + e.getLocalizedMessage());
-		}
-		
-		return hasVmListFeature;
-	}
-	
-	public void onResume() {
-		super.onResume();
-		
-		// do we need to hide the VM tab?
-		if (!this.vmTabVisible && hasVmListFeature()) {
-			this.addVmTab();
-		} else if (vmTabVisible && !hasVmListFeature()) {
-			this.removeVmTab();
-		}
-		
-		this.startService(new Intent(this, SipgateBackgroundService.class));
-	}
-	
-	@Override
-	public void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		Bundle bundle = intent.getExtras();
-		Log.d(TAG, "calling setcurrenttab from onNewIntent");
-		this.setCurrentTab(bundle);
 	}
 }

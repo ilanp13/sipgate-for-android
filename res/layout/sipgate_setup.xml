@@ -6,7 +6,7 @@
 </LinearLayout><LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_marginTop="2px" android:orientation="vertical" android:id="@+id/setupVoiceLayout">
 
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chooseExtensionHelp" android:layout_marginBottom="17px" android:id="@+id/TextView02"></TextView>
-<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/mobilePhoneNumberText"></EditText>
+<EditText android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/mobilePhoneNumberText" android:inputType="phone"></EditText>
 </LinearLayout>
 		
 		<Button android:text="@string/ok" android:id="@+id/okButton"

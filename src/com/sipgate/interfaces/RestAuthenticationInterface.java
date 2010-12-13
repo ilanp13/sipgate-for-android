@@ -13,9 +13,9 @@ public interface RestAuthenticationInterface {
 	
 	public InputStream getContacts() throws AccessProtectedResourceException, NetworkProblemException;
 	
-	public InputStream getCalls() throws AccessProtectedResourceException, NetworkProblemException;
+	public InputStream getCalls(long periodStart, long periodEnd) throws AccessProtectedResourceException, NetworkProblemException;
 	
-	public InputStream getVoiceMails() throws AccessProtectedResourceException, NetworkProblemException;
+	public InputStream getVoiceMails(long periodStart, long periodEnd) throws AccessProtectedResourceException, NetworkProblemException;
 	
 	public InputStream getVoicemail(String voicemail) throws AccessProtectedResourceException, NetworkProblemException;
 
@@ -29,4 +29,5 @@ public interface RestAuthenticationInterface {
 	
 	public InputStream setupMobileExtension(String phoneNumber, String model, String vendor, String firmware) throws AccessProtectedResourceException, NetworkProblemException;
 
+	public InputStream getRegisteredMobileDevices() throws AccessProtectedResourceException, NetworkProblemException;
 }

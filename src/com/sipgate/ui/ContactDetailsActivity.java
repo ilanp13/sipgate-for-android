@@ -16,12 +16,15 @@ import android.widget.ListView;
 import com.sipgate.R;
 import com.sipgate.adapters.ContactDetailAdapter;
 import com.sipgate.db.ContactNumberDBObject;
+import com.sipgate.db.SipgateDBAdapter;
 import com.sipgate.sipua.ui.Receiver;
 
+@SuppressWarnings("unused")
 public class ContactDetailsActivity extends Activity implements OnItemClickListener
 {
 	private static final String TAG = "ContactDetailsActivity";
 	
+	private SipgateDBAdapter sipgateDBAdapter = null;
 	private ContactDetailAdapter contactDetailAdapter = null;
 	private AlertDialog m_AlertDlg = null;
 	
@@ -38,11 +41,23 @@ public class ContactDetailsActivity extends Activity implements OnItemClickListe
 		
 		elementList = (ListView) findViewById(R.id.ContactPhonenumbers);
 		
-		contactDetailAdapter = new ContactDetailAdapter(this, bundle.getString("uuid"));
+		sipgateDBAdapter = new SipgateDBAdapter(this);
+		contactDetailAdapter = new ContactDetailAdapter(this, bundle.getString("uuid"), sipgateDBAdapter);
         
         elementList.setAdapter(contactDetailAdapter);
         elementList.setOnItemClickListener(this);
     }
+	
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+	
+		if (sipgateDBAdapter != null)
+		{
+			sipgateDBAdapter.close();
+		}
+	}
 		
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) 

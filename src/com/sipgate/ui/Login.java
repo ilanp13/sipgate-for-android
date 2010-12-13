@@ -1,15 +1,13 @@
 package com.sipgate.ui;
 
-import java.io.Serializable;
-
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,18 +18,32 @@ import android.widget.Toast;
 
 import com.sipgate.R;
 import com.sipgate.R.id;
+import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.models.SipgateProvisioningData;
+import com.sipgate.service.SipgateBackgroundService;
+import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.SettingsClient;
 
-public class Login extends Activity implements OnClickListener {
+@SuppressWarnings("unused")
+public class Login extends Activity implements OnClickListener 
+{
 	private final String TAG = "Login";
-	private Button okButton;
+	
+	private Button okButton = null;
+	private EditText username = null;
+	private EditText password = null;
 
+	private SettingsClient settingsClient = null;
 	private ApiServiceProvider apiServiceProvider = null;
+	
 	private ProgressDialog progressDialog = null;
 	
 	private Context context = this;
+	
+	boolean purged = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -40,22 +52,22 @@ public class Login extends Activity implements OnClickListener {
 
 		setContentView(R.layout.sipgate_setup_login);
 
-		context = this;
-
 		okButton = (Button) findViewById(id.okButton);
 		okButton.setOnClickListener(this);
 		
-		this.apiServiceProvider = ApiServiceProvider.getInstance(getApplicationContext());
+		username = (EditText) findViewById(R.id.inputUsername);
+		password = (EditText) findViewById(R.id.inputPassword);
 		
-		if (apiServiceProvider.isRegistered()) 
-		{
-			Intent authorizationIntent = new Intent(this, Setup.class);
-			startActivity(authorizationIntent);
-		}
+		settingsClient = SettingsClient.getInstance(this);
+		apiServiceProvider = ApiServiceProvider.getInstance(this);
+		
+		username.setText(settingsClient.getWebusername());
+		password.setText(settingsClient.getWebpassword());
 	}
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
 		boolean result = super.onCreateOptionsMenu(menu);
 
 		OptionsMenu m = new OptionsMenu();
@@ -65,8 +77,10 @@ public class Login extends Activity implements OnClickListener {
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
 		boolean result = super.onOptionsItemSelected(item);
+		
 		OptionsMenu m = new OptionsMenu();
 		m.selectItem(item, this.getApplicationContext(), this);
 
@@ -75,57 +89,49 @@ public class Login extends Activity implements OnClickListener {
 
 	public void onClick(View v) 
 	{
-		EditText username = (EditText) findViewById(R.id.inputUsername);
-		EditText password = (EditText) findViewById(R.id.inputPassword);
+		showWait();
+		
+		String user = username.getText().toString();
+		String pass = password.getText().toString();
 
-		try 
+		if ((user.length()) > 0 && (pass.length() > 0)) 
 		{
-						
-			String user = username.getText().toString();
-			String pass = password.getText().toString();
-
-			if ((user.length()) > 0 && (pass.length() > 0)) 
+			try
 			{
-				showWait();
+				apiServiceProvider.register(user, pass);
 				
-				SipgateProvisioningData data = null;
-				
-				ApiServiceProvider apiProvider = ApiServiceProvider.getInstance(getApplicationContext());
-				apiProvider.register(user, pass);
-
-				data = apiProvider.getProvisioningData();
-
-				openSetupActivity(data);
-			} else {
-				showNoCredentialsToast();
+				if (apiServiceProvider.isRegistered()) 
+				{
+					Intent setupIntent = new Intent(context, Setup.class);
+					startActivity(setupIntent);
+				}
+				else 
+				{
+					showWrongCredentialsToast();
+				}
 			}
-		} catch (NetworkProblemException e) {
-			showNetworkProblemToast();
-		} catch (Exception e) {
-			showWrongCredentialsToast();
-			e.printStackTrace();
-		} 
-		finally
+			catch (NetworkProblemException e) 
+			{
+				showNetworkProblemToast();
+			} 
+			catch (ApiException e) 
+			{
+				showWrongCredentialsToast();
+			} 
+		}
+		else 
 		{
-			hideWait();
+			showNoCredentialsToast();
 		}
+		
+		hideWait();
 	}
-	
-	private void openSetupActivity(Serializable data) {
-		try {
-			Intent intent = new Intent(getApplicationContext(), Setup.class);
-			intent.putExtra("com.sipgate.ui.credentials", data);
-			startActivity(intent);
-		} catch (ActivityNotFoundException e) {
-			Log.w(TAG, e.getLocalizedMessage());
-		}
-	}
-	
+		
 	private void showWait() 
 	{
 		okButton.setClickable(false);
 		okButton.setEnabled(false);
-		
+	
 		new Thread(new Runnable()
 		{
 			@Override
@@ -142,11 +148,20 @@ public class Login extends Activity implements OnClickListener {
 	{
 		okButton.setClickable(true);
 		okButton.setEnabled(true);
-	
+
+		try
+		{
+			Thread.sleep(250);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		
 		if (progressDialog != null && progressDialog.isShowing())
 		{
 			progressDialog.cancel();
-		}
+		}	
 	}
 
 	private void showWrongCredentialsToast() 
@@ -157,7 +172,7 @@ public class Login extends Activity implements OnClickListener {
 			public void run()
 			{
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_wrong_credentials), Toast.LENGTH_LONG).show();
+				Toast.makeText(context, getResources().getString(R.string.sipgate_wrong_credentials), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();
@@ -171,7 +186,7 @@ public class Login extends Activity implements OnClickListener {
 			public void run()
 			{
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_network_problem), Toast.LENGTH_LONG).show();
+				Toast.makeText(context, getResources().getString(R.string.sipgate_network_problem), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();
@@ -185,9 +200,14 @@ public class Login extends Activity implements OnClickListener {
 			public void run()
 			{
 				Looper.prepare();
-				Toast.makeText(getApplicationContext(), getResources().getString(R.string.sipgate_no_credentials), Toast.LENGTH_LONG).show();
+				Toast.makeText(context, getResources().getString(R.string.sipgate_no_credentials), Toast.LENGTH_LONG).show();
 				Looper.loop();
 			}
 		}).start();
+	}
+	
+	@Override
+	public void onBackPressed()
+	{
 	}
 }

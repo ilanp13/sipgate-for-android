@@ -2,7 +2,7 @@
 <resources>
 	<string name="menu_sipgate_setup">sipgate setup</string>
 	<string name="sipgate_wrong_credentials">Wrong username and / or password, please try again ...</string>
-	<string name="sipgate_no_credentials">No username and / or password provided ...</string>
+	<string name="sipgate_no_credentials">Please provide username and password ...</string>
 	<string name="sipgate_wait">Please wait. Connecting to Server...</string>
 	<string name="sipgate_load_extension">Please wait. Loading extensions...</string>
 	<string name="username">username</string>
@@ -40,9 +40,9 @@
    	<string name="sipgate_voicemail_from">from</string>
    	<string name="sipgate_seconds">seconds</string>
 	<string name="sipgate_tab_dialpad">Dialpad</string>   	
-	<string name="sipgate_tab_voicemail">Voicemail</string>   		
+	<string name="sipgate_tab_voicemail">Voicemails</string>   		
 	<string name="sipgate_tab_contacts">Contacts</string>
-	<string name="sipgate_tab_calllist">Calllist</string>   	
+	<string name="sipgate_tab_calllist">Calls</string>   	
 	<string name="sipgate_decimal_separator">.</string>
    	<string name="sipgate_empty_contactlist">Your contactlist is empty.</string>
    	<string name="sipgate_phonetype_home">Home</string>
@@ -69,17 +69,55 @@
    	<string name="sipgate_phonetype_unknown">Unknown</string>
    	<string name="sipgate_extension_try_later">	Sorry, a technical error has occurred during processing. Please try again later.</string>
    	<string name="sipgate_extension_try_later_title">Error</string>
-   	<string name="sipgate_activate_mobileextension">activate mobile extension</string>
-   	<string name="chooseExtensionHelp">you need to specifiy a sipgate mobile extension</string>
-   	<string name="sipgate_error_unable_to_create_mobile_extension">unable to create mobile extension</string>
-   	<string name="sipgate_network_problem">There is a problem with your network connection. Please make sure your device is connected to the internet and try again.</string>
-   	<string name="sipgate_unable_to_provision">Provisioning error</string>
-   	<string name="sipgate_me">Me</string>
-   	<string name="sipgate_empty_calllist">Your calllist is empty.</string>
-   	<string name="sipgate_a_new_call">You have a new call</string>
-   	<string name="sipgate_new_calls">You have %d new calls</string>
-   	<string name="sipgate_unknown_caller">Unknown</string>
-   	<string name="sipgate_no_number">anonymous</string>
-   	<string name="sipgate_loading">Loading. Please wait...</string>
-   	<string name="sipgate_download_failed">Failed to download voice mail.</string>
+	<string name="sipgate_activate_mobileextension">activate mobile extension</string>
+	<string name="chooseExtensionHelp">you need to specify a sipgate mobile extension</string>
+	<string name="sipgate_error_unable_to_create_mobile_extension">unable to create mobile extension</string>
+	<string name="sipgate_network_problem">There is a problem with your network connection. Please make sure your device is connected to the internet and try again.</string>
+	<string name="sipgate_unable_to_provision">Provisioning error</string>
+	<string name="sipgate_me">Me</string>
+	<string name="sipgate_empty_calllist">Your call list is empty.</string>
+	<string name="sipgate_a_new_call">You have a new call</string>
+	<string name="sipgate_new_calls">You have %d new calls</string>
+	<string name="sipgate_unknown_caller">Unknown</string>
+	<string name="sipgate_no_number">anonymous</string>
+	<string name="sipgate_loading">Loading. Please wait...</string>
+	<string name="sipgate_download_failed">Failed to download voice mail.</string>
+	<string name="sipgate_contacts_in_list">sipgate contacts</string>
+	<string name="sipgate_refresh">Refreshing...</string>
+	<string name="sipgate_api_error">An error occurred during the refresh. Please try again later.</string>
+	<string name="sipgate_new_entries">List has been refreshed.</string>
+	<string name="sipgate_no_entries">List has been refreshed. There were no new entries.</string>
+	<string name="simple_settings_refresh_timers">Refresh intervals</string>
+	<string name="simple_settings_refresh_contacts">contacts</string>
+	<string name="simple_settings_refresh_events">events</string>
+    <string-array name="refresh_values_labels">
+        <item>every minute</item>
+        <item>every 5 minutes</item>
+        <item>every 15 minutes</item>
+        <item>every 30 minutes</item>
+        <item>every hour</item>
+        <item>every 3 hours</item>
+        <item>every 6 hours</item>
+        <item>daily</item>
+    </string-array>
+    <string-array name="refresh_values">
+        <item>1</item>
+        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>1440</item>
+    </string-array>
+    <string-array name="simple_settings_refresh_values">
+        <item>every minute</item>
+		<item>every 5 minutes</item>
+		<item>every 15 minutes</item>
+		<item>every 30 minutes</item>
+		<item>every hour</item>
+		<item>every 3 hours</item>
+		<item>every 6 hours</item>
+		<item>once per day</item>
+    </string-array>
 </resources>

@@ -25,9 +25,10 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 {
 	private final static String TAG = "ContactListAdapter";
 
-	private LayoutInflater mInflater = null;
-	
+	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
+	
+	private LayoutInflater mInflater = null;
 	
 	private Vector<ContactDataDBObject> contactDataDBObjects = null;
 	
@@ -48,13 +49,14 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 	private HashMap <String, Integer> index = null;
 	private Object[] sections = null;
 		
-	public ContactListAdapter(Activity activity) 
+	public ContactListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
+		this.activity = activity;
+		this.sipgateDBAdapter = sipgateDBAdapter;
+	
 		mInflater = activity.getLayoutInflater();
 		
 		index = new HashMap<String, Integer>();
-			
-		sipgateDBAdapter = SipgateDBAdapter.getInstance(activity);
 		
 		contactDataDBObjects = sipgateDBAdapter.getAllContactData();
 
@@ -292,7 +294,7 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 		
 		keyList.toArray(sections);
 	}
-	
+		
 	@Override
 	public int getPositionForSection(int section)
 	{

@@ -379,7 +379,7 @@ public class Sipdroid extends Activity {
 				intent = new Intent(this, com.sipgate.ui.CallListActivity.class);
 				startActivity(intent);
 			} catch (ActivityNotFoundException e) {
-				Log.d(TAG, e.getLocalizedMessage());
+				Log.d(TAG, e.toString());
 			}
 			break;
 

@@ -43,7 +43,7 @@ public class CallParser extends DefaultHandler
 		{
 			callDataDBObject = new CallDataDBObject();
 		}
-		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName))
+		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || "recordings".equalsIgnoreCase(localName))
 		{
 			parent = localName;
 		}
@@ -69,7 +69,10 @@ public class CallParser extends DefaultHandler
 		}
 		else if ("created".equalsIgnoreCase(localName))
 		{
-			callDataDBObject.setTime(getCallTime(currentValue.toString()));
+			if (!"recordings".equalsIgnoreCase(parent))
+			{
+				callDataDBObject.setTime(getCallTime(currentValue.toString()));
+			}
 		}
 		else if ("direction".equalsIgnoreCase(localName))
 		{
@@ -187,7 +190,7 @@ public class CallParser extends DefaultHandler
 				}
 			}
 		}
-		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName))
+		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || "recordings".equalsIgnoreCase(localName))
 		{
 			parent = null;
 		}
@@ -202,12 +205,15 @@ public class CallParser extends DefaultHandler
 	{
 		long callTime = 0;
 		
-		try {
-			if (dateString != null) {
+		try 
+		{
+			if (dateString != null) 
+			{
 				return dateformatterPretty.parse(dateString).getTime();
 			}
 		} 
-		catch (ParseException e) {
+		catch (ParseException e)
+		{
 			Log.e("CallParser", "getCallTime", e);
 		}
 		

@@ -2,17 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:background="#000000">
-	<!--
-		<Button android:text="login" android:id="@+id/loginButton"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"></Button> <Button
-		android:text="get voicemails" android:id="@+id/getVoicemailsButton"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"></Button>
-	-->
+	<LinearLayout android:id="@+id/sipgateVoiceMailListRefreshView"
+		android:layout_height="wrap_content" android:orientation="horizontal"
+		android:layout_width="fill_parent" android:gravity="center"
+		android:background="#333333" android:padding="2dip">
+		<ImageView android:id="@+id/sipgateVoiceMailListRefreshImage"
+			android:layout_width="wrap_content" android:layout_gravity="center"
+			android:layout_marginRight="5px"
+			android:layout_height="wrap_content" android:background="@drawable/refresh_spinner"></ImageView>
+		<TextView android:text="@string/sipgate_refresh" android:id="@+id/VoiceMailListNumberTextView"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:gravity="center" android:textColor="#FFFFFF"
+			android:textSize="12dip"></TextView>
+	</LinearLayout>
 	<ListView android:id="@+id/EventListView"
 		android:layout_height="fill_parent" android:layout_width="fill_parent"
-		android:choiceMode="singleChoice">
+		android:choiceMode="singleChoice" android:fastScrollEnabled="true">
 	</ListView>
 	<TextView android:text="@string/sipgate_empty_eventlist"
 		android:id="@+id/EmptyEventListTextView" android:layout_width="fill_parent"
