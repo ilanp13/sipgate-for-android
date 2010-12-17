@@ -3,8 +3,10 @@ package com.sipgate.ui;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.content.ContentProviderOperation;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract.RawContacts;
 
 import com.sipgate.R;
 import com.sipgate.db.SipgateDBAdapter;

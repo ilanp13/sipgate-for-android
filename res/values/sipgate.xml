@@ -120,4 +120,5 @@
 		<item>every 6 hours</item>
 		<item>once per day</item>
     </string-array>
+    <string name="label">sipgate</string>
 </resources>

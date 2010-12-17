@@ -30,6 +30,7 @@ import com.sipgate.R;
 import com.sipgate.adapters.CallListAdapter;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.db.SystemDataDBObject;
 import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
@@ -120,7 +121,16 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		super.onResume();
 		
 		registerForBackgroundIntents();
+
+		SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_CALLS_COUNT);
 		
+		if (systemDataDBObject != null)
+		{
+			systemDataDBObject.setValue(String.valueOf(0));
+			
+			sipgateDBAdapter.update(systemDataDBObject);
+		}
+				
 		refreshState = application.getRefreshState();
 		application.setRefreshState(SipgateApplication.RefreshState.NONE);
 		
