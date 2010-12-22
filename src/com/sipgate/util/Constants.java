@@ -16,5 +16,7 @@ public abstract class Constants
 	public static final String XMLRPC_API_10_SERVER_URL = API_10_BASEURL + "/RPC2";
 
 	public static final long ONE_DAY_IN_MS = 86400000;
-	public static final long ONE_MIN_IN_MS = 60000; 
+	public static final long ONE_MIN_IN_MS = 60000;	
+	
+	public static final String ACCOUNT_TYPE = "com.sipgate";
 }

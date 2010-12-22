@@ -1,6 +1,5 @@
 package com.sipgate.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -9,21 +8,17 @@ import java.util.Vector;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.Service;
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderOperation.Builder;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.sipgate.R;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.db.SystemDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.exceptions.StoreDataException;
 import com.sipgate.util.ApiServiceProvider;
@@ -78,8 +73,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	private VoiceMailDataDBObject oldVoiceMailDataDBObject = null;
 	private CallDataDBObject oldCallDataDBObject = null;
 		
-	private	int unreadCallsCounter = 0;
-	private	int unreadVoiceMailsCounter = 0;
+	private	int newCallsCounter = 0;
+	private	int newVoiceMailsCounter = 0;
 	
 	private int deletedContacts = 0;
 	private int updatedContacts = 0;
@@ -521,7 +516,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.d(TAG, "notifyIfNewContacts");
 		
-		if (newContactDataDBObjects == null) {
+		if (newContactDataDBObjects == null) 
+		{
 			Log.i(TAG, "notifyIfNewContacts() -> callDataDBObjects is null");
 			return -1;
 		}
@@ -530,28 +526,33 @@ public class SipgateBackgroundService extends Service implements EventService
 		insertedContacts = 0;
 		updatedContacts = 0;
 		
-		try {
-			if (sipgateDBAdapter == null) {
+		try
+		{
+			if (sipgateDBAdapter == null) 
+			{
 				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
 			Vector<ContactDataDBObject> oldContactDataDBObjects = sipgateDBAdapter.getAllContactData();
 			
 			sipgateDBAdapter.startTransaction();
-		
+			
 			deleteOldContacts(newContactDataDBObjects, oldContactDataDBObjects, sipgateDBAdapter);
+						
 			updateContacts(newContactDataDBObjects, oldContactDataDBObjects, sipgateDBAdapter);		
-
+			
 			Log.d(TAG, "ContactDataDBObject deleted: " + deletedContacts);
 			Log.d(TAG, "ContactDataDBObject inserted: " + insertedContacts);
 			Log.d(TAG, "ContactDataDBObject updated: " + updatedContacts);
-									
+			
 			sipgateDBAdapter.commitTransaction();
 		}
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			Log.e(TAG, "notifyIfNewContacts()", e);
 			
-			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) 
+			{
 				sipgateDBAdapter.rollbackTransaction();
 			}
 			
@@ -577,7 +578,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.d(TAG, "notifyIfUnreadsCalls");
 		
-		if (newCallDataDBObjects == null) {
+		if (newCallDataDBObjects == null) 
+		{
 			Log.i(TAG, "notifyIfUnreadsCalls() -> callDataDBObjects is null");
 			return -1;
 		}
@@ -586,18 +588,23 @@ public class SipgateBackgroundService extends Service implements EventService
 		insertedCalls = 0;
 		updatedCalls = 0;
 
-		unreadCallsCounter = 0;
+		newCallsCounter = 0;
 		
-		try {
-			if (sipgateDBAdapter == null) {
+		try 
+		{
+			if (sipgateDBAdapter == null) 
+			{
 				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
+			
+			SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_CALLS_COUNT);
 			
 			Vector<CallDataDBObject> oldCallDataDBObjects = sipgateDBAdapter.getAllCallData();
 			
 			sipgateDBAdapter.startTransaction();
 			
-			if (fullRefresh) {
+			if (fullRefresh) 
+			{
 				deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
 			}
 			
@@ -608,26 +615,49 @@ public class SipgateBackgroundService extends Service implements EventService
 			Log.d(TAG, "CallDataDBObject updated: " + updatedCalls);
 			
 			sipgateDBAdapter.commitTransaction();
+			
+			if (systemDataDBObject != null)
+			{
+				newCallsCounter = newCallsCounter + Integer.parseInt(systemDataDBObject.getValue());
+				
+				systemDataDBObject.setValue(String.valueOf(newCallsCounter));
+				
+				sipgateDBAdapter.update(systemDataDBObject);
+				
+				if (newCallsCounter > 0) 
+				{
+					createNewCallNotification(newCallsCounter);
+					Log.d(TAG, "new calls: " + newCallsCounter);
+				}
+				else 
+				{
+					removeNewCallNotification();
+				}
+			}
+			else
+			{
+				systemDataDBObject = new SystemDataDBObject();
+				
+				systemDataDBObject.setKey(SystemDataDBObject.NEW_CALLS_COUNT);
+				systemDataDBObject.setValue(String.valueOf(0));
+				
+				sipgateDBAdapter.insert(systemDataDBObject);
+				
+				removeNewCallNotification();
+			}
 		}
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			Log.e(TAG, "notifyIfUnreadsCalls()", e);
 			
-			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) 
+			{
 				sipgateDBAdapter.rollbackTransaction();
 			}
 			
 			throw new StoreDataException();
 		}
-	
-		if (unreadCallsCounter > 0) {
-			createNewCallNotification(unreadCallsCounter);
-			
-			Log.d(TAG, "new unread calls: " + unreadCallsCounter);
-		}
-		else {
-			removeNewCallNotification();
-		}
-
+		
 		return insertedCalls;
 	}
 	
@@ -647,7 +677,8 @@ public class SipgateBackgroundService extends Service implements EventService
 	{
 		Log.d(TAG, "notifyIfUnreadVoiceMails");
 		
-		if (newVoiceMailDataDBObjects == null) {
+		if (newVoiceMailDataDBObjects == null)
+		{
 			Log.i(TAG, "notifyIfUnreadVoiceMails() -> voiceMailDataDBObjects is null");
 			return -1;
 		}
@@ -656,18 +687,23 @@ public class SipgateBackgroundService extends Service implements EventService
 		insertedVoiceMails = 0;
 		updatedVoiceMails = 0;
 		
-		unreadVoiceMailsCounter = 0;
+		newVoiceMailsCounter = 0;
 		
-		try {
-			if (sipgateDBAdapter == null) {
+		try 
+		{
+			if (sipgateDBAdapter == null) 
+			{
 				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
+			SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_VOICEMAILS_COUNT);
+						
 			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
 			
 			sipgateDBAdapter.startTransaction();
 			
-			if (fullRefresh) {
+			if (fullRefresh) 
+			{
 				deleteOldVoiceMails(newVoiceMailDataDBObjects, oldVoiceMailDataDBObjects, sipgateDBAdapter);
 			}
 			
@@ -678,26 +714,49 @@ public class SipgateBackgroundService extends Service implements EventService
 			Log.d(TAG, "VoiceMailDataDBObject updated: " + updatedVoiceMails);
 											
 			sipgateDBAdapter.commitTransaction();
+			
+			if (systemDataDBObject != null)
+			{
+				newVoiceMailsCounter = newVoiceMailsCounter + Integer.parseInt(systemDataDBObject.getValue());
+				
+				systemDataDBObject.setValue(String.valueOf(newVoiceMailsCounter));
+				
+				sipgateDBAdapter.update(systemDataDBObject);
+				
+				if (newVoiceMailsCounter > 0) 
+				{
+					createNewVoiceMailNotification(newVoiceMailsCounter);
+					Log.d(TAG, "new voicemails: " + newVoiceMailsCounter);
+				}
+				else 
+				{
+					removeNewVoiceMailNotification();
+				}
+			}
+			else
+			{
+				systemDataDBObject = new SystemDataDBObject();
+				
+				systemDataDBObject.setKey(SystemDataDBObject.NEW_VOICEMAILS_COUNT);
+				systemDataDBObject.setValue(String.valueOf(0));
+				
+				sipgateDBAdapter.insert(systemDataDBObject);
+				
+				removeNewVoiceMailNotification();
+			}
 		}
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			Log.e(TAG, "notifyIfUnreadsVoiceMails()", e);
 			
-			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) {
+			if (sipgateDBAdapter != null && sipgateDBAdapter.inTransaction()) 
+			{
 				sipgateDBAdapter.rollbackTransaction();
 			}
 			
 			throw new StoreDataException();
 		}
-		
-		if (unreadVoiceMailsCounter > 0) {
-			createNewVoiceMailNotification(unreadVoiceMailsCounter);
-		
-			Log.d(TAG, "new unseen voicemails: " + unreadVoiceMailsCounter);
-		}
-		else {
-			removeNewVoiceMailNotification();
-		}
-		
+			
 		return insertedVoiceMails;
 	}
 	
@@ -831,46 +890,62 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		notifyFrontend(callListener, ACTION_GETEVENTS);
 		
-		try {
-			try {
+		try 
+		{
+			try 
+			{
 				Thread.sleep(2000);
 			}
-			catch (Exception threadException) {
+			catch (Exception threadException) 
+			{
 				threadException.printStackTrace();
 			}
-			finally {
-				
+			finally 
+			{
 				if (lastFullRefreshCalls == 0 || lastFullRefreshCalls + Constants.ONE_DAY_IN_MS < currentRefreshCalls ||
 					lastFullRefreshCalls + Constants.ONE_DAY_IN_MS < currentRefreshCalls + settingsClient.getEventsRefreshTime()) 
 				{
 					calls = apiClient.getCalls();
 					
-					lastFullRefreshCalls = currentRefreshCalls;
+					if (calls.size() > 0)
+					{
+						lastFullRefreshCalls = currentRefreshCalls;
+					}
 				}
-				else {
+				else 
+				{
 					calls = apiClient.getCalls(lastRefreshCalls, currentRefreshCalls);
 				}
 				
-				lastRefreshCalls = currentRefreshCalls;
+				if (calls.size() > 0)
+				{
+					lastRefreshCalls = currentRefreshCalls;
+				}
 				
-				if (notifyIfNewCalls(calls, this, (lastFullRefreshCalls == currentRefreshCalls)) > 0 ) {
+				if (notifyIfNewCalls(calls, this, (lastFullRefreshCalls == currentRefreshCalls)) > 0 ) 
+				{
 					notifyFrontend(callListener, ACTION_NEWEVENTS);
 				}
-				else {
+				else 
+				{
 					notifyFrontend(callListener, ACTION_NOEVENTS);
 				}
 			}
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 			
-			try {
+			try 
+			{
 				Thread.sleep(2000);
 			}
-			catch (Exception threadException) {
+			catch (Exception threadException) 
+			{
 				threadException.printStackTrace();
 			}
-			finally {
+			finally 
+			{
 				notifyFrontend(callListener, ACTION_ERROR);
 			}
 		}
@@ -892,46 +967,62 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		notifyFrontend(voiceMailListener, ACTION_GETEVENTS);
 		
-		try {
-			try {
+		try 
+		{
+			try 
+			{
 				Thread.sleep(2000);
 			}
-			catch (Exception threadException) {
+			catch (Exception threadException) 
+			{
 				threadException.printStackTrace();
 			}
-			finally {
-				
+			finally 
+			{
 				if (lastFullRefreshVoiceMails == 0 || lastFullRefreshVoiceMails + Constants.ONE_DAY_IN_MS < currentRefreshVoiceMails ||
 					lastFullRefreshVoiceMails + Constants.ONE_DAY_IN_MS < currentRefreshVoiceMails + settingsClient.getEventsRefreshTime()) 
 				{	
 					voiceMails = apiClient.getVoiceMails();
 					
-					lastFullRefreshVoiceMails = currentRefreshVoiceMails; 
+					if (voiceMails.size() > 0)
+					{
+						lastFullRefreshVoiceMails = currentRefreshVoiceMails; 
+					}
 				}
-				else {
+				else 
+				{
 					voiceMails = apiClient.getVoiceMails(lastRefreshVoiceMails, currentRefreshVoiceMails);
 				}
 				
-				lastRefreshVoiceMails = currentRefreshVoiceMails;
+				if (voiceMails.size() > 0)
+				{
+					lastRefreshVoiceMails = currentRefreshVoiceMails;
+				}
 								
-				if (notifyIfNewVoiceMails(voiceMails, this, (lastFullRefreshVoiceMails == currentRefreshVoiceMails)) > 0 ) {
+				if (notifyIfNewVoiceMails(voiceMails, this, (lastFullRefreshVoiceMails == currentRefreshVoiceMails)) > 0 ) 
+				{
 					notifyFrontend(voiceMailListener, ACTION_NEWEVENTS);
 				}
-				else {
+				else 
+				{
 					notifyFrontend(voiceMailListener, ACTION_NOEVENTS);
 				}
 			}
 		} 
-		catch (Exception e) {
+		catch (Exception e) 
+		{
 			e.printStackTrace();
 			
-			try {
+			try 
+			{
 				Thread.sleep(2000);
 			}
-			catch (Exception threadException) {
+			catch (Exception threadException) 
+			{
 				threadException.printStackTrace();
 			}
-			finally {
+			finally 
+			{
 				notifyFrontend(voiceMailListener, ACTION_ERROR);
 			}
 		}
@@ -1045,42 +1136,11 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter.insert(newContactDataDBObject);
 				sipgateDBAdapter.insertAllContactNumberDBObjects(newContactDataDBObject.getContactNumberDBObjects());
 				
-				//addAndroidContact(newContactDataDBObject);
-				
 				insertedContacts++;
 			}
 		}
 	}
-	
-	private void addAndroidContact(ContactDataDBObject contactDataDBObject)
-	{
-		Builder builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-		.withValue(ContactsContract.Data.MIMETYPE,"ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE")
-		.withValue(ContactsContract.CommonDataKinds.Im.DATA, contactDataDBObject.getUuid())
-		.withValue(ContactsContract.CommonDataKinds.Im.TYPE,ContactsContract.CommonDataKinds.Im.TYPE_WORK)
-		.withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL,ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL)
-		.withValue(ContactsContract.Data.DISPLAY_NAME, contactDataDBObject.getDisplayName())
-		.withValue(ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL,"sipgate");
-		
-		ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-		
-		operationList.add(builder.build());
-		
-		ContentResolver resolver = getContentResolver();
-		
-		try 
-		{
-			resolver.applyBatch(ContactsContract.AUTHORITY, operationList);
-		} 
-		catch (RemoteException e) 
-		{
-			Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
-		} 
-		catch (OperationApplicationException e) 
-		{
-			Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
-		}	
-	}
+
 	/**
 	 * This functions inserts new and updates already existing calls
 	 * in the database.
@@ -1105,17 +1165,13 @@ public class SipgateBackgroundService extends Service implements EventService
 				
 				sipgateDBAdapter.update(newCallDataDBObject);
 				
-				if (!newCallDataDBObject.isRead() && newCallDataDBObject.isMissed() && newCallDataDBObject.getDirection() == CallDataDBObject.INCOMING) {
-					unreadCallsCounter++;
-				}
-				
 				updatedCalls++;
 			}
 			else {
 				sipgateDBAdapter.insert(newCallDataDBObject);
 				
 				if (!newCallDataDBObject.isRead() && newCallDataDBObject.isMissed() && newCallDataDBObject.getDirection() == CallDataDBObject.INCOMING) {
-					unreadCallsCounter++;
+					newCallsCounter++;
 				}
 				
 				insertedCalls++;
@@ -1145,17 +1201,13 @@ public class SipgateBackgroundService extends Service implements EventService
 				
 				sipgateDBAdapter.update(newVoiceMailDataDBObject);
 
-				if (!newVoiceMailDataDBObject.isRead() && !newVoiceMailDataDBObject.isSeen()) {
-					unreadVoiceMailsCounter++;
-				}
-				
 				updatedVoiceMails++;
 			}
 			else {
 				sipgateDBAdapter.insert(newVoiceMailDataDBObject);
 				
 				if (!newVoiceMailDataDBObject.isRead()) {
-					unreadVoiceMailsCounter++;
+					newVoiceMailsCounter++;
 				}
 				
 				insertedVoiceMails++;

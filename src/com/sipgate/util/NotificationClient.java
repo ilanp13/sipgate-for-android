@@ -58,7 +58,7 @@ public class NotificationClient {
 	 */
 	public void setNotification(NotificationClient.NotificationType notificationType, int drawable, String message) {
 		Notification notification = new Notification(drawable, message, 0 );
-		notification.flags = Notification.FLAG_ONLY_ALERT_ONCE | Notification.FLAG_AUTO_CANCEL;
+		notification.flags = Notification.FLAG_ONLY_ALERT_ONCE | Notification.FLAG_AUTO_CANCEL | Notification.FLAG_NO_CLEAR;
 
 		/*
 		 * add the right tab, which will be opened when the user clicks on the notification000
