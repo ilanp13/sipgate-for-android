@@ -66,7 +66,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 	private TextView emptyList = null;
 	
 	private AnimationDrawable frameAnimation = null;
-	private Thread animationThread = null;
 	private boolean isAnimationRunning = false;
 	
 	private ServiceConnection serviceConnection = null;
@@ -109,13 +108,15 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		emptyList = (TextView) findViewById(R.id.EmptyEventListTextView);
 
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
-		animationThread = new Thread()
+		Runnable animationThread = new Runnable()
 		{
 			public void run()
 			{
 				frameAnimation.start();
 			}
 		};
+		
+		refreshView.post(animationThread);
 		
 		appContext = getApplicationContext();
 		apiClient = ApiServiceProvider.getInstance(activity);
@@ -193,7 +194,6 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		}	
 		
 		if(!isAnimationRunning) {
-			animationThread.start();
 			isAnimationRunning = true;
 		}
 	}

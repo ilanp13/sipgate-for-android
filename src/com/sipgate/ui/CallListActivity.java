@@ -58,7 +58,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	private TextView emptyList = null;
 	
 	private AnimationDrawable frameAnimation = null;
-	private Thread animationThread = null;
 	private boolean isAnimationRunning = false;
 	
 	private ServiceConnection serviceConnection = null;
@@ -92,13 +91,15 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		emptyList = (TextView) findViewById(R.id.EmptyCallListTextView);
 		
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
-		animationThread = new Thread(new Runnable()
+		Runnable animationThread = new Runnable()
 		{
 			public void run()
 			{
 				frameAnimation.start();
 			}
-		});
+		};
+		
+		refreshView.post(animationThread);
 		
 		context = getApplicationContext();
 		
@@ -165,7 +166,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		}
 		
 		if(!isAnimationRunning) {
-			animationThread.start();
 			isAnimationRunning = true;
 		}
 	}

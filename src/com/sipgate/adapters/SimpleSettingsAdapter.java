@@ -1,16 +1,12 @@
 package com.sipgate.adapters;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.Typeface;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -23,12 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sipgate.R;
-import com.sipgate.db.CallDataDBObject;
-import com.sipgate.db.ContactDataDBObject;
-import com.sipgate.db.SipgateDBAdapter;
-import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.models.SipgateBalanceData;
-import com.sipgate.models.holder.CallViewHolder;
 import com.sipgate.models.holder.SimpleSettingsCheckboxViewHolder;
 import com.sipgate.models.holder.SimpleSettingsInfoViewHolder;
 import com.sipgate.models.holder.SimpleSettingsStandardViewHolder;
@@ -75,21 +66,30 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		this.context = activity.getApplicationContext();
 		mInflater = activity.getLayoutInflater();
 
-		account = activity.getResources().getString(R.string.simple_settings_account);
-		telephone = activity.getResources().getString(R.string.simple_settings_extension);
-		balance = activity.getResources().getString(R.string.simple_settings_balance);
+		account = activity.getResources().getString(
+				R.string.simple_settings_account);
+		telephone = activity.getResources().getString(
+				R.string.simple_settings_extension);
+		balance = activity.getResources().getString(
+				R.string.simple_settings_balance);
 
-		overWireless = activity.getResources().getString(R.string.simple_settings_wlan);
+		overWireless = activity.getResources().getString(
+				R.string.simple_settings_wlan);
 		over3G = activity.getResources().getString(R.string.simple_settings_3g);
 
-		refresh = activity.getResources().getString(R.string.simple_settings_refresh_timers);
-		experts = activity.getResources().getString(R.string.simple_settings_advanced);
+		refresh = activity.getResources().getString(
+				R.string.simple_settings_refresh_timers);
+		experts = activity.getResources().getString(
+				R.string.simple_settings_advanced);
 
-		checkboxOff = activity.getResources().getDrawable(R.drawable.btn_check_off);
-		checkboxOn = activity.getResources().getDrawable(R.drawable.btn_check_on);
+		checkboxOff = activity.getResources().getDrawable(
+				R.drawable.btn_check_off);
+		checkboxOn = activity.getResources().getDrawable(
+				R.drawable.btn_check_on);
 
 		settings = SettingsClient.getInstance(activity.getApplicationContext());
-		apiServiceProvider = ApiServiceProvider.getInstance(activity.getApplicationContext());
+		apiServiceProvider = ApiServiceProvider.getInstance(activity
+				.getApplicationContext());
 
 		// register handler for messages sent by child-threads:
 		this.balanceThreadMessageHandler = new Handler() {
@@ -97,6 +97,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
 				case BALANCE_RESULT_MSG:
+					System.err.println("got data");
 					notifyDataSetChanged();
 					break;
 				}
@@ -108,17 +109,17 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public void run() {
+				System.err.println("fetching data");
 				try {
-					synchronized (balanceData) {
-						balanceData = apiServiceProvider.getBillingBalance();
-					}
+					balanceData = apiServiceProvider.getBillingBalance();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
+				System.err.println("triggering got data");
 				// notify the main thread after success
-				balanceThreadMessageHandler
-						.sendMessage(Message.obtain(balanceThreadMessageHandler, BALANCE_RESULT_MSG));
+				balanceThreadMessageHandler.sendMessage(Message.obtain(
+						balanceThreadMessageHandler, BALANCE_RESULT_MSG));
 			}
 		};
 		balanceThread.start();
@@ -180,10 +181,16 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 
 	private View getInfoView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.sipgate_simple_preferences_list_bit_with_info, null);
+			convertView = mInflater.inflate(
+					R.layout.sipgate_simple_preferences_list_bit_with_info,
+					null);
 			infoHolder = new SimpleSettingsInfoViewHolder();
-			infoHolder.textView = (TextView) convertView.findViewById(R.id.sipgateSettingsInfoName);
-			infoHolder.infoTextView = (TextView) convertView.findViewById(R.id.sipgateSettingsInfoInfo);
+			infoHolder.textView = (TextView) convertView
+					.findViewById(R.id.sipgateSettingsInfoName);
+			infoHolder.infoTextView = (TextView) convertView
+					.findViewById(R.id.sipgateSettingsInfoInfo);
+			infoHolder.spinnerView = (ImageView) convertView
+					.findViewById(R.id.preference_spinner);
 			convertView.setTag(infoHolder);
 		} else {
 			Log.d(TAG, convertView.getTag().getClass().toString());
@@ -194,49 +201,78 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		case 0:
 			infoHolder.textView.setText(account);
 			infoHolder.infoTextView.setText(settings.getWebusername());
+			infoHolder.spinnerView.setVisibility(View.GONE);
 			break;
 		case 1:
 			infoHolder.textView.setText(telephone);
 			infoHolder.infoTextView.setText(settings.getExtensionAlias());
+			infoHolder.spinnerView.setVisibility(View.GONE);
 			break;
 		case 2:
 			infoHolder.textView.setText(balance);
 
-			// balance data is fetched async. but the view is notified upon availability
-			synchronized (balanceData) {
-				if (balanceData != null) {
-					double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());
-					Double roundedBalance = new Double(Math.floor(balanceAmount * 100.) / 100.);
-					String[] balanceArray = roundedBalance.toString().split("[.]");
-					String balanceString = null;
-					String separator = context.getResources().getString(R.string.sipgate_decimal_separator);
-					if (balanceArray.length == 1) {
-						balanceString = balanceArray[0] + separator + "00";
-					} else if (balanceArray[1].length() == 1) {
-						balanceString = balanceArray[0] + separator + balanceArray[1] + "0";
-					} else {
-						balanceString = balanceArray[0] + separator + balanceArray[1];
+			if (balanceData == null) {
+				infoHolder.infoTextView.setText("");
+				infoHolder.spinnerView.setVisibility(View.VISIBLE);
+
+				final AnimationDrawable frameAnimation = (AnimationDrawable) infoHolder.spinnerView
+						.getBackground();
+				Runnable animationStarter = new Runnable() {
+					public void run() {
+						frameAnimation.start();
 					}
-					infoHolder.infoTextView.setText(balanceString + " " + balanceData.getCurrency());
+				};
+				infoHolder.spinnerView.post(animationStarter);
+
+			} else {
+				final AnimationDrawable frameAnimation = (AnimationDrawable) infoHolder.spinnerView.getBackground();
+				Runnable animationStopper = new Runnable() {
+					public void run() {
+						frameAnimation.stop();
+					}
+				};
+				infoHolder.spinnerView.post(animationStopper);
+
+				infoHolder.spinnerView.setVisibility(View.GONE);
+
+				double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());
+				Double roundedBalance = new Double(Math.floor(balanceAmount * 100.) / 100.);
+				String[] balanceArray = roundedBalance.toString().split("[.]");
+				String balanceString = null;
+				String separator = context.getResources().getString(R.string.sipgate_decimal_separator);
+				if (balanceArray.length == 1) {
+					balanceString = balanceArray[0] + separator + "00";
+				} else if (balanceArray[1].length() == 1) {
+					balanceString = balanceArray[0] + separator	+ balanceArray[1] + "0";
+				} else {
+					balanceString = balanceArray[0] + separator	+ balanceArray[1];
 				}
+				infoHolder.infoTextView.setText(balanceString + " "	+ balanceData.getCurrency());
 			}
 			break;
 		default:
+
 			break;
 		}
 
 		return convertView;
 	}
 
-	private View getCheckboxView(int position, View convertView, ViewGroup parent) {
+	private View getCheckboxView(int position, View convertView,
+			ViewGroup parent) {
 		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.sipgate_simple_preferences_list_bit_with_checkbox, null);
+			convertView = mInflater.inflate(
+					R.layout.sipgate_simple_preferences_list_bit_with_checkbox,
+					null);
 			checkboxHolder = new SimpleSettingsCheckboxViewHolder();
-			checkboxHolder.textView = (TextView) convertView.findViewById(R.id.sipgateSettingsCheckboxName);
-			checkboxHolder.imageView = (ImageView) convertView.findViewById(R.id.sipgateSettingsCheckboxBox);
+			checkboxHolder.textView = (TextView) convertView
+					.findViewById(R.id.sipgateSettingsCheckboxName);
+			checkboxHolder.imageView = (ImageView) convertView
+					.findViewById(R.id.sipgateSettingsCheckboxBox);
 			convertView.setTag(checkboxHolder);
 		} else {
-			checkboxHolder = (SimpleSettingsCheckboxViewHolder) convertView.getTag();
+			checkboxHolder = (SimpleSettingsCheckboxViewHolder) convertView
+					.getTag();
 		}
 
 		switch (position) {
@@ -264,15 +300,19 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		return convertView;
 	}
 
-	private View getStandardView(int position, View convertView, ViewGroup parent) {
+	private View getStandardView(int position, View convertView,
+			ViewGroup parent) {
 		if (convertView == null) {
 
-			convertView = mInflater.inflate(R.layout.sipgate_simple_preferences_list_bit, null);
+			convertView = mInflater.inflate(
+					R.layout.sipgate_simple_preferences_list_bit, null);
 			standardHolder = new SimpleSettingsStandardViewHolder();
-			standardHolder.textView = (TextView) convertView.findViewById(R.id.sipgateSettingsStandardName);
+			standardHolder.textView = (TextView) convertView
+					.findViewById(R.id.sipgateSettingsStandardName);
 			convertView.setTag(standardHolder);
 		} else {
-			standardHolder = (SimpleSettingsStandardViewHolder) convertView.getTag();
+			standardHolder = (SimpleSettingsStandardViewHolder) convertView
+					.getTag();
 		}
 
 		switch (position) {
