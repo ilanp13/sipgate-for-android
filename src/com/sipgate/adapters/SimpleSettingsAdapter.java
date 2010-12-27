@@ -37,6 +37,8 @@ import com.sipgate.util.SettingsClient;
 
 @SuppressWarnings("unused")
 public class SimpleSettingsAdapter extends BaseAdapter {
+	private static final int BALANCE_RETRY_COUNT = 3;
+
 	private final static String TAG = "SimpleSettingsAdapter";
 
 	protected static final int BALANCE_RESULT_MSG = 0;
@@ -63,6 +65,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 	private SettingsClient settings = null;
 	private ApiServiceProvider apiServiceProvider = null;
 	private SipgateBalanceData balanceData = null;
+	private boolean balanceProblem = false;
 	private Context context = null;
 
 	private HashMap<String, String> nameCache = null;
@@ -108,12 +111,16 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public void run() {
-				try {
-					synchronized (balanceData) {
+				int retryCount = 0;
+				while (balanceData == null && retryCount++ <= BALANCE_RETRY_COUNT) {
+					try {
 						balanceData = apiServiceProvider.getBillingBalance();
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
+				}
+				if (balanceData == null) {
+					balanceProblem = true;
 				}
 
 				// notify the main thread after success
@@ -124,26 +131,32 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		balanceThread.start();
 	}
 
+	@Override
 	public boolean areAllItemsEnabled() {
 		return true;
 	}
 
+	@Override
 	public boolean isEnabled(int position) {
 		return true;
 	}
 
+	@Override
 	public Object getItem(int position) {
 		return null;
 	}
 
+	@Override
 	public long getItemId(int position) {
 		return position;
 	}
 
+	@Override
 	public int getViewTypeCount() {
 		return 3;
 	}
 
+	@Override
 	public int getItemViewType(int position) {
 		switch (position) {
 		case 0:
@@ -161,6 +174,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		}
 	}
 
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		switch (position) {
 		case 0:
@@ -202,23 +216,25 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		case 2:
 			infoHolder.textView.setText(balance);
 
-			// balance data is fetched async. but the view is notified upon availability
-			synchronized (balanceData) {
-				if (balanceData != null) {
-					double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());
-					Double roundedBalance = new Double(Math.floor(balanceAmount * 100.) / 100.);
-					String[] balanceArray = roundedBalance.toString().split("[.]");
-					String balanceString = null;
-					String separator = context.getResources().getString(R.string.sipgate_decimal_separator);
-					if (balanceArray.length == 1) {
-						balanceString = balanceArray[0] + separator + "00";
-					} else if (balanceArray[1].length() == 1) {
-						balanceString = balanceArray[0] + separator + balanceArray[1] + "0";
-					} else {
-						balanceString = balanceArray[0] + separator + balanceArray[1];
-					}
-					infoHolder.infoTextView.setText(balanceString + " " + balanceData.getCurrency());
+			// balance data is fetched async. but the view is notified upon
+			// availability
+			if (balanceData != null) {
+				double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());
+				Double roundedBalance = new Double(Math.floor(balanceAmount * 100.) / 100.);
+				String[] balanceArray = roundedBalance.toString().split("[.]");
+				String balanceString = null;
+				String separator = context.getResources().getString(R.string.sipgate_decimal_separator);
+				if (balanceArray.length == 1) {
+					balanceString = balanceArray[0] + separator + "00";
+				} else if (balanceArray[1].length() == 1) {
+					balanceString = balanceArray[0] + separator + balanceArray[1] + "0";
+				} else {
+					balanceString = balanceArray[0] + separator + balanceArray[1];
 				}
+				infoHolder.infoTextView.setText(balanceString + " " + balanceData.getCurrency());
+			} else if (balanceProblem) {
+				infoHolder.infoTextView.setText(context.getResources().getString(
+						R.string.sipgate_simple_settings_balance_problem));
 			}
 			break;
 		default:
@@ -289,6 +305,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		return convertView;
 	}
 
+	@Override
 	public boolean hasStableIds() {
 		return true;
 	}

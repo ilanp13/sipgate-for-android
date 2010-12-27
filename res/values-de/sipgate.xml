@@ -117,4 +117,5 @@
 		<item>Alle 6 Stunden</item>
 		<item>einmal Täglich</item>
     </string-array>
+<string name="sipgate_simple_settings_balance_problem">Daten konnten nicht geladen werden</string>
 </resources>
