@@ -29,6 +29,7 @@ import com.sipgate.util.SettingsClient;
 @SuppressWarnings("unused")
 public class SimpleSettingsAdapter extends BaseAdapter {
 	private static final int BALANCE_RETRY_COUNT = 3;
+	private static final int BALANCE_RETRY_DELAY = 1000;
 
 	private final static String TAG = "SimpleSettingsAdapter";
 
@@ -114,14 +115,25 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			public void run() {
 				int retryCount = 0;
 				while (balanceData == null && retryCount++ <= BALANCE_RETRY_COUNT) {
+					// try to get balanceData
 					try {
 						balanceData = apiServiceProvider.getBillingBalance();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
-				if (balanceData == null) {
-					balanceProblem = true;
+
+					// if there was a problem, balanceData is null
+					if (balanceData == null) {
+						try {
+							// take a little sleep before we try again
+							Thread.sleep(BALANCE_RETRY_DELAY);
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+						balanceProblem = true;
+					} else {
+						balanceProblem = false;
+					}
 				}
 
 				System.err.println("triggering got data");
