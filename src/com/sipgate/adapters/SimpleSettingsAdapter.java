@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -298,10 +299,8 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 					R.layout.sipgate_simple_preferences_list_bit_with_checkbox,
 					null);
 			checkboxHolder = new SimpleSettingsCheckboxViewHolder();
-			checkboxHolder.textView = (TextView) convertView
-					.findViewById(R.id.sipgateSettingsCheckboxName);
-			checkboxHolder.imageView = (ImageView) convertView
-					.findViewById(R.id.sipgateSettingsCheckboxBox);
+			checkboxHolder.checkedTextView = (CheckedTextView) convertView
+					.findViewById(R.id.sipgateSettingsCheckedBoxView);
 			convertView.setTag(checkboxHolder);
 		} else {
 			checkboxHolder = (SimpleSettingsCheckboxViewHolder) convertView
@@ -310,21 +309,13 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 
 		switch (position) {
 		case 3:
-			checkboxHolder.textView.setText(overWireless);
+			checkboxHolder.checkedTextView.setText(overWireless);
 			Log.e(TAG, settings.getUseWireless().toString());
-			if (settings.getUseWireless()) {
-				checkboxHolder.imageView.setImageDrawable(checkboxOn);
-			} else {
-				checkboxHolder.imageView.setImageDrawable(checkboxOff);
-			}
+			checkboxHolder.checkedTextView.setChecked(settings.getUseWireless());
 			break;
 		case 4:
-			checkboxHolder.textView.setText(over3G);
-			if (settings.getUse3G()) {
-				checkboxHolder.imageView.setImageDrawable(checkboxOn);
-			} else {
-				checkboxHolder.imageView.setImageDrawable(checkboxOff);
-			}
+			checkboxHolder.checkedTextView.setText(over3G);
+			checkboxHolder.checkedTextView.setChecked(settings.getUse3G());
 			break;
 		default:
 			break;

@@ -1,5 +1,6 @@
 package com.sipgate.parser;
 
+import java.util.Locale;
 import java.util.Vector;
 
 import org.xml.sax.Attributes;
@@ -8,6 +9,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
+import com.sipgate.util.PhoneNumberFormatter;
 
 public class ContactParser extends DefaultHandler
 {
@@ -19,6 +21,12 @@ public class ContactParser extends DefaultHandler
 	private StringBuffer currentValue = null;
 	private String parent = null;
 
+	private String numberPretty = null;
+	private String numberE164 = null;
+	
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
+	
 	public ContactParser()
 	{
 		contactDataDBObjects = new Vector<ContactDataDBObject>();
@@ -74,7 +82,13 @@ public class ContactParser extends DefaultHandler
 		{
 			if ("tel".equalsIgnoreCase(parent))
 			{
-				contactNumberDBObject.setNumberE164(currentValue.toString());
+				formatter.initWithFreestyle(currentValue.toString(), locale.getCountry());
+					
+				numberPretty = formatter.formattedNumber();
+				numberE164 = formatter.e164NumberWithPrefix("+");
+				
+				contactNumberDBObject.setNumberE164(numberE164);
+				contactNumberDBObject.setNumberPretty(numberPretty);
 			}
 			else if ("fn".equalsIgnoreCase(parent))
 			{
@@ -87,10 +101,6 @@ public class ContactParser extends DefaultHandler
 			{
 				contactNumberDBObject.setType(currentValue.toString());
 			}
-		}
-		else if ("x-local-value".equalsIgnoreCase(localName))
-		{
-			contactNumberDBObject.setNumberPretty(currentValue.toString());
 		}
 		else if ("entry".equalsIgnoreCase(localName))
 		{

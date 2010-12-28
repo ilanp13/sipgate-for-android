@@ -73,7 +73,10 @@ public class SipgateBackgroundService extends Service implements EventService
 	private VoiceMailDataDBObject oldVoiceMailDataDBObject = null;
 	private CallDataDBObject oldCallDataDBObject = null;
 		
-	private	int newCallsCounter = 0;
+	private	int tempMissedCalls = 0;
+	private int missedTempCallsCounter = 0;
+	private	int missedCallsCount = 0;
+	
 	private	int newVoiceMailsCounter = 0;
 	
 	private int deletedContacts = 0;
@@ -100,7 +103,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private Vector<VoiceMailDataDBObject> voiceMails = null;
 			
 	/**
-	 * The onCreate function of the service, which is called at every
+	 * The onCreate function of the service, which is called asetRemoteNumberE164t every
 	 * first start and is used to instantiate several other classes.
 	 * 
 	 * @since 1.0
@@ -130,7 +133,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		Log.d(TAG,"onDestroy");
 				
 		stopService();
-		
+	
 		if (sipgateDBAdapter != null)
 		{
 			sipgateDBAdapter.close();
@@ -246,7 +249,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	 * This function unregisters from information regarding
 	 * the refreshing of voice mails.
 	 * 
-	 * @param tag A string uniquely identifying the process that wants to be no longer called back.
+	 * @param tag A string uniquely irefreshCallEventsdentifying the process that wants to be no longer called back.
 	 * @throws RemoteException Thrown when the remote communication failed.
 	 * @since 1.2
 	 */
@@ -302,7 +305,7 @@ public class SipgateBackgroundService extends Service implements EventService
 		
 		lastFullRefreshCalls = 0;
 		lastRefreshCalls = 0;
-	
+				
 		callRefreshTimer.scheduleAtFixedRate(new TimerTask() 
 		{
 			public void run() 
@@ -316,7 +319,7 @@ public class SipgateBackgroundService extends Service implements EventService
 
 		}, 1000, settingsClient.getEventsRefreshTime());
 	}
-	
+		
 	/**
 	 * This function resets the timer and triggers a full refresh
 	 * of voice mails.
@@ -334,7 +337,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	
 		lastFullRefreshVoiceMails = 0;
 		lastRefreshVoiceMails = 0;
-			
+		
 		voiceMailRefreshTimer.scheduleAtFixedRate(new TimerTask() 
 		{
 			public void run() 
@@ -351,7 +354,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	/**
 	 * This function returns a stub class containing the interface
 	 * this class provides for RPCs.
-	 * 
+	 * tempCounter
 	 * @param intent The intent that binded on the service.
 	 * @return A stub containing the interface to access this class. 
 	 * @since 1.0
@@ -431,7 +434,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			/**
 			 * This is a wrapper function for unregistering on the
 			 * calls update status.
-			 * 
+			 * newTempCallsCounter
 			 * @param tag A string uniquely identifying the process that wants to no longer be called back.
 			 * @throws RemoteException Thrown when the remote communication failed.
 			 * @since 1.2
@@ -588,7 +591,10 @@ public class SipgateBackgroundService extends Service implements EventService
 		insertedCalls = 0;
 		updatedCalls = 0;
 
-		newCallsCounter = 0;
+		missedCallsCount = 0;
+		missedTempCallsCounter = 0;
+		
+		tempMissedCalls = 0;
 		
 		try 
 		{
@@ -597,37 +603,85 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
-			SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_CALLS_COUNT);
-			
+			SystemDataDBObject notifyCallsCountDBObj = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_CALLS_COUNT);
+			SystemDataDBObject notifyTempCallsCountDBObj = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_TEMP_CALLS_COUNT);
+						
 			Vector<CallDataDBObject> oldCallDataDBObjects = sipgateDBAdapter.getAllCallData();
-			
+			Vector<CallDataDBObject> tempCallDataDBObjects = sipgateDBAdapter.getAllTempCallDataDBObjects();
+						
 			sipgateDBAdapter.startTransaction();
+
+			if (notifyCallsCountDBObj != null)
+			{
+				missedCallsCount = Integer.valueOf(notifyCallsCountDBObj.getValue());
+			}
+			
+			if (notifyTempCallsCountDBObj != null)
+			{
+				missedTempCallsCounter = Integer.valueOf(notifyTempCallsCountDBObj.getValue());
+			}
 			
 			if (fullRefresh) 
 			{
 				deleteOldCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
+				
+				missedCallsCount = 0;
+				tempMissedCalls = 0;
+				missedTempCallsCounter = 0;
+				
+				tempCallDataDBObjects.removeAllElements();
 			}
 			
 			updateCalls(newCallDataDBObjects, oldCallDataDBObjects, sipgateDBAdapter);
-
+			
+			for(int i=0; i < tempCallDataDBObjects.size(); i++)
+			{
+				if(tempCallDataDBObjects.get(i).getDirection() == CallDataDBObject.INCOMING)
+				{
+					if (tempCallDataDBObjects.get(i).isMissed())
+					{
+						tempMissedCalls++;
+					}
+				}
+				
+				sipgateDBAdapter.delete(tempCallDataDBObjects.get(i));
+			}
+			
+			if (notifyTempCallsCountDBObj != null)
+			{
+				notifyTempCallsCountDBObj.setValue(String.valueOf(0));
+				sipgateDBAdapter.update(notifyTempCallsCountDBObj);
+			}
+			
+			sipgateDBAdapter.commitTransaction();
+				
+			Log.d(TAG, "missedCallsCount: " + missedCallsCount);
+			Log.d(TAG, "missedTempCallsCounter: " + missedTempCallsCounter);
+			Log.d(TAG, "tempMissedCalls: " + tempMissedCalls);
+			
 			Log.d(TAG, "CallDataDBObject deleted: " + deletedCalls);
 			Log.d(TAG, "CallDataDBObject inserted: " + insertedCalls);
 			Log.d(TAG, "CallDataDBObject updated: " + updatedCalls);
 			
-			sipgateDBAdapter.commitTransaction();
-			
-			if (systemDataDBObject != null)
+			if (notifyCallsCountDBObj != null)
 			{
-				newCallsCounter = newCallsCounter + Integer.parseInt(systemDataDBObject.getValue());
+				missedCallsCount = missedCallsCount - (tempMissedCalls - missedTempCallsCounter);
 				
-				systemDataDBObject.setValue(String.valueOf(newCallsCounter));
-				
-				sipgateDBAdapter.update(systemDataDBObject);
-				
-				if (newCallsCounter > 0) 
+				if (missedCallsCount > 0)
 				{
-					createNewCallNotification(newCallsCounter);
-					Log.d(TAG, "new calls: " + newCallsCounter);
+					notifyCallsCountDBObj.setValue(String.valueOf(missedCallsCount));
+				}
+				else
+				{
+					notifyCallsCountDBObj.setValue(String.valueOf(0));
+				}
+				
+				sipgateDBAdapter.update(notifyCallsCountDBObj);
+				
+				if (missedCallsCount > 0) 
+				{
+					createNewCallNotification(missedCallsCount);
+					Log.d(TAG, "new calls: " + missedCallsCount);
 				}
 				else 
 				{
@@ -636,12 +690,12 @@ public class SipgateBackgroundService extends Service implements EventService
 			}
 			else
 			{
-				systemDataDBObject = new SystemDataDBObject();
+				notifyCallsCountDBObj = new SystemDataDBObject();
 				
-				systemDataDBObject.setKey(SystemDataDBObject.NEW_CALLS_COUNT);
-				systemDataDBObject.setValue(String.valueOf(0));
+				notifyCallsCountDBObj.setKey(SystemDataDBObject.NOTIFY_CALLS_COUNT);
+				notifyCallsCountDBObj.setValue(String.valueOf(0));
 				
-				sipgateDBAdapter.insert(systemDataDBObject);
+				sipgateDBAdapter.insert(notifyCallsCountDBObj);
 				
 				removeNewCallNotification();
 			}
@@ -696,7 +750,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter = new SipgateDBAdapter(context);
 			}
 			
-			SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_VOICEMAILS_COUNT);
+			SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_VOICEMAILS_COUNT);
 						
 			Vector<VoiceMailDataDBObject> oldVoiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
 			
@@ -737,7 +791,7 @@ public class SipgateBackgroundService extends Service implements EventService
 			{
 				systemDataDBObject = new SystemDataDBObject();
 				
-				systemDataDBObject.setKey(SystemDataDBObject.NEW_VOICEMAILS_COUNT);
+				systemDataDBObject.setKey(SystemDataDBObject.NOTIFY_VOICEMAILS_COUNT);
 				systemDataDBObject.setValue(String.valueOf(0));
 				
 				sipgateDBAdapter.insert(systemDataDBObject);
@@ -914,7 +968,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				}
 				else 
 				{
-					calls = apiClient.getCalls(lastRefreshCalls, currentRefreshCalls);
+					calls = apiClient.getCalls(lastRefreshCalls-Constants.ONE_MIN_IN_MS, currentRefreshCalls+Constants.ONE_DAY_IN_MS);
 				}
 				
 				if (calls.size() > 0)
@@ -991,7 +1045,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				}
 				else 
 				{
-					voiceMails = apiClient.getVoiceMails(lastRefreshVoiceMails, currentRefreshVoiceMails);
+					voiceMails = apiClient.getVoiceMails(lastRefreshVoiceMails-Constants.ONE_MIN_IN_MS, currentRefreshVoiceMails+Constants.ONE_DAY_IN_MS);
 				}
 				
 				if (voiceMails.size() > 0)
@@ -1171,7 +1225,7 @@ public class SipgateBackgroundService extends Service implements EventService
 				sipgateDBAdapter.insert(newCallDataDBObject);
 				
 				if (!newCallDataDBObject.isRead() && newCallDataDBObject.isMissed() && newCallDataDBObject.getDirection() == CallDataDBObject.INCOMING) {
-					newCallsCounter++;
+					missedCallsCount++;
 				}
 				
 				insertedCalls++;

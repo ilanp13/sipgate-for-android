@@ -30,7 +30,8 @@ public class OneShotAlarm2 extends BroadcastReceiver {
 
     @Override
 	public void onReceive(Context context, Intent intent) {
-    	if (!Sipdroid.release) Log.i("SipUA:","alarm2");
+    	Log.i("OneShotAlarm2", "onReceive");
+    	if (!Sipdroid.release) Log.i("OneShotAlarm2:","alarm2");
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Settings.PREF_WLAN, Settings.DEFAULT_WLAN) ||
         		PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Settings.PREF_3G, Settings.DEFAULT_3G) ||
         		PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Settings.PREF_VPN, Settings.DEFAULT_VPN) ||

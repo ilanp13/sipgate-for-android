@@ -301,15 +301,18 @@ public class CallListAdapter extends BaseAdapter
 				{
 					try 
 					{
-						try
+						if (callDataDBObject.getReadModifyUrl() != null && callDataDBObject.getReadModifyUrl().length() > 0)
 						{
-							apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+							try
+							{
+								apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+							}
+							catch (FeatureNotAvailableException fex)
+							{
+								Log.w(TAG, "markAsRead()", fex);
+							}
 						}
-						catch (FeatureNotAvailableException fex)
-						{
-							Log.w(TAG, "markAsRead()", fex);
-						}
-					
+						
 						callDataDBObject.setRead(true);
 						
 						sipgateDBAdapter.update(callDataDBObject);

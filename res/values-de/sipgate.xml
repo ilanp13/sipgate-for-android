@@ -4,7 +4,7 @@
 	<string name="sipgate_wrong_credentials">Falscher Beutzername oder falsches Passwort. Bitte versuchen Sie es noch einmal ...</string>
 	<string name="sipgate_no_credentials">Bitte Benutzername und Passwort eingeben ...</string>
 	<string name="sipgate_wait">Bitte warten. Verbinde zum Server...</string>
-	<string name="sipgate_load_extension">Bitte warten. Lade Telefoneliste...</string>
+	<string name="sipgate_load_extension">Bitte warten. Lade Liste der Telefone...</string>
 	<string name="username">Benutzername</string>
 	<string name="password">Passwort</string>
 	<string name="ok">Ok</string>

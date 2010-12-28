@@ -123,13 +123,22 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		
 		registerForBackgroundIntents();
 
-		SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_CALLS_COUNT);
+		SystemDataDBObject notifyCallsCountDBObj = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_CALLS_COUNT);
 		
-		if (systemDataDBObject != null)
+		if (notifyCallsCountDBObj != null)
 		{
-			systemDataDBObject.setValue(String.valueOf(0));
+			notifyCallsCountDBObj.setValue(String.valueOf(0));
 			
-			sipgateDBAdapter.update(systemDataDBObject);
+			sipgateDBAdapter.update(notifyCallsCountDBObj);
+		}
+		
+		SystemDataDBObject notifyTempCallsCountDBObj = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_TEMP_CALLS_COUNT);
+		
+		if (notifyTempCallsCountDBObj != null)
+		{
+			notifyTempCallsCountDBObj.setValue(String.valueOf(0));
+			
+			sipgateDBAdapter.update(notifyTempCallsCountDBObj);
 		}
 				
 		refreshState = application.getRefreshState();
