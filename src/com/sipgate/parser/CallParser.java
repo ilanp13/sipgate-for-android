@@ -2,6 +2,7 @@ package com.sipgate.parser;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.xml.sax.Attributes;
@@ -11,6 +12,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
 
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.util.PhoneNumberFormatter;
 
 public class CallParser extends DefaultHandler
 {
@@ -22,6 +24,12 @@ public class CallParser extends DefaultHandler
 	private StringBuffer currentValue = null;
 	private String parent = null;
 	private String location = null;
+	
+	private String numberPretty = null;
+	private String numberE164 = null;
+	
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
 	
 	public CallParser()
 	{
@@ -117,51 +125,35 @@ public class CallParser extends DefaultHandler
 		}
 		else if ("numberE164".equalsIgnoreCase(localName))
 		{
+			formatter.initWithFreestyle(currentValue.toString().replace("+", ""), locale.getCountry());
+			
+			numberPretty = formatter.formattedNumber();
+			numberE164 = formatter.e164NumberWithPrefix("+");
+			
 			if ("targets".equalsIgnoreCase(parent))
 			{
 				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
 				{
-					callDataDBObject.setLocalNumberE164(currentValue.toString());
+					callDataDBObject.setLocalNumberE164(numberE164);
+					callDataDBObject.setLocalNumberPretty(numberPretty);
 				}
 				else
 				{
-					callDataDBObject.setRemoteNumberE164(currentValue.toString());
+					callDataDBObject.setRemoteNumberE164(numberE164);
+					callDataDBObject.setRemoteNumberPretty(numberPretty);
 				}
 			}
 			else if ("sources".equalsIgnoreCase(parent))
 			{
 				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
 				{
-					callDataDBObject.setRemoteNumberE164(currentValue.toString());
+					callDataDBObject.setRemoteNumberE164(numberE164);
+					callDataDBObject.setRemoteNumberPretty(numberPretty);
 				}
 				else
 				{
-					callDataDBObject.setLocalNumberE164(currentValue.toString());
-				}
-			}
-		}
-		else if ("numberPretty".equalsIgnoreCase(localName))
-		{
-			if ("targets".equalsIgnoreCase(parent))
-			{				
-				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
-				{
-					callDataDBObject.setLocalNumberPretty(currentValue.toString());
-				}
-				else
-				{
-					callDataDBObject.setRemoteNumberPretty(currentValue.toString());
-				}
-			}
-			else if ("sources".equalsIgnoreCase(parent))
-			{
-				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
-				{
-					callDataDBObject.setRemoteNumberPretty(currentValue.toString());
-				}
-				else
-				{
-					callDataDBObject.setLocalNumberPretty(currentValue.toString());
+					callDataDBObject.setLocalNumberE164(numberE164);
+					callDataDBObject.setLocalNumberPretty(numberPretty);
 				}
 			}
 		}

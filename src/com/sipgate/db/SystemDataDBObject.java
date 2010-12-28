@@ -7,8 +7,9 @@ import com.sipgate.db.base.BaseDBObject;
 public class SystemDataDBObject extends BaseDBObject
 {
 	public final static String REGISTER_DATE = "registerDate";
-	public final static String NEW_CALLS_COUNT = "newCallsCount";
-	public final static String NEW_VOICEMAILS_COUNT = "newVoiceMailsCount";
+	public final static String NOTIFY_CALLS_COUNT = "notifyCallsCount";
+	public final static String NOTIFY_TEMP_CALLS_COUNT = "notifyTempCallsCount";
+	public final static String NOTIFY_VOICEMAILS_COUNT = "notifyVoiceMailsCount";
 		
 	private String key = "";
 	private String value = "";

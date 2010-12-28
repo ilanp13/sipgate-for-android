@@ -42,6 +42,7 @@ import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.MediaConnector;
+import com.sipgate.util.NotificationClient;
 import com.sipgate.util.SipgateApplication;
 
 /**
@@ -150,7 +151,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		
 		registerForBackgroundIntents();		
 		
-		SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_VOICEMAILS_COUNT);
+		SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_VOICEMAILS_COUNT);
 		
 		if (systemDataDBObject != null)
 		{

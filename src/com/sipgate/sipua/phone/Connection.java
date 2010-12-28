@@ -1,6 +1,6 @@
 package com.sipgate.sipua.phone;
 
-import com.sipgate.sipua.ui.Receiver;
+import java.util.Locale;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -10,7 +10,17 @@ import android.os.SystemClock;
 import android.provider.CallLog;
 import android.provider.CallLog.Calls;
 import android.provider.Contacts.People;
+import android.text.GetChars;
 import android.text.TextUtils;
+import android.text.format.Formatter;
+
+import com.sipgate.R;
+import com.sipgate.db.CallDataDBObject;
+import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.db.SystemDataDBObject;
+import com.sipgate.sipua.ui.Receiver;
+import com.sipgate.util.NotificationClient;
+import com.sipgate.util.PhoneNumberFormatter;
 
 /*
  * Copyright (C) 2009 The Sipdroid Open Source Project
@@ -157,18 +167,98 @@ public class Connection
         this.userData = userdata;
     }
     
-    public static Uri addCall(CallerInfo ci, Context context, String number,
-            boolean isPrivateNumber, int callType, long start, int duration) {
-        final ContentResolver resolver = context.getContentResolver();
-
-        if (TextUtils.isEmpty(number)) {
-            if (isPrivateNumber) {
+    public static Uri addCall(CallerInfo ci, Context context, String number, boolean isPrivateNumber, int callType, long start, int duration) 
+    {       
+        if (TextUtils.isEmpty(number)) 
+        {
+            if (isPrivateNumber) 
+            {
                 number = CallerInfo.PRIVATE_NUMBER;
-            } else {
+            } 
+            else 
+            {
                 number = CallerInfo.UNKNOWN_NUMBER;
             }
         }
-
+        
+        SipgateDBAdapter sipgateDBAdapter = new SipgateDBAdapter(context);
+        
+        CallDataDBObject callDataDBObject = new CallDataDBObject();
+        
+        callDataDBObject.setId(System.currentTimeMillis());
+        callDataDBObject.setTemp(true);
+        callDataDBObject.setRead(false);
+        callDataDBObject.setTime(start);
+        
+        switch (callType)
+		{
+			case CallLog.Calls.MISSED_TYPE:
+				callDataDBObject.setMissed(true);
+				callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+				break;
+			case CallLog.Calls.INCOMING_TYPE:
+				callDataDBObject.setDirection(CallDataDBObject.INCOMING);
+				break;
+			case CallLog.Calls.OUTGOING_TYPE:
+				callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
+				break;
+			default:
+				break;
+		}
+        
+        PhoneNumberFormatter phoneNumberFormatter = new PhoneNumberFormatter();
+        
+        phoneNumberFormatter.initWithFreestyle(number, Locale.getDefault().getCountry());
+       
+        callDataDBObject.setRemoteNumberE164(phoneNumberFormatter.e164NumberWithPrefix("+"));
+        callDataDBObject.setRemoteNumberPretty(phoneNumberFormatter.formattedPhoneNumberFromStringWithCountry(phoneNumberFormatter.e164NumberWithPrefix("+"), Locale.getDefault().getCountry()));
+    	
+    	sipgateDBAdapter.insert(callDataDBObject);
+    	
+    	if (callDataDBObject.isMissed())
+        {
+    		NotificationClient notifyClient = new NotificationClient(context); 
+    		
+    		SystemDataDBObject notifyCallsCount = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_CALLS_COUNT);
+			SystemDataDBObject notifyTempCallsCount = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_TEMP_CALLS_COUNT);
+			
+    	    int callsCount = 1;
+    	    
+    	    if (notifyTempCallsCount != null)
+	        {
+    	    	callsCount = callsCount + Integer.valueOf(notifyTempCallsCount.getValue());
+    	    	
+	        	notifyTempCallsCount.setValue(String.valueOf(callsCount));
+	        	
+	        	sipgateDBAdapter.update(notifyTempCallsCount);
+	        }
+	        else
+	        {
+	        	notifyTempCallsCount = new SystemDataDBObject();
+	        	notifyTempCallsCount.setKey(SystemDataDBObject.NOTIFY_TEMP_CALLS_COUNT);
+	        	notifyTempCallsCount.setValue(String.valueOf(callsCount));
+	        	
+	        	sipgateDBAdapter.insert(notifyTempCallsCount);
+	        }
+	        
+	        if (notifyCallsCount != null)
+	        {
+	        	callsCount = callsCount + Integer.valueOf(notifyCallsCount.getValue());
+	        }
+	        
+	        if(callsCount == 1)
+	        {
+	            notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, String.format((String) context.getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(callsCount)));
+	        }
+			else 
+			{
+			    notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, String.format((String) context.getResources().getText(R.string.sipgate_new_calls), Integer.valueOf(callsCount)));
+		    }
+	    }
+    	
+    	sipgateDBAdapter.close();
+    	
+    	ContentResolver resolver = context.getContentResolver();
         ContentValues values = new ContentValues(5);
 
         if (number.contains("&"))
@@ -221,21 +311,16 @@ public class Connection
 	        callLogType = CallLog.Calls.OUTGOING_TYPE;
 	    }
 	
-	    // get the callerinfo object and then log the call with it.
-	    {
-	        Object o = getUserData();
-	        CallerInfo ci;
-	        if ((o == null) || (o instanceof CallerInfo)){
-	            ci = (CallerInfo) o;
-	        } else {
-	            ci = ((PhoneUtils.CallerInfoToken) o).currentInfo;
-	        }
-	        if (callLogType == CallLog.Calls.MISSED_TYPE)
-	        	Receiver.onText(Receiver.MISSED_CALL_NOTIFICATION, ci != null && ci.name != null?ci.name:number, android.R.drawable.stat_notify_missed_call, 0);
-	        addCall(ci, Receiver.mContext, number, isPrivateNumber,
-	                callLogType, date, (int) duration / 1000);
-	    }
+	    Object o = getUserData();
+        CallerInfo ci;
+        if ((o == null) || (o instanceof CallerInfo)){
+            ci = (CallerInfo) o;
+        } else {
+            ci = ((PhoneUtils.CallerInfoToken) o).currentInfo;
+        }
+        if (callLogType == CallLog.Calls.MISSED_TYPE)
+        	Receiver.onText(Receiver.MISSED_CALL_NOTIFICATION, ci != null && ci.name != null?ci.name:number, android.R.drawable.stat_notify_missed_call, 0);
+
+        addCall(ci, Receiver.mContext, number, isPrivateNumber, callLogType, date, (int) duration / 1000);
 	}
-
-
 }
