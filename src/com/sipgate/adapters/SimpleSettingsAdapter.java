@@ -29,6 +29,23 @@ import com.sipgate.util.SettingsClient;
 
 @SuppressWarnings("unused")
 public class SimpleSettingsAdapter extends BaseAdapter {
+	
+	private enum ElementType {
+		INFOELEMENT (R.layout.sipgate_simple_preferences_list_bit_with_info),
+		CHECKBOXELEMENT (R.layout.sipgate_simple_preferences_list_bit_with_checkbox),
+		TEXTELEMENT (R.layout.sipgate_simple_preferences_list_bit);
+		
+		private int id;
+		
+		ElementType(int id) {
+			this.id = id;
+		}
+		
+		public int getId() {
+			return id;
+		}
+	}
+	
 	private static final int BALANCE_RETRY_COUNT = 3;
 	private static final int BALANCE_RETRY_DELAY = 1000;
 
@@ -52,7 +69,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 	private Drawable checkboxOn = null;
 
 	private SimpleSettingsInfoViewHolder infoHolder = null;
-	private SimpleSettingsStandardViewHolder standardHolder = null;
+	private SimpleSettingsStandardViewHolder textHolder = null;
 	private SimpleSettingsCheckboxViewHolder checkboxHolder = null;
 
 	private SettingsClient settings = null;
@@ -62,8 +79,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 	private Context context = null;
 
 	private HashMap<String, String> nameCache = null;
-
-	private Handler balanceThreadMessageHandler = null;
 
 	private List<DataSetObserver> dataSetObservers = null;
 
@@ -96,19 +111,29 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		apiServiceProvider = ApiServiceProvider.getInstance(activity
 				.getApplicationContext());
 
+
+		startGetBalance();
+	}
+
+	/**
+	 * gets users balance asynchronously, creating a thread for that.
+	 * sends a BALANCE_RESULT_MSG to signal end of execution.
+	 * this.balanceProblem shows success.
+	 * on success, balance is written to balanceData. 
+	 */
+	private void startGetBalance() {
 		// register handler for messages sent by child-threads:
-		this.balanceThreadMessageHandler = new Handler() {
+		final Handler balanceThreadMessageHandler = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
 				case BALANCE_RESULT_MSG:
-					System.err.println("got data");
 					notifyDataSetChanged();
 					break;
 				}
 			}
 		};
-
+		
 		// run thread that will fetch the balance
 		Thread balanceThread = new Thread() {
 			@SuppressWarnings("synthetic-access")
@@ -137,7 +162,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 					}
 				}
 
-				System.err.println("triggering got data");
 				// notify the main thread after success
 				balanceThreadMessageHandler.sendMessage(Message.obtain(
 						balanceThreadMessageHandler, BALANCE_RESULT_MSG));
@@ -207,22 +231,124 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		}
 	}
 
+	
+
+	/**
+	 * inflates a new listview-element, including it's holder
+	 * holder is set as the view's tag
+	 * @param type
+	 * @return
+	 */
+	private View createListElementView(ElementType type) {
+		View convertView;
+		convertView = mInflater.inflate(type.getId(), null);
+		convertView.setTag(createHolder(type, convertView));
+		return convertView;
+	}
+
+	/**
+	 * creates a holder-object, fills in view-components. return-type depends on type
+	 * @param type
+	 * @param convertView the convertView passed to getView() 
+	 * @return
+	 */
+	private Object createHolder(ElementType type, View convertView) {
+
+		switch (type) {
+		case INFOELEMENT:
+			SimpleSettingsInfoViewHolder infoHolder = new SimpleSettingsInfoViewHolder();
+			infoHolder.textView = (TextView) convertView
+			.findViewById(R.id.sipgateSettingsInfoName);
+			infoHolder.infoTextView = (TextView) convertView
+			.findViewById(R.id.sipgateSettingsInfoInfo);
+			infoHolder.spinnerView = (ImageView) convertView
+			.findViewById(R.id.preference_spinner);
+			return infoHolder;
+		case CHECKBOXELEMENT:
+			SimpleSettingsCheckboxViewHolder checkboxHolder = new SimpleSettingsCheckboxViewHolder();
+			checkboxHolder.checkedTextView = (CheckedTextView) convertView
+					.findViewById(R.id.sipgateSettingsCheckedBoxView);
+			return checkboxHolder;
+		case TEXTELEMENT:
+			SimpleSettingsStandardViewHolder textHolder = new SimpleSettingsStandardViewHolder();
+			textHolder.textView = (TextView) convertView
+					.findViewById(R.id.sipgateSettingsStandardName);
+			return textHolder;
+		default:
+			return null;
+		}
+	}
+
+	/**
+	 * transforms {@link SipgateBalanceData} into a String
+	 * @param balanceData
+	 * @return {@link String} to be presented to the user
+	 */
+	private String createBalanceString(SipgateBalanceData balanceData) {
+		double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());
+		Double roundedBalance = new Double(Math.floor(balanceAmount * 100.) / 100.);
+		String[] balanceArray = roundedBalance.toString().split("[.]");
+		String balanceString = null;
+		String separator = context.getResources().getString(R.string.sipgate_decimal_separator);
+		if (balanceArray.length == 1) {
+			balanceString = balanceArray[0] + separator + "00";
+		} else if (balanceArray[1].length() == 1) {
+
+			balanceString = balanceArray[0] + separator + balanceArray[1] + "0";
+		} else {
+			balanceString = balanceArray[0] + separator + balanceArray[1];
+		}
+		return balanceString;
+	}
+
+	/**
+	 * shows/hides an imageview and starts/stops its animation 
+	 * @param spinnerView is an imageview with the spinning animation set as background
+	 * @param visible
+	 */
+	private void showSpinner(ImageView spinnerView, boolean visible) {
+		
+		if (visible) {
+			final AnimationDrawable frameAnimation = (AnimationDrawable) spinnerView.getBackground();
+			Runnable animationStarter = new Runnable() {
+				public void run() {
+					frameAnimation.start();
+				}
+			};
+			spinnerView.post(animationStarter);
+			spinnerView.setVisibility(View.VISIBLE);
+		} else {
+			final AnimationDrawable frameAnimation = (AnimationDrawable) infoHolder.spinnerView.getBackground();
+			Runnable animationStopper = new Runnable() {
+				public void run() {
+					frameAnimation.stop();
+				}
+			};
+			infoHolder.spinnerView.post(animationStopper);
+			infoHolder.spinnerView.setVisibility(View.GONE);
+		}
+	}
+
+	/**
+	 * creates infoviews for listview-elements
+	 * @see getView
+	 * @param position
+	 * @param convertView
+	 * @param parent
+	 * @return
+	 */
 	private View getInfoView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
-			convertView = mInflater.inflate(
-					R.layout.sipgate_simple_preferences_list_bit_with_info,
-					null);
-			infoHolder = new SimpleSettingsInfoViewHolder();
-			infoHolder.textView = (TextView) convertView
-					.findViewById(R.id.sipgateSettingsInfoName);
-			infoHolder.infoTextView = (TextView) convertView
-					.findViewById(R.id.sipgateSettingsInfoInfo);
-			infoHolder.spinnerView = (ImageView) convertView
-					.findViewById(R.id.preference_spinner);
-			convertView.setTag(infoHolder);
+			convertView = createListElementView(ElementType.INFOELEMENT);
+			infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
 		} else {
-			Log.d(TAG, convertView.getTag().getClass().toString());
-			infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag();
+			Object tag = convertView.getTag();
+			if (SimpleSettingsInfoViewHolder.class.isInstance(tag.getClass())) {
+				infoHolder = (SimpleSettingsInfoViewHolder) tag;
+			} else { // this tag is not usable. create another holder. this should not happen anyway with such a small list
+				convertView = createListElementView(ElementType.INFOELEMENT);
+				infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag();  // cast is save here. createListElementView guarantees it
+			}
 		}
 
 		switch (position) {
@@ -246,41 +372,12 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 							R.string.sipgate_simple_settings_balance_problem));
 				} else {
 					infoHolder.infoTextView.setText("");
-					infoHolder.spinnerView.setVisibility(View.VISIBLE);
-
-					final AnimationDrawable frameAnimation = (AnimationDrawable) infoHolder.spinnerView.getBackground();
-					Runnable animationStarter = new Runnable() {
-						public void run() {
-							frameAnimation.start();
-						}
-					};
-					infoHolder.spinnerView.post(animationStarter);
+					showSpinner(infoHolder.spinnerView, true);
 				}
 			} else {
-				final AnimationDrawable frameAnimation = (AnimationDrawable) infoHolder.spinnerView.getBackground();
-				Runnable animationStopper = new Runnable() {
-					public void run() {
-						frameAnimation.stop();
-					}
-				};
-				infoHolder.spinnerView.post(animationStopper);
+				showSpinner(infoHolder.spinnerView, false);
 
-				infoHolder.spinnerView.setVisibility(View.GONE);
-
-
-				double balanceAmount = (double) Double.parseDouble(balanceData.getTotal());
-				Double roundedBalance = new Double(Math.floor(balanceAmount * 100.) / 100.);
-				String[] balanceArray = roundedBalance.toString().split("[.]");
-				String balanceString = null;
-				String separator = context.getResources().getString(R.string.sipgate_decimal_separator);
-				if (balanceArray.length == 1) {
-					balanceString = balanceArray[0] + separator + "00";
-				} else if (balanceArray[1].length() == 1) {
-
-					balanceString = balanceArray[0] + separator + balanceArray[1] + "0";
-				} else {
-					balanceString = balanceArray[0] + separator + balanceArray[1];
-				}
+				String balanceString = createBalanceString(balanceData);
 				infoHolder.infoTextView.setText(balanceString + " " + balanceData.getCurrency());
 			} 
 			break;
@@ -291,20 +388,28 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 
 		return convertView;
 	}
-
+	
+	/**
+	 * creates checkboxviews for listview-elements
+	 * see getView
+	 * @param position
+	 * @param convertView
+	 * @param parent
+	 * @return
+	 */
 	private View getCheckboxView(int position, View convertView,
 			ViewGroup parent) {
 		if (convertView == null) {
-			convertView = mInflater.inflate(
-					R.layout.sipgate_simple_preferences_list_bit_with_checkbox,
-					null);
-			checkboxHolder = new SimpleSettingsCheckboxViewHolder();
-			checkboxHolder.checkedTextView = (CheckedTextView) convertView
-					.findViewById(R.id.sipgateSettingsCheckedBoxView);
-			convertView.setTag(checkboxHolder);
+			convertView = createListElementView(ElementType.CHECKBOXELEMENT);
+			checkboxHolder = (SimpleSettingsCheckboxViewHolder) convertView.getTag();
 		} else {
-			checkboxHolder = (SimpleSettingsCheckboxViewHolder) convertView
-					.getTag();
+			Object tag = convertView.getTag();
+			if (SimpleSettingsInfoViewHolder.class.isInstance(tag.getClass())) {
+				checkboxHolder = (SimpleSettingsCheckboxViewHolder) tag;
+			} else { // this tag is not usable. create another holder. this should not happen anyway with such a small list
+				convertView = createListElementView(ElementType.CHECKBOXELEMENT);
+				checkboxHolder= (SimpleSettingsCheckboxViewHolder) convertView.getTag();  // cast is save here. createListElementView guarantees it
+			}
 		}
 
 		switch (position) {
@@ -323,27 +428,34 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		return convertView;
 	}
 
+	/**
+	 * creates textviews for listview-elements
+	 * @param position
+	 * @param convertView
+	 * @param parent
+	 * @return
+	 */
 	private View getStandardView(int position, View convertView,
 			ViewGroup parent) {
 		if (convertView == null) {
-
-			convertView = mInflater.inflate(
-					R.layout.sipgate_simple_preferences_list_bit, null);
-			standardHolder = new SimpleSettingsStandardViewHolder();
-			standardHolder.textView = (TextView) convertView
-					.findViewById(R.id.sipgateSettingsStandardName);
-			convertView.setTag(standardHolder);
+			convertView = createListElementView(ElementType.TEXTELEMENT);
+			textHolder = (SimpleSettingsStandardViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
 		} else {
-			standardHolder = (SimpleSettingsStandardViewHolder) convertView
-					.getTag();
+			Object tag = convertView.getTag();
+			if (SimpleSettingsStandardViewHolder.class.isInstance(tag.getClass())) {
+				textHolder = (SimpleSettingsStandardViewHolder) tag;
+			} else { // this tag is not usable. create another holder. this should not happen anyway with such a small list
+				convertView = createListElementView(ElementType.TEXTELEMENT);
+				textHolder = (SimpleSettingsStandardViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
+			}
 		}
-
+		
 		switch (position) {
 		case 5:
-			standardHolder.textView.setText(refresh);
+			textHolder.textView.setText(refresh);
 			break;
 		case 6:
-			standardHolder.textView.setText(experts);
+			textHolder.textView.setText(experts);
 			break;
 		default:
 			break;

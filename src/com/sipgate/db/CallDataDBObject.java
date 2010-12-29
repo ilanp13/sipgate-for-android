@@ -90,7 +90,10 @@ public class CallDataDBObject extends BaseDBObject
 									"remoteNumberPretty VARCHAR, " +
 									"remoteName VARCHAR, " +
 									"readModifyUrl VARCHAR);",
-								"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);"
+								"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);",
+								"CREATE TRIGGER delete_CallData_Max100 AFTER INSERT ON CallData BEGIN " +
+									"DELETE FROM CallData WHERE time < (SELECT time FROM CallData ORDER BY time DESC LIMIT 99,1); " +
+								"END;"
 		};
 	}
 
