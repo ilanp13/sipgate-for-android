@@ -51,7 +51,9 @@ public class CallParser extends DefaultHandler
 		{
 			callDataDBObject = new CallDataDBObject();
 		}
-		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || "recordings".equalsIgnoreCase(localName))
+		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || 
+				 "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || 
+				 "recordings".equalsIgnoreCase(localName))
 		{
 			parent = localName;
 		}
@@ -182,7 +184,9 @@ public class CallParser extends DefaultHandler
 				}
 			}
 		}
-		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || "recordings".equalsIgnoreCase(localName))
+		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || 
+				 "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || 
+				 "recordings".equalsIgnoreCase(localName))
 		{
 			parent = null;
 		}

@@ -338,7 +338,7 @@ public class PhoneNumberFormatter {
 			return theNum;
 		}
 		
-		String e123result = String.format("+%s", theNum);
+		String e123result = String.format("%s", theNum);
 		return e123result;
 	}
 	
@@ -405,6 +405,18 @@ public class PhoneNumberFormatter {
 			return this;
 		}
 		this.isEmergencyNumber = false;
+		
+		/*
+		 * check if we have a dd 
+		 */
+		
+		if (num != null && num.length() >= 3 && (num.substring(0, 3).equals("dd:"))) {
+			if (num.length() == 3) {
+				num = "";
+			} else {
+				num = num.substring(3);
+			}
+		}
 		
 		/*
 		 * check if we have a tel or sip uri
@@ -546,7 +558,15 @@ public class PhoneNumberFormatter {
 		/*
 		 * just add the prefix and return the e164 number
 		 */
-		return String.format("%s%s", prefix, this.e164Number);
+	
+		if (e164Number != null && e164Number.length() > 0)
+		{	
+			return String.format("%s%s", prefix, this.e164Number);
+		}
+		else
+		{
+			return formattedNumberWithPrefixtype(this.prefixType);
+		}
 	}
 	
 	/**

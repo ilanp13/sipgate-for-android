@@ -310,7 +310,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		switch (position) {
 		case 3:
 			checkboxHolder.checkedTextView.setText(overWireless);
-			Log.e(TAG, settings.getUseWireless().toString());
 			checkboxHolder.checkedTextView.setChecked(settings.getUseWireless());
 			break;
 		case 4:
