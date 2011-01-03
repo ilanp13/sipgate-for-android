@@ -37,7 +37,7 @@ import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
 import com.sipgate.models.SipgateUserdataSip;
 import com.sipgate.models.api.xmlrpc.SipgateServerData;
-import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.ApiServiceProviderImpl.API_FEATURE;
 
 /*
  * 

@@ -3,11 +3,9 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.sipgate.api.types.MobileExtension;
 import com.sipgate.api.types.RegisteredMobileDevice;
@@ -18,301 +16,98 @@ import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.AuthenticationErrorException;
 import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
-import com.sipgate.exceptions.SipgateSettingsProviderGeneralException;
-import com.sipgate.interfaces.ApiClientInterface;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateProvisioningData;
-import com.sipgate.util.SettingsClient.API_TYPE;
+import com.sipgate.util.ApiServiceProviderImpl.API_FEATURE;
 
-public class ApiServiceProvider
-{
-	public enum API_FEATURE
-	{
-		VM_LIST
-	};
+public abstract class ApiServiceProvider {
 
-	private static final String TAG = "ApiServiceProvider";
-	// singleton foo:
-	private static ApiServiceProvider singleton = null;
-	// attributes:
-	private ApiClientInterface apiClient = null;
-	private Context ctx = null;
-	private SettingsClient settings = null;
-
-	private ApiServiceProvider(Context context)
-	{
-		super();
-		this.ctx = context;
-		this.settings = SettingsClient.getInstance(this.ctx);
-		// do we have credentials an api-type in the settings?
-		String username = this.settings.getWebusername();
-		String password = this.settings.getWebpassword();
-		API_TYPE apiType;
-		try
-		{
-			apiType = this.settings.getApiType();
-		}
-		catch (SipgateSettingsProviderGeneralException e)
-		{
-			apiType = null;
-		}
-		if (username.length() > 0 && password.length() > 0 && apiType != null)
-		{
-			try
-			{
-				this.apiClient = this.initClient(apiType, username, password);
-				if (!apiClient.connectivityOk())
-				{
-					unRegister();
-				}
-			}
-			catch (ApiException e)
-			{
-				Log.e(TAG, "ApiServiceProvider() unregistering due to error getting api-client using settings -> " + e.toString());
-				unRegister();
-			}
-			catch (NetworkProblemException e)
-			{
-				Log.e(TAG, "ApiServiceProvider() unregistering due to network error checking api credentials -> " + e.toString());
-				unRegister();
-			}
-		}
-	}
-
-	/*
-	 * get an instance of the singleton object
-	 */
-	synchronized public static ApiServiceProvider getInstance(Context context)
-	{
-		if (singleton == null)
-		{
-			singleton = new ApiServiceProvider(context);
-		}
-		return singleton;
-	}
-
-	synchronized public static void destroy()
-	{
-		singleton = null;
-	}
+	private static ApiServiceProvider singleton;
 
 	/*
 	 * check whether the application was registered to an account. This is
 	 * transparent for OAuth and Basic-Auth use.
 	 */
-	public boolean isRegistered()
-	{
-		return (apiClient != null);
-	}
-
-	private ApiClientInterface initClient(API_TYPE apiType, String username, String password) throws ApiException
-	{
-		ApiClientInterface tmpClient = null;
-		if (apiType.equals(API_TYPE.REST))
-		{
-			tmpClient = new RestClient(username, password);
-		}
-		else
-		{
-			tmpClient = new XmlrpcClient(username, password);
-		}
-		return tmpClient;
-	}
+	public abstract boolean isRegistered();
 
 	/*
 	 * Register the application to an account. This is transparent for OAuth and
 	 * Basic-Auth use.
 	 */
-	public void register(String username, String password) throws ApiException, NetworkProblemException
-	{
-		// unregister first if needed!
-		if (this.isRegistered())
-		{
-			this.unRegister();
-		}
-		// now we try to find out the right api:
-		ArrayList<API_TYPE> apiClientList = new ArrayList<API_TYPE>();
-		if (username.contains("@"))
-		{
-			apiClientList.add(API_TYPE.REST);
-			apiClientList.add(API_TYPE.XMLRPC);
-		}
-		else
-		{
-			apiClientList.add(API_TYPE.XMLRPC);
-			apiClientList.add(API_TYPE.REST);
-		}
-		for (API_TYPE clientType : apiClientList)
-		{
-			ApiClientInterface tmpClient = null;
-			try
-			{
-				tmpClient = this.initClient(clientType, username, password);
-				if (tmpClient.connectivityOk())
-				{
-					this.apiClient = tmpClient;
-					this.settings.setApiType(clientType);
-					this.settings.setWebusername(username);
-					this.settings.setWebuserpass(password);
-					break;
-				}
-			}
-			catch (NetworkProblemException e)
-			{
-				Log.e(TAG, "register() try with '" + clientType.toString() + "' failed -> " + e.toString());
-				throw e;
-			}
-			catch (Exception e)
-			{
-				Log.i(TAG, "register() try with '" + clientType.toString() + "' failed -> " + e.toString());
-			}
-		}
-		if (this.apiClient == null)
-		{
-			Log.e(TAG, "register() failed: none of the API-backends was accessible!");
-			throw new ApiException();
-		}
-		Log.d(TAG, "register() done without problems");
-	}
+	public abstract void register(String username, String password) throws ApiException,
+			NetworkProblemException;
 
 	/*
 	 * Unregister the application from an account. This is transparent for OAuth
 	 * and Basic-Auth use.
 	 */
-	public void unRegister()
-	{
-		apiClient = null;
-	}
+	public abstract void unRegister();
 
 	/*
 	 * get information for provisioning sip clients
 	 */
-	public SipgateProvisioningData getProvisioningData() throws ApiException, FeatureNotAvailableException, AuthenticationErrorException, NetworkProblemException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getProvisioningData();
-		}
-	}
+	public abstract SipgateProvisioningData getProvisioningData() throws ApiException,
+			FeatureNotAvailableException, AuthenticationErrorException,
+			NetworkProblemException;
 
 	/*
 	 * get accounts current balance
 	 */
-	public SipgateBalanceData getBillingBalance() throws ApiException, FeatureNotAvailableException, NetworkProblemException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getBillingBalance();
-		}
-	}
+	public abstract SipgateBalanceData getBillingBalance() throws ApiException,
+			FeatureNotAvailableException, NetworkProblemException;
 
 	/*
 	 * voice mail list
 	 */
-	public Vector<VoiceMailDataDBObject> getVoiceMails(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getVoiceMails(periodStart, periodEnd);
-		}
-	}
+	public abstract Vector<VoiceMailDataDBObject> getVoiceMails(long periodStart,
+			long periodEnd) throws ApiException, FeatureNotAvailableException;
 
 	/*
 	 * voice mail list
 	 */
-	public Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getVoiceMails(-1, -1);
-		}
-	}
+	public abstract Vector<VoiceMailDataDBObject> getVoiceMails() throws ApiException,
+			FeatureNotAvailableException;
 
 	/*
 	 * get voicemail content as stream
 	 */
-	public InputStream getVoicemail(String voicemail) throws ApiException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getVoicemail(voicemail);
-		}
-	}
+	public abstract InputStream getVoicemail(String voicemail) throws ApiException,
+			FeatureNotAvailableException;
 
 	/*
 	 * mark specific vm as read
 	 */
-	public void setVoiceMailRead(String voicemail) throws ApiException, FeatureNotAvailableException, NetworkProblemException
-	{
-		synchronized (this.apiClient)
-		{
-			apiClient.setVoiceMailRead(voicemail);
-		}
-	}
+	public abstract void setVoiceMailRead(String voicemail) throws ApiException,
+			FeatureNotAvailableException, NetworkProblemException;
 
 	/*
 	 * mark specific call as read
 	 */
-	public void setCallRead(String call) throws ApiException, FeatureNotAvailableException, NetworkProblemException
-	{
-		synchronized (this.apiClient)
-		{
-			apiClient.setCallRead(call);
-		}
-	}
+	public abstract void setCallRead(String call) throws ApiException,
+			FeatureNotAvailableException, NetworkProblemException;
 
 	/*
 	 * contact list
 	 */
-	public Vector<ContactDataDBObject> getContacts() throws ApiException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getContacts();
-		}
-	}
+	public abstract Vector<ContactDataDBObject> getContacts() throws ApiException,
+			FeatureNotAvailableException;
 
 	/*
 	 * calls list
 	 */
-	public Vector<CallDataDBObject> getCalls(long periodStart, long periodEnd) throws ApiException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getCalls(periodStart, periodEnd);
-		}
-	}
+	public abstract Vector<CallDataDBObject> getCalls(long periodStart, long periodEnd)
+			throws ApiException, FeatureNotAvailableException;
 
 	/*
 	 * calls list
 	 */
-	public Vector<CallDataDBObject> getCalls() throws ApiException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getCalls(-1, -1);
-		}
-	}
+	public abstract Vector<CallDataDBObject> getCalls() throws ApiException,
+			FeatureNotAvailableException;
 
-	public boolean featureAvailable(API_FEATURE feature) throws ApiException
-	{
-		if (apiClient != null)
-		{
-			synchronized (this.apiClient)
-			{
-				return apiClient.featureAvailable(feature);
-			}
-		}
-		return false;
-	}
+	public abstract boolean featureAvailable(API_FEATURE feature) throws ApiException;
 
-	public String getBaseProductType() throws IOException, URISyntaxException, FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.getBaseProductType();
-		}
-	}
+	public abstract String getBaseProductType() throws IOException, URISyntaxException,
+			FeatureNotAvailableException;
 
 	/**
 	 * This methods calls the api to create a mobile extension and returns it
@@ -326,13 +121,9 @@ public class ApiServiceProvider
 	 * @return a fresh MobileExtension with credentials
 	 * @throws FeatureNotAvailableException
 	 */
-	public MobileExtension setupMobileExtension(String phoneNumber, String model, String vendor, String firmware) throws FeatureNotAvailableException
-	{
-		synchronized (this.apiClient)
-		{
-			return apiClient.setupMobileExtension(phoneNumber, model, vendor, firmware);
-		}
-	}
+	public abstract MobileExtension setupMobileExtension(String phoneNumber,
+			String model, String vendor, String firmware)
+			throws FeatureNotAvailableException;
 
 	/**
 	 * This method calls the api and requests all registered mobile devices
@@ -342,11 +133,37 @@ public class ApiServiceProvider
 	 * @return a Vector with all registered mobile devices
 	 * @throws FeatureNotAvailableException
 	 */
-	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices() throws FeatureNotAvailableException, ApiException
+	public abstract Vector<RegisteredMobileDevice> getRegisteredMobileDevices()
+			throws FeatureNotAvailableException, ApiException;
+
+	
+	/**
+	 * get an instance of the singleton object.
+	 * creates {@link ApiServiceProviderImpl} by default
+	 * @param context used to initialize the instance
+	 * @return a singleton instance
+	 */
+	synchronized public static ApiServiceProvider getInstance(Context context)
 	{
-		synchronized (this.apiClient)
+		if (singleton == null)
 		{
-			return apiClient.getRegisteredMobileDevices();
+			singleton = new ApiServiceProviderImpl(context);
 		}
+		return singleton;
 	}
+
+	synchronized public static void destroy()
+	{
+		singleton = null;
+	}
+
+	/**
+	 * defines the singleton instance returned by getInstance
+	 * @param singleton
+	 */
+	synchronized public static void setInstance(ApiServiceProvider singleton) 
+	{
+		ApiServiceProvider.singleton = singleton;
+	}
+	
 }

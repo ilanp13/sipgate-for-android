@@ -20,6 +20,7 @@ import com.sipgate.R.id;
 import com.sipgate.exceptions.ApiException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.ApiServiceProviderImpl;
 import com.sipgate.util.SettingsClient;
 
 @SuppressWarnings("unused")

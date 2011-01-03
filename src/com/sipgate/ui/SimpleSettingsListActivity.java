@@ -2,25 +2,21 @@ package com.sipgate.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.sipgate.R;
 import com.sipgate.adapters.SimpleSettingsAdapter;
 import com.sipgate.db.SipgateDBAdapter;
-import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
-import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.ApiServiceProviderImpl;
 import com.sipgate.util.SettingsClient;
 
 /**
@@ -30,7 +26,6 @@ import com.sipgate.util.SettingsClient;
  * @author Karsten Knuth
  * @version 1.0
  */
-@SuppressWarnings("unused")
 public class SimpleSettingsListActivity extends Activity implements OnItemClickListener 
 {
 	private static final String TAG = "SimpleSettingsListActivity";
@@ -107,7 +102,7 @@ public class SimpleSettingsListActivity extends Activity implements OnItemClickL
 			settingsClient.unRegisterExtension();
 			Receiver.engine(getApplicationContext()).halt();
 
-			if (ApiServiceProvider.getInstance(getApplicationContext()).isRegistered()){
+			if (ApiServiceProviderImpl.getInstance(getApplicationContext()).isRegistered()){
 				intent = new Intent(this, Setup.class);
 				startActivity(intent);
 			}
