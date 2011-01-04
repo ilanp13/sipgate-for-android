@@ -39,7 +39,7 @@ import com.sipgate.parser.CallParser;
 import com.sipgate.parser.ContactParser;
 import com.sipgate.parser.RegisteredMobileDeviceParser;
 import com.sipgate.parser.VoiceMailParser;
-import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.ApiServiceProviderImpl.API_FEATURE;
 
 public class RestClient implements ApiClientInterface {
 	

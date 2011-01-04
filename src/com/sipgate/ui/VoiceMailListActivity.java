@@ -42,7 +42,6 @@ import com.sipgate.service.EventService;
 import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.util.ApiServiceProvider;
 import com.sipgate.util.MediaConnector;
-import com.sipgate.util.NotificationClient;
 import com.sipgate.util.SipgateApplication;
 
 /**
@@ -117,6 +116,7 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 			}
 		};
 		
+		refreshView.setVisibility(View.VISIBLE);
 		refreshView.post(animationThread);
 		
 		appContext = getApplicationContext();
