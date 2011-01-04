@@ -1,6 +1,7 @@
 package com.sipgate.parser;
 
 import java.text.ParseException;
+
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Vector;
@@ -14,6 +15,15 @@ import android.util.Log;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.util.PhoneNumberFormatter;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for VoiceMailDataDBObjects
+ * A Document is handled by this Class and it trys to parse the content into VoiceMailDataDBObjects
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class VoiceMailParser extends DefaultHandler
 {
 	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
@@ -37,6 +47,10 @@ public class VoiceMailParser extends DefaultHandler
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of CallParser to reuse instead of creating 
+	 * a new instance of CallParser for memory saving
+	 */
 	public void init()
 	{
 		voiceMailDataDBObjects.clear();
@@ -172,6 +186,10 @@ public class VoiceMailParser extends DefaultHandler
 		return callTime;
 	}
 
+	/**
+	 * This method returns a Vector of parsed VoiceMailDataDBObjects
+	 * @return a Vector of all VoiceMailDataDBObjects parsed by this handler since the last call of init()
+	 */
 	public Vector<VoiceMailDataDBObject> getVoiceMailDataDBObjects()
 	{
 		return voiceMailDataDBObjects;

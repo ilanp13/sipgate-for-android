@@ -29,7 +29,6 @@ public class CallListAdapter extends BaseAdapter
 {
 	private final static String TAG = "CallListAdapter";
 
-	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
 
 	private LayoutInflater mInflater = null;
@@ -70,7 +69,6 @@ public class CallListAdapter extends BaseAdapter
 	
 	public CallListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
-		this.activity = activity;
 		this.sipgateDBAdapter = sipgateDBAdapter;
 		
 		mInflater = activity.getLayoutInflater();

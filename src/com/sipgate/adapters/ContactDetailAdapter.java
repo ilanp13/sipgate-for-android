@@ -16,10 +16,7 @@ import com.sipgate.models.holder.ContactDetailViewHolder;
 
 public class ContactDetailAdapter extends BaseAdapter
 {
-	private final static String TAG = "ContactDetailAdapter";
-
-	private Activity activity = null;
-	
+	private Activity activity = null;	
 	private LayoutInflater mInflater = null;
 	
 	private ContactDataDBObject contactDataDBObject = null;

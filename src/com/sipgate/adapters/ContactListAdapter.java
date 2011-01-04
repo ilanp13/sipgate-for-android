@@ -25,7 +25,6 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 {
 	private final static String TAG = "ContactListAdapter";
 
-	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private LayoutInflater mInflater = null;
@@ -51,7 +50,6 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 		
 	public ContactListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
-		this.activity = activity;
 		this.sipgateDBAdapter = sipgateDBAdapter;
 	
 		mInflater = activity.getLayoutInflater();

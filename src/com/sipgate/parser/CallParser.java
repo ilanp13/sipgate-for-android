@@ -14,6 +14,15 @@ import android.util.Log;
 import com.sipgate.db.CallDataDBObject;
 import com.sipgate.util.PhoneNumberFormatter;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for CallDataDBObjects
+ * A Document is handled by this Class and it trys to parse the content into CallDataDBObjects
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class CallParser extends DefaultHandler
 {
 	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
@@ -37,6 +46,10 @@ public class CallParser extends DefaultHandler
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of CallParser to reuse instead of creating 
+	 * a new instance of CallParser for memory saving
+	 */
 	public void init()
 	{
 		callDataDBObjects.clear();
@@ -216,6 +229,10 @@ public class CallParser extends DefaultHandler
 		return callTime;
 	}
 
+	/**
+	 * This method returns a Vector of parsed CallDataDBObjects
+	 * @return a Vector of all CallDataDBObjects parsed by this handler since the last call of init()
+	 */
 	public Vector<CallDataDBObject> getCallDataDBObjects()
 	{
 		return callDataDBObjects;

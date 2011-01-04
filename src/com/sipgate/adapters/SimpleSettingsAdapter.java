@@ -64,9 +64,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 	private String refresh = null;
 	private String experts = null;
 
-	private Drawable checkboxOff = null;
-	private Drawable checkboxOn = null;
-
 	private SimpleSettingsInfoViewHolder infoHolder = null;
 	private SimpleSettingsStandardViewHolder textHolder = null;
 	private SimpleSettingsCheckboxViewHolder checkboxHolder = null;
@@ -76,10 +73,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 	private SipgateBalanceData balanceData = null;
 	private boolean balanceProblem = false;
 	private Context context = null;
-
-	private HashMap<String, String> nameCache = null;
-
-	private List<DataSetObserver> dataSetObservers = null;
 
 	public SimpleSettingsAdapter(Activity activity) {
 		this.context = activity.getApplicationContext();
@@ -100,11 +93,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 				R.string.simple_settings_refresh_timers);
 		experts = activity.getResources().getString(
 				R.string.simple_settings_advanced);
-
-		checkboxOff = activity.getResources().getDrawable(
-				R.drawable.btn_check_off);
-		checkboxOn = activity.getResources().getDrawable(
-				R.drawable.btn_check_on);
 
 		settings = SettingsClient.getInstance(activity.getApplicationContext());
 		apiServiceProvider = ApiServiceProvider.getInstance(activity

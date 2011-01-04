@@ -19,8 +19,6 @@ import com.sipgate.db.base.BaseDBObject;
  */
 public class SipgateDBAdapter extends BaseDBAdapter
 {
-	private static SipgateDBAdapter sipgateDBAdapter = null;
-	
 	/**
 	 * Default constructor.
 	 * 
@@ -127,7 +125,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -182,7 +180,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -238,7 +236,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -282,7 +280,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -418,7 +416,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -459,7 +457,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -507,7 +505,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -575,7 +573,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			}
 			finally
 			{
-				if (!cursor.isClosed() && cursor != null)
+				if (cursor != null && !cursor.isClosed())
 				{
 					cursor.close();
 				}
@@ -625,7 +623,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -680,7 +678,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -730,7 +728,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -768,7 +766,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -806,7 +804,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}

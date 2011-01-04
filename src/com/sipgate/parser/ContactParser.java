@@ -11,6 +11,15 @@ import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
 import com.sipgate.util.PhoneNumberFormatter;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for ContactDataDBObjects
+ * A Document is handled by this Class and it trys to parse the content into ContactDataDBObjects
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class ContactParser extends DefaultHandler
 {
 	private Vector <ContactDataDBObject> contactDataDBObjects = null;
@@ -33,6 +42,10 @@ public class ContactParser extends DefaultHandler
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of ContactParser to reuse instead of creating 
+	 * a new instance of ContactParser for memory saving
+	 */
 	public void init()
 	{
 		contactDataDBObjects.clear();
@@ -120,6 +133,10 @@ public class ContactParser extends DefaultHandler
 		currentValue.append(ch, start, length);
 	}
 
+	/**
+	 * This method returns a Vector of parsed ContactDataDBObjects
+	 * @return a Vector of all ContactDataDBObjects parsed by this handler since the last call of init()
+	 */
 	public Vector<ContactDataDBObject> getContactDataDBObjects()
 	{
 		return contactDataDBObjects;
