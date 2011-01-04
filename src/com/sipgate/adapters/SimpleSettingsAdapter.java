@@ -341,13 +341,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			convertView = createListElementView(ElementType.INFOELEMENT);
 			infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
 		} else {
-			Object tag = convertView.getTag();
-			if (SimpleSettingsInfoViewHolder.class.isInstance(tag.getClass())) {
-				infoHolder = (SimpleSettingsInfoViewHolder) tag;
-			} else { // this tag is not usable. create another holder. this should not happen anyway with such a small list
-				convertView = createListElementView(ElementType.INFOELEMENT);
-				infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag();  // cast is save here. createListElementView guarantees it
-			}
+			infoHolder = (SimpleSettingsInfoViewHolder) convertView.getTag();  // cast is save here. createListElementView guarantees it
 		}
 
 		switch (position) {
@@ -402,13 +396,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			convertView = createListElementView(ElementType.CHECKBOXELEMENT);
 			checkboxHolder = (SimpleSettingsCheckboxViewHolder) convertView.getTag();
 		} else {
-			Object tag = convertView.getTag();
-			if (SimpleSettingsInfoViewHolder.class.isInstance(tag.getClass())) {
-				checkboxHolder = (SimpleSettingsCheckboxViewHolder) tag;
-			} else { // this tag is not usable. create another holder. this should not happen anyway with such a small list
-				convertView = createListElementView(ElementType.CHECKBOXELEMENT);
-				checkboxHolder= (SimpleSettingsCheckboxViewHolder) convertView.getTag();  // cast is save here. createListElementView guarantees it
-			}
+			checkboxHolder= (SimpleSettingsCheckboxViewHolder) convertView.getTag();  // cast is save here.
 		}
 
 		switch (position) {
@@ -440,13 +428,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			convertView = createListElementView(ElementType.TEXTELEMENT);
 			textHolder = (SimpleSettingsStandardViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
 		} else {
-			Object tag = convertView.getTag();
-			if (SimpleSettingsStandardViewHolder.class.isInstance(tag.getClass())) {
-				textHolder = (SimpleSettingsStandardViewHolder) tag;
-			} else { // this tag is not usable. create another holder. this should not happen anyway with such a small list
-				convertView = createListElementView(ElementType.TEXTELEMENT);
-				textHolder = (SimpleSettingsStandardViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
-			}
+			textHolder = (SimpleSettingsStandardViewHolder) convertView.getTag(); // cast is save here. createListElementView guarantees it
 		}
 		
 		switch (position) {
