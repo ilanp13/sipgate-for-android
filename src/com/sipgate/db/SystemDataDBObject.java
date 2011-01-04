@@ -89,7 +89,7 @@ public class SystemDataDBObject extends BaseDBObject
 	{
 		if (obj instanceof SystemDataDBObject)
 		{
-			return ((SystemDataDBObject)obj).getKey() == key;
+			return ((SystemDataDBObject)obj).getKey().equals(key);
 		}
 		else
 		{	

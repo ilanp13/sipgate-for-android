@@ -3,7 +3,6 @@ package com.sipgate.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.Locale;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
