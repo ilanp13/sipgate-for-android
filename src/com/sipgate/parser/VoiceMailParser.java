@@ -26,7 +26,7 @@ import com.sipgate.util.PhoneNumberFormatter;
  */
 public class VoiceMailParser extends DefaultHandler
 {
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ssZ");
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	private Vector <VoiceMailDataDBObject> voiceMailDataDBObjects = null;
 	private VoiceMailDataDBObject voiceMailDataDBObject = null;

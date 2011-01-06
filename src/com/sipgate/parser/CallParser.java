@@ -25,7 +25,7 @@ import com.sipgate.util.PhoneNumberFormatter;
  */
 public class CallParser extends DefaultHandler
 {
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ssZ");
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	private Vector <CallDataDBObject> callDataDBObjects = null;
 	private CallDataDBObject callDataDBObject = null;
