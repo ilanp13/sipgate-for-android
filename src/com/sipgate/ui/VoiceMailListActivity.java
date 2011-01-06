@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.sipgate.R;
 import com.sipgate.adapters.VoiceMailListAdapter;
 import com.sipgate.db.SipgateDBAdapter;
+import com.sipgate.db.SystemDataDBObject;
 import com.sipgate.db.VoiceMailDataDBObject;
 import com.sipgate.db.VoiceMailFileDBObject;
 import com.sipgate.service.EventService;
@@ -148,6 +149,15 @@ public class VoiceMailListActivity extends Activity implements OnItemClickListen
 		super.onResume();
 		
 		registerForBackgroundIntents();		
+		
+		SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_VOICEMAILS_COUNT);
+		
+		if (systemDataDBObject != null)
+		{
+			systemDataDBObject.setValue(String.valueOf(0));
+			
+			sipgateDBAdapter.update(systemDataDBObject);
+		}
 		
 		refreshState = application.getRefreshState();
 		application.setRefreshState(SipgateApplication.RefreshState.NONE);

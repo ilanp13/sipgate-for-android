@@ -1,6 +1,7 @@
 package com.sipgate.db;
 
 import android.database.sqlite.SQLiteStatement;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import com.sipgate.db.base.BaseDBObject;
 
@@ -15,7 +16,7 @@ public class ContactNumberDBObject extends BaseDBObject
 	
 	public enum PhoneType 
 	{
-		HOME, CELL, WORK, WORK_FAX, HOME_FAX, PAGER, OTHER, CUSTOM, ASSISTANT, CALLBACK, CAR, COMPANY_MAIN, ISDN, MAIN, MMS, OTHER_FAX, RADIO, TELEX, TTY_TDD, WORK_CELL, WORK_PAGER;
+		HOME, CELL, WORK, WORK_FAX, HOME_FAX, PAGER, OTHER, CALLBACK, CAR, COMPANY_MAIN, ISDN, MAIN, OTHER_FAX, RADIO, TELEX, TTY_TDD, WORK_CELL, WORK_PAGER, ASSISTANT, MMS;
 	}
 	
 	public void bindDelete(SQLiteStatement statement)
@@ -92,10 +93,15 @@ public class ContactNumberDBObject extends BaseDBObject
 	{
 		return type;
 	}
-
+	
 	public void setType(String type)
 	{
 		this.type = type;
+	}
+	
+	public void setType(int typePos)
+	{
+		setType(PhoneType.values()[typePos].name());
 	}
 
 	public String getUuid()
@@ -138,6 +144,11 @@ public class ContactNumberDBObject extends BaseDBObject
 		{
 			return PhoneType.OTHER;
 		}
+	}
+	
+	public int getTypeAsCommonDataKindsPhoneInt()
+	{
+		return getPhoneType().ordinal()+1;
 	}
 
 	@Override

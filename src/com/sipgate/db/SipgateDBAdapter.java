@@ -66,12 +66,32 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	}
 	
 	/**
+	 * Gets a cursor with all the system data.
+	 * 
+	 * @return A cursor with all the system data records
+	 * @since 1.0
+	 */
+	public Cursor getAllSystemDataCursor()
+	{
+		return database.query("SystemData", null, null, null, null, null, null);
+	}
+	
+	/**
+	 * Wrapper method for method getAllContactData(boolean withNumbers)
+	 * @return a Vector with all ContactDataDBObjects without numbers
+	 */
+	public Vector<ContactDataDBObject> getAllContactData()
+	{
+		return getAllContactData(false);
+	}
+	
+	/**
 	 * Gets a Vector with all the contact data.
 	 * 
 	 * @return A vector with all the contact data objects
 	 * @since 1.0
 	 */
-	public Vector<ContactDataDBObject> getAllContactData()
+	public Vector<ContactDataDBObject> getAllContactData(boolean withNumbers)
 	{
 		Vector<ContactDataDBObject> contactData = new Vector<ContactDataDBObject>();
 
@@ -91,7 +111,12 @@ public class SipgateDBAdapter extends BaseDBAdapter
 					contact.setFirstName(cursor.getString(1));
 					contact.setLastName(cursor.getString(2));
 					contact.setDisplayName(cursor.getString(3));
-						
+					
+					if (withNumbers)
+					{
+						contact.setContactNumberDBObjects(getContactNumberDBObjectsByUuid(contact.getUuid()));
+					}
+					
 					contactData.add(contact);
 				}
 			}
@@ -222,6 +247,50 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	}
 	
 	/**
+	 * Gets a Vector with all the system data.
+	 * 
+	 * @return A vector with all the system data objects
+	 * @since 1.0
+	 */
+	public Vector<SystemDataDBObject> getAllSystemData()
+	{
+		Vector<SystemDataDBObject> systemData = new Vector<SystemDataDBObject>();
+		
+		Cursor cursor = getAllSystemDataCursor();
+		
+		SystemDataDBObject system = null;
+		
+		try
+		{
+			if (cursor != null)
+			{
+				while (cursor.moveToNext())
+				{
+					system = new SystemDataDBObject();
+					
+					system.setKey(cursor.getString(0));
+					system.setValue(cursor.getString(1));
+										
+					systemData.add(system);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getAllSystemData() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+		
+		return systemData;
+	}
+	
+	/**
 	 * Gets a cursor with a specific contact data record.
 	 * 
 	 * @param uuid The contact uiid
@@ -291,6 +360,18 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	public Cursor getVoiceMailFileCursorById(long id)
 	{
 		return database.query("VoiceMailFile", null, "id = ?", new String[]{ String.valueOf(id) }, null, null, null);
+	}	
+	
+	/**
+	 * Gets a cursor with a specific system data record.
+	 * 
+	 * @param key the of the system data record
+	 * @return A cursor with the specific system data record
+	 * @since 1.0
+	 */
+	public Cursor getSystemDataCursorById(String key)
+	{
+		return database.query("SystemData", null, "key = ?", new String[]{ key }, null, null, null);
 	}	
 	
 	/**
@@ -585,7 +666,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 				cursor.close();
 			}
 		}
-	
+		
 		return voiceMail;
 	}
 	
@@ -625,6 +706,44 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 	
 		return voiceMailFile;
+	}
+		
+	/**
+	 * Gets an object with a specific system data record.
+	 * 
+	 * @param key the key of the system data record
+	 * @return An object with the specific system data record
+	 * @since 1.0
+	 */
+	public SystemDataDBObject getSystemDataDBObjectByKey(String key)
+	{
+		SystemDataDBObject systemDataDBObject = null;
+		
+		Cursor cursor = getSystemDataCursorById(key);
+		
+		try
+		{
+			if (cursor != null && cursor.moveToNext())
+			{
+				systemDataDBObject = new SystemDataDBObject();
+			
+				systemDataDBObject.setKey(cursor.getString(0));
+				systemDataDBObject.setValue(cursor.getString(1));
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getSystemDataDBObjectByKey() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (!cursor.isClosed() && cursor != null)
+			{
+				cursor.close();
+			}
+		}
+	
+		return systemDataDBObject;
 	}
 	
 	/**
@@ -722,6 +841,25 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		return count;
 	}
 	
+	/**
+	 * Gets the number of the system data records in the database.
+	 * 
+	 * @return The number of the system data records in the database
+	 * @since 1.0
+	 */
+	public long getSystemDataCount()
+	{
+		long count = 0;
+		
+		SQLiteStatement statement = database.compileStatement("Select count(*) from SystemData");
+		
+		count = statement.simpleQueryForLong();
+		
+		statement.close();
+		
+		return count;
+	}
+	
 	
 	/**
 	 * Deletes all contact data records in the database;
@@ -790,6 +928,36 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	public void deleteAllVoiceMailFileDBObjects()
 	{
 		SQLiteStatement statement = database.compileStatement("Delete from VoiceMailFile");
+		
+		statement.execute();
+		
+		statement.close();
+	}
+	
+	/**
+	 * Deletes all system data records in the database.
+	 * 
+	 * @since 1.0
+	 */
+	public void deleteAllSystemDataDBObjects()
+	{
+		SQLiteStatement statement = database.compileStatement("Delete from SystemData");
+		
+		statement.execute();
+		
+		statement.close();
+	}
+	
+	/**
+	 * Deletes a system data record in the database by key;
+	 * 
+	 * @since 1.0
+	 */
+	public void deleteSystemDataDBObjectByKey(String key)
+	{
+		SQLiteStatement statement = database.compileStatement("Delete from SystemData WHERE key = ?");
+	
+		statement.bindString(1, key);
 		
 		statement.execute();
 		
@@ -1023,6 +1191,13 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		{
 		    database.execSQL(statement);
 		}
+		
+		SystemDataDBObject systemDataDBObject = new SystemDataDBObject();
+		
+		for(String statement : systemDataDBObject.getCreateStatement())
+		{
+		    database.execSQL(statement);
+		}
 	}	
 	
 	@Override
@@ -1042,5 +1217,8 @@ public class SipgateDBAdapter extends BaseDBAdapter
 
 		VoiceMailDataDBObject voiceMailDataDBObject = new VoiceMailDataDBObject();
 		database.execSQL(voiceMailDataDBObject.getDropStatement());	
+		
+		SystemDataDBObject systemDataDBObject = new SystemDataDBObject();
+		database.execSQL(systemDataDBObject.getDropStatement());	
 	}
 }

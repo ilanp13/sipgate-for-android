@@ -19,7 +19,6 @@ public class ContactDetailAdapter extends BaseAdapter
 	private final static String TAG = "ContactDetailAdapter";
 
 	private Activity activity = null;
-	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private LayoutInflater mInflater = null;
 	
@@ -32,7 +31,6 @@ public class ContactDetailAdapter extends BaseAdapter
 	public ContactDetailAdapter(Activity activity, String uuid, SipgateDBAdapter sipgateDBAdapter) 
 	{
 		this.activity = activity;
-		this.sipgateDBAdapter = sipgateDBAdapter;
 		
 		mInflater = activity.getLayoutInflater();
 		
@@ -140,9 +138,6 @@ public class ContactDetailAdapter extends BaseAdapter
 					break;
 				case OTHER:
 					type = activity.getResources().getString(R.string.sipgate_phonetype_other);
-					break;
-				case CUSTOM:
-					type = activity.getResources().getString(R.string.sipgate_phonetype_custom);
 					break;
 				case ASSISTANT:
 					type = activity.getResources().getString(R.string.sipgate_phonetype_assistant);
