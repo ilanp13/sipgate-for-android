@@ -16,6 +16,7 @@ public class CallDataDBObject extends BaseDBObject
 	private long missed = 0;
 	private long read = 0;
 	private long time = 0;
+	private long temp = 0;
 		
 	private String localNumberE164 = "";
 	private String localNumberPretty = "";
@@ -39,16 +40,17 @@ public class CallDataDBObject extends BaseDBObject
 		statement.bindLong(3, missed);
 		statement.bindLong(4, read);
 		statement.bindLong(5, time);
+		statement.bindLong(6, temp);
+				
+		statement.bindString(7, localNumberE164);	
+		statement.bindString(8, localNumberPretty);
+		statement.bindString(9, localName);
 		
-		statement.bindString(6, localNumberE164);	
-		statement.bindString(7, localNumberPretty);
-		statement.bindString(8, localName);
+		statement.bindString(10, remoteNumberE164);
+		statement.bindString(11, remoteNumberPretty);
+		statement.bindString(12, remoteName);
 		
-		statement.bindString(9, remoteNumberE164);
-		statement.bindString(10, remoteNumberPretty);
-		statement.bindString(11, remoteName);
-		
-		statement.bindString(12, readModifyUrl);
+		statement.bindString(13, readModifyUrl);
 	}
 
 	public void bindUpdate(SQLiteStatement statement)
@@ -57,18 +59,19 @@ public class CallDataDBObject extends BaseDBObject
 		statement.bindLong(2, missed);
 		statement.bindLong(3, read);
 		statement.bindLong(4, time);
+		statement.bindLong(5, temp);
+				
+		statement.bindString(6, localNumberE164);
+		statement.bindString(7, localNumberPretty);
+		statement.bindString(8, localName);
 		
-		statement.bindString(5, localNumberE164);
-		statement.bindString(6, localNumberPretty);
-		statement.bindString(7, localName);
+		statement.bindString(9, remoteNumberE164);
+		statement.bindString(10, remoteNumberPretty);
+		statement.bindString(11, remoteName);
 		
-		statement.bindString(8, remoteNumberE164);
-		statement.bindString(9, remoteNumberPretty);
-		statement.bindString(10, remoteName);
+		statement.bindString(12, readModifyUrl);
 		
-		statement.bindString(11, readModifyUrl);
-		
-		statement.bindLong(12, id);
+		statement.bindLong(13, id);
 	}
 
 	public String[] getCreateStatement()
@@ -79,6 +82,7 @@ public class CallDataDBObject extends BaseDBObject
 									"missed INTEGER, " +
 									"read INTEGER, " +
 									"time INTEGER, " +
+									"temp INTEGER, " +
 									"localNumberE164 VARCHAR, " +
 									"localNumberPretty VARCHAR, " +
 									"localName VARCHAR, " +
@@ -86,7 +90,10 @@ public class CallDataDBObject extends BaseDBObject
 									"remoteNumberPretty VARCHAR, " +
 									"remoteName VARCHAR, " +
 									"readModifyUrl VARCHAR);",
-								"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);"
+								"CREATE UNIQUE INDEX uidx_id_CallData ON CallData (id ASC);",
+								"CREATE TRIGGER delete_CallData_Max100 AFTER INSERT ON CallData BEGIN " +
+									"DELETE FROM CallData WHERE time < (SELECT time FROM CallData ORDER BY time DESC LIMIT 99,1); " +
+								"END;"
 		};
 	}
 
@@ -98,9 +105,9 @@ public class CallDataDBObject extends BaseDBObject
 	public String getInsertStatement()
 	{
 		return 	"INSERT INTO CallData (" +
-					"id, direction, missed, read, time, localNumberE164, localNumberPretty, " +
+					"id, direction, missed, read, time, temp, localNumberE164, localNumberPretty, " +
 					"localName, remoteNumberE164, remoteNumberPretty, remoteName, readModifyUrl) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	}
 
 	public String getTableName()
@@ -111,7 +118,7 @@ public class CallDataDBObject extends BaseDBObject
 	public String getUpdateStatement()
 	{
 		return 	"UPDATE CallData " +
-					"SET direction = ?, missed = ?, read = ?, time = ?, localNumberE164 = ?, localNumberPretty = ?, " +
+					"SET direction = ?, missed = ?, read = ?, time = ?, temp = ?, localNumberE164 = ?, localNumberPretty = ?, " +
 					"localName = ?, remoteNumberE164 = ?, remoteNumberPretty = ?, remoteName = ?, readModifyUrl = ? " +
 				"WHERE id = ?";
 	}
@@ -184,6 +191,21 @@ public class CallDataDBObject extends BaseDBObject
 	public void setTime(long time)
 	{
 		this.time = time;
+	}
+	
+	public boolean isTemp()
+	{
+		return (temp > 0);
+	}
+	
+	public void setTemp(long temp)
+	{
+		this.temp = temp;
+	}
+
+	public void setTemp(boolean temp)
+	{
+		this.temp = (temp ? 1 : 0);
 	}
 	
 	public Date getCallAsDate()

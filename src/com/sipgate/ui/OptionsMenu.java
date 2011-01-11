@@ -139,7 +139,7 @@ public class OptionsMenu {
 	}
 	
 	/**
-	 * This function reads the current build version to display it
+	 * This function reads the current build version to display itServiceConnection
 	 * in the about box.
 	 * 
 	 * @param context The application context.
@@ -198,7 +198,7 @@ public class OptionsMenu {
 		.setCancelable(true)
 		.show();
 	}
-	
+
 	/**
 	 * Shuts down the program.
 	 * 
@@ -208,24 +208,27 @@ public class OptionsMenu {
 	 */
 	private void shutDownProgram(Context context, Activity activity)
 	{
-		Receiver.engine(context).unregister();
-		
-		try {
-			Thread.sleep(2000);
-		}
-		catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-						
 		on(context,false);
+		
+		Receiver.engine(context).unregister();
 		Receiver.pos(true);
 		Receiver.engine(context).halt();
 		Receiver.mSipdroidEngine = null;
+		
 		context.stopService(new Intent(context,RegisterService.class));
-		Log.d(TAG, "stopping voicemail service");
+		context.stopService(new Intent(context,SipgateBackgroundService.class));
+		
+		try 
+		{
+			Thread.sleep(2000);
+		}
+		catch (InterruptedException e1) 
+		{
+			e1.printStackTrace();
+		}
+		
 		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
-		context.stopService(new Intent(context,SipgateBackgroundService.class));
 		
 		ApiServiceProvider.destroy();
 		

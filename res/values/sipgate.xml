@@ -121,4 +121,5 @@
 		<item>once per day</item>
     </string-array>
     <string name="label">sipgate</string>
+<string name="sipgate_simple_settings_balance_problem">unable to get data</string>
 </resources>

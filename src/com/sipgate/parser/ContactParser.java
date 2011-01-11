@@ -1,5 +1,6 @@
 package com.sipgate.parser;
 
+import java.util.Locale;
 import java.util.Vector;
 
 import org.xml.sax.Attributes;
@@ -8,7 +9,17 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
+import com.sipgate.util.PhoneNumberFormatter;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for ContactDataDBObjects
+ * A Document is handled by this Class and it trys to parse the content into ContactDataDBObjects
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class ContactParser extends DefaultHandler
 {
 	private Vector <ContactDataDBObject> contactDataDBObjects = null;
@@ -19,12 +30,22 @@ public class ContactParser extends DefaultHandler
 	private StringBuffer currentValue = null;
 	private String parent = null;
 
+	private String numberPretty = null;
+	private String numberE164 = null;
+	
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
+	
 	public ContactParser()
 	{
 		contactDataDBObjects = new Vector<ContactDataDBObject>();
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of ContactParser to reuse instead of creating 
+	 * a new instance of ContactParser for memory saving
+	 */
 	public void init()
 	{
 		contactDataDBObjects.clear();
@@ -74,7 +95,13 @@ public class ContactParser extends DefaultHandler
 		{
 			if ("tel".equalsIgnoreCase(parent))
 			{
-				contactNumberDBObject.setNumberE164(currentValue.toString());
+				formatter.initWithFreestyle(currentValue.toString(), locale.getCountry());
+					
+				numberPretty = formatter.formattedNumber();
+				numberE164 = formatter.e164NumberWithPrefix("+");
+				
+				contactNumberDBObject.setNumberE164(numberE164);
+				contactNumberDBObject.setNumberPretty(numberPretty);
 			}
 			else if ("fn".equalsIgnoreCase(parent))
 			{
@@ -87,10 +114,6 @@ public class ContactParser extends DefaultHandler
 			{
 				contactNumberDBObject.setType(currentValue.toString());
 			}
-		}
-		else if ("x-local-value".equalsIgnoreCase(localName))
-		{
-			contactNumberDBObject.setNumberPretty(currentValue.toString());
 		}
 		else if ("entry".equalsIgnoreCase(localName))
 		{
@@ -110,6 +133,10 @@ public class ContactParser extends DefaultHandler
 		currentValue.append(ch, start, length);
 	}
 
+	/**
+	 * This method returns a Vector of parsed ContactDataDBObjects
+	 * @return a Vector of all ContactDataDBObjects parsed by this handler since the last call of init()
+	 */
 	public Vector<ContactDataDBObject> getContactDataDBObjects()
 	{
 		return contactDataDBObjects;

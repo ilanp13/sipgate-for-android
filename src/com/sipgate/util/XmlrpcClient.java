@@ -37,7 +37,7 @@ import com.sipgate.models.SipgateProvisioningData;
 import com.sipgate.models.SipgateProvisioningExtension;
 import com.sipgate.models.SipgateUserdataSip;
 import com.sipgate.models.api.xmlrpc.SipgateServerData;
-import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.ApiServiceProviderImpl.API_FEATURE;
 
 /*
  * 
@@ -280,7 +280,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			
 			apiResult = (HashMap<String, Object>) this.doXmlrpcCall("samurai.HistoryGetByDate", parameters);
 			
-			Object[] HistoryList = (Object[]) apiResult.get("History");
+			Object[] historyList = (Object[]) apiResult.get("History");
 			
 			CallDataDBObject callDataDBObject = null;
 			HashMap<String, Object> historySet = null;
@@ -298,16 +298,21 @@ public class XmlrpcClient implements ApiClientInterface {
 			
 			String callID = null;
 			
-			for (Object HistoryObject : HistoryList) {
+			Integer count = 0;
+			
+			for (Object historyObject : historyList) {
 				
 				callDataDBObject = new CallDataDBObject();
 				
-				historySet = (HashMap<String, Object>) HistoryObject;
+				historySet = (HashMap<String, Object>) historyObject;
 				
 				if (historySet.containsKey("TOS") && historySet.get("TOS") != null && !historySet.get("TOS").equals("voice")) {
 					continue;
 				}
 				
+				count++;
+				if (count == 101) break;
+
 				callID = (String)historySet.get("EntryID");
 				
 				if (callID != null && callID.length() > 0)

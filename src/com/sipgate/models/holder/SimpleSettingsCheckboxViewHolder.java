@@ -1,11 +1,8 @@
 package com.sipgate.models.holder;
 
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.CheckedTextView;
 
-public class SimpleSettingsCheckboxViewHolder {
-
-	public TextView textView;
-	public ImageView imageView;
-
+public class SimpleSettingsCheckboxViewHolder
+{
+	public CheckedTextView checkedTextView;
 }

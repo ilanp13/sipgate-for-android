@@ -41,6 +41,7 @@ import com.sipgate.util.SipgateApplication;
  * it's functions.
  * 
  * @author Karsten Knuth
+ * @author graef
  * @version 1.2
  */
 public class CallListActivity extends Activity implements OnItemClickListener 
@@ -58,7 +59,6 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	private TextView emptyList = null;
 	
 	private AnimationDrawable frameAnimation = null;
-	private Thread animationThread = null;
 	private boolean isAnimationRunning = false;
 	
 	private ServiceConnection serviceConnection = null;
@@ -92,13 +92,15 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		emptyList = (TextView) findViewById(R.id.EmptyCallListTextView);
 		
 		frameAnimation = (AnimationDrawable) refreshSpinner.getBackground();
-		animationThread = new Thread(new Runnable()
+		Runnable animationThread = new Runnable()
 		{
 			public void run()
 			{
 				frameAnimation.start();
 			}
-		});
+		};
+		
+		refreshView.post(animationThread);
 		
 		context = getApplicationContext();
 		
@@ -122,19 +124,29 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		
 		registerForBackgroundIntents();
 
-		SystemDataDBObject systemDataDBObject = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NEW_CALLS_COUNT);
+		SystemDataDBObject notifyCallsCountDBObj = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_CALLS_COUNT);
 		
-		if (systemDataDBObject != null)
+		if (notifyCallsCountDBObj != null)
 		{
-			systemDataDBObject.setValue(String.valueOf(0));
+			notifyCallsCountDBObj.setValue(String.valueOf(0));
 			
-			sipgateDBAdapter.update(systemDataDBObject);
+			sipgateDBAdapter.update(notifyCallsCountDBObj);
+		}
+		
+		SystemDataDBObject notifyTempCallsCountDBObj = sipgateDBAdapter.getSystemDataDBObjectByKey(SystemDataDBObject.NOTIFY_TEMP_CALLS_COUNT);
+		
+		if (notifyTempCallsCountDBObj != null)
+		{
+			notifyTempCallsCountDBObj.setValue(String.valueOf(0));
+			
+			sipgateDBAdapter.update(notifyTempCallsCountDBObj);
 		}
 				
 		refreshState = application.getRefreshState();
 		application.setRefreshState(SipgateApplication.RefreshState.NONE);
 		
-		switch (refreshState) {
+		switch (refreshState) 
+		{
 			case NEW_EVENTS: 
 				refreshView.setVisibility(View.GONE);
 				callListAdapter.notifyDataSetChanged();
@@ -156,16 +168,19 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				break;
 		}
 		
-		if (callListAdapter.isEmpty()) {
+		if (callListAdapter.isEmpty()) 
+		{
 			elementList.setVisibility(View.GONE);
 			emptyList.setVisibility(View.VISIBLE);
-		} else {
+		} 
+		else 
+		{
 			elementList.setVisibility(View.VISIBLE);
 			emptyList.setVisibility(View.GONE);
 		}
 		
-		if(!isAnimationRunning) {
-			animationThread.start();
+		if(!isAnimationRunning) 
+		{
 			isAnimationRunning = true;
 		}
 	}
@@ -271,17 +286,21 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				public void onServiceConnected(ComponentName name, IBinder binder)
 				{
 					Log.v(TAG, "service " + name + " connected -> bind");
-					try {
+					try 
+					{
 						serviceBinding = (EventService) binder;
-						try {
+						try 
+						{
 							Log.d(TAG, "service binding -> registerOnCallsIntent");
 							serviceBinding.registerOnCallsIntents(TAG, getCallsIntent(), newCallsIntent(), noCallsIntent(), errorIntent());
 						}
-						catch (RemoteException e) {
+						catch (RemoteException e) 
+						{
 							e.printStackTrace();
 						}
 					}
-					catch (ClassCastException e) {
+					catch (ClassCastException e) 
+					{
 						e.printStackTrace();
 					}
 				}
@@ -290,7 +309,8 @@ public class CallListActivity extends Activity implements OnItemClickListener
 			boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 			Log.v(TAG, "bind service -> " + bindret);
 		}
-		else {
+		else 
+		{
 			Log.d(TAG, "service connection is not null -> already running");
 		}
 	}
@@ -303,14 +323,18 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 */
 	private void unregisterFromBackgroungIntents()
 	{		
-		if (serviceConnection != null) {
-			try {
-				if (serviceBinding != null) {
+		if (serviceConnection != null) 
+		{
+			try 
+			{
+				if (serviceBinding != null) 
+				{
 					Log.d(TAG, "service unbinding -> unregisterOnCallsIntent");
 					serviceBinding.unregisterOnCallsIntents(TAG);
 				}
 			}
-			catch (RemoteException e) {
+			catch (RemoteException e) 
+			{
 				e.printStackTrace();
 			}
 
@@ -359,12 +383,15 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 * @return The callback intent for no new calls.
 	 * @since 1.2
 	 */
-	private PendingIntent noCallsIntent() {
-		if (onNoCallsPendingIntent == null) {
+	private PendingIntent noCallsIntent() 
+	{
+		if (onNoCallsPendingIntent == null) 
+		{
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_NOEVENTS);
 			onNoCallsPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
+		
 		return onNoCallsPendingIntent;
 	}
 	
@@ -375,12 +402,15 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 * @return The callback intent for errors during the download.
 	 * @since 1.2
 	 */
-	private PendingIntent errorIntent() {
-		if (onErrorPendingIntent == null) {
+	private PendingIntent errorIntent() 
+	{
+		if (onErrorPendingIntent == null) 
+		{
 			Intent onChangedIntent = new Intent(this, SipgateFrames.class);
 			onChangedIntent.setAction(SipgateBackgroundService.ACTION_ERROR);
 			onErrorPendingIntent = PendingIntent.getActivity(this, SipgateBackgroundService.REQUEST_NEWEVENTS, onChangedIntent, 0);
 		}
+		
 		return onErrorPendingIntent;
 	}
 	
@@ -390,7 +420,8 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 * 
 	 * @since 1.2
 	 */
-	private void showNewEntriesToast() {
+	private void showNewEntriesToast() 
+	{
 		new Thread(new Runnable()
 		{
 			@Override
@@ -409,7 +440,8 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 * 
 	 * @since 1.2
 	 */
-	private void showErrorToast() {
+	private void showErrorToast() 
+	{
 		new Thread(new Runnable()
 		{
 			@Override
@@ -430,11 +462,13 @@ public class CallListActivity extends Activity implements OnItemClickListener
 	 */
 	private void callTarget(final String target)
 	{
-		if (m_AlertDlg != null) {
+		if (m_AlertDlg != null)
+		{
 			m_AlertDlg.cancel();
 		}
 		
-		if (target.length() == 0) {
+		if (target.length() == 0) 
+		{
 			m_AlertDlg = new AlertDialog.Builder(this)
 		
 				.setMessage(R.string.empty)
@@ -443,7 +477,8 @@ public class CallListActivity extends Activity implements OnItemClickListener
 				.setCancelable(true)
 				.show();
 		}
-		else if (!Receiver.engine(this).call(target)) {
+		else if (!Receiver.engine(this).call(target)) 
+		{
 			m_AlertDlg = new AlertDialog.Builder(this)
 			.setMessage(R.string.notfast)
 			.setTitle(R.string.app_name)

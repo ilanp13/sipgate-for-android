@@ -16,7 +16,7 @@ import com.sipgate.exceptions.FeatureNotAvailableException;
 import com.sipgate.exceptions.NetworkProblemException;
 import com.sipgate.models.SipgateBalanceData;
 import com.sipgate.models.SipgateProvisioningData;
-import com.sipgate.util.ApiServiceProvider.API_FEATURE;
+import com.sipgate.util.ApiServiceProviderImpl.API_FEATURE;
 
 public interface ApiClientInterface {
 	public SipgateBalanceData getBillingBalance() throws ApiException, FeatureNotAvailableException, NetworkProblemException;

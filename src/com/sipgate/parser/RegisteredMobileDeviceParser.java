@@ -8,6 +8,15 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.sipgate.api.types.RegisteredMobileDevice;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for RegisteredMobileDevices
+ * A Document is handled by this Class and it trys to parse the content into RegisteredMobileDevices
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class RegisteredMobileDeviceParser extends DefaultHandler
 {
 	private Vector <RegisteredMobileDevice> registeredMobileDevices = null;
@@ -21,6 +30,10 @@ public class RegisteredMobileDeviceParser extends DefaultHandler
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of CallParser to reuse instead of creating 
+	 * a new instance of CallParser for memory saving
+	 */
 	public void init()
 	{
 		registeredMobileDevices.clear();
@@ -66,6 +79,10 @@ public class RegisteredMobileDeviceParser extends DefaultHandler
 		currentValue.append(ch, start, length);
 	}
 	
+	/**
+	 * This method returns a Vector of parsed RegisteredMobileDevices
+	 * @return a Vector of all RegisteredMobileDevices parsed by this handler since the last call of init()
+	 */
 	public Vector<RegisteredMobileDevice> getRegisteredMobileDevices()
 	{
 		return registeredMobileDevices;

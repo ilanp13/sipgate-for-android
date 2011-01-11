@@ -19,8 +19,6 @@ import com.sipgate.db.base.BaseDBObject;
  */
 public class SipgateDBAdapter extends BaseDBAdapter
 {
-	private static SipgateDBAdapter sipgateDBAdapter = null;
-	
 	/**
 	 * Default constructor.
 	 * 
@@ -127,7 +125,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -163,13 +161,14 @@ public class SipgateDBAdapter extends BaseDBAdapter
 					call.setMissed(cursor.getLong(2));
 					call.setRead(cursor.getLong(3));
 					call.setTime(cursor.getLong(4));
-					call.setLocalNumberE164(cursor.getString(5));
-					call.setLocalNumberPretty(cursor.getString(6));
-					call.setLocalName(cursor.getString(7));
-					call.setRemoteNumberE164(cursor.getString(8));
-					call.setRemoteNumberPretty(cursor.getString(9));
-					call.setRemoteName(cursor.getString(10));
-					call.setReadModifyUrl(cursor.getString(11));
+					call.setTemp(cursor.getLong(5));
+					call.setLocalNumberE164(cursor.getString(6));
+					call.setLocalNumberPretty(cursor.getString(7));
+					call.setLocalName(cursor.getString(8));
+					call.setRemoteNumberE164(cursor.getString(9));
+					call.setRemoteNumberPretty(cursor.getString(10));
+					call.setRemoteName(cursor.getString(11));
+					call.setReadModifyUrl(cursor.getString(12));
 					
 					callData.add(call);
 				}
@@ -181,7 +180,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -237,7 +236,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -281,7 +280,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -336,6 +335,18 @@ public class SipgateDBAdapter extends BaseDBAdapter
 	public Cursor getCallDataCursorById(long id)
 	{
 		return database.query("CallData", null, "id = ?", new String[]{ String.valueOf(id) }, null, null, null);
+	}
+	
+	
+	/**
+	 * Gets a cursor with all temp call data records.
+	 * 
+	 * @return A cursor with all temp marked call data records
+	 * @since 1.0
+	 */
+	public Cursor getAllTempCallDataCursor()
+	{
+		return database.query("CallData", null, "temp = ?", new String[]{ String.valueOf(1) }, null, null, "time asc");
 	}
 	
 	/**
@@ -405,7 +416,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -446,7 +457,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -494,7 +505,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -562,7 +573,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 			}
 			finally
 			{
-				if (!cursor.isClosed() && cursor != null)
+				if (cursor != null && !cursor.isClosed())
 				{
 					cursor.close();
 				}
@@ -596,13 +607,14 @@ public class SipgateDBAdapter extends BaseDBAdapter
 				call.setMissed(cursor.getLong(2));
 				call.setRead(cursor.getLong(3));
 				call.setTime(cursor.getLong(4));
-				call.setLocalNumberE164(cursor.getString(5));
-				call.setLocalNumberPretty(cursor.getString(6));
-				call.setLocalName(cursor.getString(7));
-				call.setRemoteNumberE164(cursor.getString(8));
-				call.setRemoteNumberPretty(cursor.getString(9));
-				call.setRemoteName(cursor.getString(10));
-				call.setReadModifyUrl(cursor.getString(11));
+				call.setTemp(cursor.getLong(5));
+				call.setLocalNumberE164(cursor.getString(6));
+				call.setLocalNumberPretty(cursor.getString(7));
+				call.setLocalName(cursor.getString(8));
+				call.setRemoteNumberE164(cursor.getString(9));
+				call.setRemoteNumberPretty(cursor.getString(10));
+				call.setRemoteName(cursor.getString(11));
+				call.setReadModifyUrl(cursor.getString(12));
 			}
 		}
 		catch (Exception e)
@@ -611,13 +623,68 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
 		}
 	
 		return call;
+	}
+	
+	/**
+	 * Gets a Vector with all temp call data.
+	 *
+	 * @return A vector with all temp call data objects
+	 * @since 1.0
+	 */
+	public Vector<CallDataDBObject> getAllTempCallDataDBObjects()
+	{
+		Vector<CallDataDBObject> callData = new Vector<CallDataDBObject>();
+
+		Cursor cursor = getAllTempCallDataCursor();
+		
+		CallDataDBObject call = null;
+		
+		try
+		{
+			if (cursor != null)
+			{
+				while (cursor.moveToNext())
+				{
+					call = new CallDataDBObject();
+					
+					call.setId(cursor.getLong(0));
+					call.setDirection(cursor.getLong(1));
+					call.setMissed(cursor.getLong(2));
+					call.setRead(cursor.getLong(3));
+					call.setTime(cursor.getLong(4));
+					call.setTemp(cursor.getLong(5));
+					call.setLocalNumberE164(cursor.getString(6));
+					call.setLocalNumberPretty(cursor.getString(7));
+					call.setLocalName(cursor.getString(8));
+					call.setRemoteNumberE164(cursor.getString(9));
+					call.setRemoteNumberPretty(cursor.getString(10));
+					call.setRemoteName(cursor.getString(11));
+					call.setReadModifyUrl(cursor.getString(12));
+					
+					callData.add(call);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e(getClass().getName(), "getAllTempCallDataDBObjects() -> " + e.getMessage());
+		}
+		finally
+		{
+			if (cursor != null && !cursor.isClosed())
+			{
+				cursor.close();
+			}
+		}
+		
+		return callData;
 	}
 	
 	/**
@@ -661,7 +728,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -699,7 +766,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}
@@ -737,7 +804,7 @@ public class SipgateDBAdapter extends BaseDBAdapter
 		}
 		finally
 		{
-			if (!cursor.isClosed() && cursor != null)
+			if (cursor != null && !cursor.isClosed())
 			{
 				cursor.close();
 			}

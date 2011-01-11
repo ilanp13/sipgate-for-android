@@ -2,6 +2,7 @@ package com.sipgate.parser;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.xml.sax.Attributes;
@@ -11,10 +12,20 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
 
 import com.sipgate.db.CallDataDBObject;
+import com.sipgate.util.PhoneNumberFormatter;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for CallDataDBObjects
+ * A Document is handled by this Class and it trys to parse the content into CallDataDBObjects
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class CallParser extends DefaultHandler
 {
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	private Vector <CallDataDBObject> callDataDBObjects = null;
 	private CallDataDBObject callDataDBObject = null;
@@ -23,12 +34,22 @@ public class CallParser extends DefaultHandler
 	private String parent = null;
 	private String location = null;
 	
+	private String numberPretty = null;
+	private String numberE164 = null;
+	
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
+	
 	public CallParser()
 	{
 		callDataDBObjects = new Vector<CallDataDBObject>();
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of CallParser to reuse instead of creating 
+	 * a new instance of CallParser for memory saving
+	 */
 	public void init()
 	{
 		callDataDBObjects.clear();
@@ -43,7 +64,9 @@ public class CallParser extends DefaultHandler
 		{
 			callDataDBObject = new CallDataDBObject();
 		}
-		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || "recordings".equalsIgnoreCase(localName))
+		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || 
+				 "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || 
+				 "recordings".equalsIgnoreCase(localName))
 		{
 			parent = localName;
 		}
@@ -117,51 +140,35 @@ public class CallParser extends DefaultHandler
 		}
 		else if ("numberE164".equalsIgnoreCase(localName))
 		{
+			formatter.initWithFreestyle(currentValue.toString().replace("+", ""), locale.getCountry());
+			
+			numberPretty = formatter.formattedNumber();
+			numberE164 = formatter.e164NumberWithPrefix("+");
+			
 			if ("targets".equalsIgnoreCase(parent))
 			{
 				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
 				{
-					callDataDBObject.setLocalNumberE164(currentValue.toString());
+					callDataDBObject.setLocalNumberE164(numberE164);
+					callDataDBObject.setLocalNumberPretty(numberPretty);
 				}
 				else
 				{
-					callDataDBObject.setRemoteNumberE164(currentValue.toString());
+					callDataDBObject.setRemoteNumberE164(numberE164);
+					callDataDBObject.setRemoteNumberPretty(numberPretty);
 				}
 			}
 			else if ("sources".equalsIgnoreCase(parent))
 			{
 				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
 				{
-					callDataDBObject.setRemoteNumberE164(currentValue.toString());
+					callDataDBObject.setRemoteNumberE164(numberE164);
+					callDataDBObject.setRemoteNumberPretty(numberPretty);
 				}
 				else
 				{
-					callDataDBObject.setLocalNumberE164(currentValue.toString());
-				}
-			}
-		}
-		else if ("numberPretty".equalsIgnoreCase(localName))
-		{
-			if ("targets".equalsIgnoreCase(parent))
-			{				
-				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
-				{
-					callDataDBObject.setLocalNumberPretty(currentValue.toString());
-				}
-				else
-				{
-					callDataDBObject.setRemoteNumberPretty(currentValue.toString());
-				}
-			}
-			else if ("sources".equalsIgnoreCase(parent))
-			{
-				if (callDataDBObject.getDirection() == CallDataDBObject.INCOMING)
-				{
-					callDataDBObject.setRemoteNumberPretty(currentValue.toString());
-				}
-				else
-				{
-					callDataDBObject.setLocalNumberPretty(currentValue.toString());
+					callDataDBObject.setLocalNumberE164(numberE164);
+					callDataDBObject.setLocalNumberPretty(numberPretty);
 				}
 			}
 		}
@@ -190,7 +197,9 @@ public class CallParser extends DefaultHandler
 				}
 			}
 		}
-		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || "recordings".equalsIgnoreCase(localName))
+		else if ("read".equalsIgnoreCase(localName) || "sources".equalsIgnoreCase(localName) || 
+				 "targets".equalsIgnoreCase(localName) || "extension".equalsIgnoreCase(localName) || 
+				 "recordings".equalsIgnoreCase(localName))
 		{
 			parent = null;
 		}
@@ -220,6 +229,10 @@ public class CallParser extends DefaultHandler
 		return callTime;
 	}
 
+	/**
+	 * This method returns a Vector of parsed CallDataDBObjects
+	 * @return a Vector of all CallDataDBObjects parsed by this handler since the last call of init()
+	 */
 	public Vector<CallDataDBObject> getCallDataDBObjects()
 	{
 		return callDataDBObjects;

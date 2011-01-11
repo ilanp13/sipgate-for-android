@@ -29,7 +29,6 @@ public class CallListAdapter extends BaseAdapter
 {
 	private final static String TAG = "CallListAdapter";
 
-	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
 
 	private LayoutInflater mInflater = null;
@@ -70,7 +69,6 @@ public class CallListAdapter extends BaseAdapter
 	
 	public CallListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
-		this.activity = activity;
 		this.sipgateDBAdapter = sipgateDBAdapter;
 		
 		mInflater = activity.getLayoutInflater();
@@ -301,15 +299,18 @@ public class CallListAdapter extends BaseAdapter
 				{
 					try 
 					{
-						try
+						if (callDataDBObject.getReadModifyUrl() != null && callDataDBObject.getReadModifyUrl().length() > 0)
 						{
-							apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+							try
+							{
+								apiClient.setCallRead(callDataDBObject.getReadModifyUrl());
+							}
+							catch (FeatureNotAvailableException fex)
+							{
+								Log.w(TAG, "markAsRead()", fex);
+							}
 						}
-						catch (FeatureNotAvailableException fex)
-						{
-							Log.w(TAG, "markAsRead()", fex);
-						}
-					
+						
 						callDataDBObject.setRead(true);
 						
 						sipgateDBAdapter.update(callDataDBObject);

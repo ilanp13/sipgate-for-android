@@ -30,9 +30,10 @@ import android.util.Log;
 public class OneShotLocation extends BroadcastReceiver {
 
 	public static void receive(Context context, Intent intent) {
+		Log.i("OneShotLocation", "receive");
 		Location loc;
 
-		if (!Sipdroid.release) Log.i("SipUA:",intent.getExtras().keySet().toString());
+		if (!Sipdroid.release) Log.i("OneShotLocation:",intent.getExtras().keySet().toString());
     	if (Receiver.mContext == null) Receiver.mContext = context;
     	loc = (Location)intent.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED);
     	if (loc != null) {

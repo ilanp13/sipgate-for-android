@@ -1,11 +1,5 @@
 package com.sipgate.ui;
 
-import com.sipgate.R;
-import com.sipgate.service.SipgateBackgroundService;
-import com.sipgate.util.ApiServiceProvider;
-import com.sipgate.util.SipgateApplication;
-import com.sipgate.util.ApiServiceProvider.API_FEATURE;
-
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -14,6 +8,12 @@ import android.util.Log;
 import android.view.Window;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
+
+import com.sipgate.R;
+import com.sipgate.service.SipgateBackgroundService;
+import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.ApiServiceProviderImpl.API_FEATURE;
+import com.sipgate.util.SipgateApplication;
 
 /**
  * This class holds the frame view and functions as dispatcher for
