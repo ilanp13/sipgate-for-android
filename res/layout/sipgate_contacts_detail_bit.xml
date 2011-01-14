@@ -8,28 +8,30 @@
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:orientation="vertical">
 
-		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="wrap_content" android:stretchColumns="0" >
-			<TableRow xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="wrap_content">
+		<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:stretchColumns="0">
+			<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+				android:layout_width="fill_parent" android:layout_height="wrap_content">
 				<LinearLayout android:id="@+id/ContactsPhonenumberRowDetails"
 					android:orientation="vertical" android:layout_height="wrap_content"
-					android:layout_width="fill_parent" android:padding="5dp" android:layout_gravity="center_vertical" >
-					<TextView android:id="@+id/ContactNumberType" android:text="Rufnummer (Typ)"
-						android:textColor="#FFFFFF" android:layout_width="wrap_content" android:textSize="16dp"
-						android:paddingLeft="10dp"
-						android:layout_height="wrap_content"/>
-					<TextView android:id="@+id/ContactNumberValue" android:text="Rufnummer"
-						android:textColor="#CCCCCC" android:layout_width="wrap_content"
-						android:paddingLeft="10dp"
-						android:layout_height="wrap_content"/>
+					android:layout_width="fill_parent" android:padding="5dp"
+					android:layout_gravity="center_vertical" android:minHeight="56dp">
+					<TextView android:id="@+id/ContactNumberType"
+						android:text="Rufnummer (Typ)" android:textColor="#FFFFFF"
+						android:layout_width="wrap_content" android:textSize="16dp"
+						android:layout_height="wrap_content" />
+					<TextView android:id="@+id/ContactNumberValue"
+						android:text="Rufnummer" android:textColor="#CCCCCC"
+						android:layout_width="wrap_content" android:layout_height="wrap_content" />
 				</LinearLayout>
 				<ImageView android:id="@+id/ContactCallButton"
 					android:src="@drawable/sipgate_call_list_icon_call" android:layout_height="wrap_content"
 					android:layout_width="wrap_content" android:maxWidth="54dp"
-					android:maxHeight="54dp" android:layout_margin="5dp" />
+					android:maxHeight="54dp" android:paddingRight="10dp"
+					android:layout_gravity="center_vertical" />
 			</TableRow>
 		</TableLayout>
-		<View android:id="@+id/ContactsSeparator" android:layout_width="fill_parent"
-			android:layout_height="1dp" android:background="#FF808080" />
 	</LinearLayout>
 
 </LinearLayout>
