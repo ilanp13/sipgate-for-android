@@ -19,7 +19,7 @@
 				android:src="@drawable/icon_voicemail"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"
 				android:maxWidth="21dp" android:maxHeight="21dp"
-				android:layout_gravity="top" android:paddingLeft="10dp" android:paddingTop="10dp"/>
+				android:layout_gravity="top" android:paddingLeft="10dp" android:paddingTop="13dp"/>
 
 			<LinearLayout android:orientation="vertical"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
