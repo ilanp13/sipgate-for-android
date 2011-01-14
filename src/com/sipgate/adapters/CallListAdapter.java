@@ -77,15 +77,15 @@ public class CallListAdapter extends BaseAdapter
 		
 		callDataDBObjects = sipgateDBAdapter.getAllCallData();
 				
-		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
-		noNumberString = activity.getResources().getString(R.string.sipgate_no_number);		
+		unknownCallerString = activity.getResources().getString(R.string.sipgateUnknownCaller);
+		noNumberString = activity.getResources().getString(R.string.sipgateNoNumber);		
 		
-		incomingIcon = activity.getResources().getDrawable(R.drawable.icon_incoming);
-		missedIcon = activity.getResources().getDrawable(R.drawable.icon_missed);
-		outgoingIcon = activity.getResources().getDrawable(R.drawable.icon_outgoing);
+		incomingIcon = activity.getResources().getDrawable(R.drawable.sipgate_call_list_icon_incoming);
+		missedIcon = activity.getResources().getDrawable(R.drawable.sipgate_call_list_icon_missed);
+		outgoingIcon = activity.getResources().getDrawable(R.drawable.sipgate_call_list_icon_outgoing);
 		
-		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
-		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
+		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForDay));
+		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForTime));
 		
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();
@@ -136,13 +136,13 @@ public class CallListAdapter extends BaseAdapter
 		{
 			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 			holder = new CallViewHolder();
-			holder.callerNameView = (TextView) convertView.findViewById(R.id.CallerNameTextView);
-			holder.callerNumberView = (TextView) convertView.findViewById(R.id.CallerNumberTextView);
-			holder.callTimeView = (TextView) convertView.findViewById(R.id.DateTimeTextView);
-			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.CallTypeImage);
-			holder.callButtonView = (ImageView) convertView.findViewById(R.id.CallImageButton);
-			holder.categoryTextView = (TextView) convertView.findViewById(R.id.CategoryTextView);
-			holder.separator = (View) convertView.findViewById(R.id.CallSeparator);
+			holder.callerNameView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCallerNameTextView);
+			holder.callerNumberView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCallerNumberTextView);
+			holder.callTimeView = (TextView) convertView.findViewById(R.id.sipgateCallListBitDateTimeTextView);
+			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.sipgateCallListBitCallTypeImage);
+			holder.callButtonView = (ImageView) convertView.findViewById(R.id.sipgateCallListBitCallImage);
+			holder.categoryTextView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCategoryTextView);
+			holder.separator = (View) convertView.findViewById(R.id.sipgateCallListBitSeparator);
 			convertView.setTag(holder);
 		} 
 		else 

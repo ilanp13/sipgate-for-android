@@ -61,14 +61,14 @@ public class VoiceMailListAdapter extends BaseAdapter
 		
 		voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
 				
-		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
+		unknownCallerString = activity.getResources().getString(R.string.sipgateUnknownCaller);
 		secondsText =  activity.getResources().getString(R.string.sipgate_seconds);
 
 		readIcon = activity.getResources().getDrawable(R.drawable.voicemail_read);
 		unreadIcon = activity.getResources().getDrawable(R.drawable.voicemail_unread);
 		
-		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
-		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
+		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForDay));
+		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForTime));
 		
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();

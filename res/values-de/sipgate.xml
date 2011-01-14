@@ -18,8 +18,8 @@
 	<string name="simple_settings_wlan">VoIP via WLAN</string>
 	<string name="simple_settings_3g">VoIP via 3G</string>
 	<string name="simple_settings_advanced">Experten-Einstellungen</string>
-	<string name="dateTimeFormatForDay">dd.MM.yyyy</string>
-   	<string name="dateTimeFormatForTime">HH:mm</string>
+	<string name="sipgateDateTimeFormatForDay">dd.MM.yyyy</string>
+   	<string name="sipgateDateTimeFormatForTime">HH:mm</string>
    	<string name="refresh">aktualisieren</string>
    	<string name="menu_contacts">Kontakte</string>
    	<string name="menu_dial_pad">Ziffernblock</string>
@@ -72,8 +72,8 @@
 	<string name="sipgate_network_problem">Es ist ein Netzwerkproblem aufgetreten. Bitte prüfen Sie, ob Ihr Gerät mit dem Internet verbunden ist und versuchen Sie es noch einmal.</string>
 	<string name="sipgate_unable_to_provision">Fehler beim Provisionieren</string>
    	<string name="sipgate_me">Ich</string>
-   	<string name="sipgate_unknown_caller">Unbekannt</string>
-   	<string name="sipgate_no_number">anonym</string>
+   	<string name="sipgateUnknownCaller">Unbekannt</string>
+   	<string name="sipgateNoNumber">anonym</string>
    	<string name="sipgate_empty_calllist">Keine Einträge in Ihrer Anrufliste.</string>
    	<string name="sipgate_new_calls">%d neue Anrufe</string>
    	<string name="sipgate_a_new_call">Ein neuer Anruf</string>
