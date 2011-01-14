@@ -64,9 +64,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 		unknownCallerString = activity.getResources().getString(R.string.sipgateUnknownCaller);
 		secondsText =  activity.getResources().getString(R.string.sipgate_seconds);
 
-		readIcon = activity.getResources().getDrawable(R.drawable.voicemail_read);
-		unreadIcon = activity.getResources().getDrawable(R.drawable.voicemail_unread);
-		
 		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForDay));
 		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForTime));
 		
@@ -136,12 +133,10 @@ public class VoiceMailListAdapter extends BaseAdapter
 					
 			if(isRead) 
 			{
-				holder.iconVM.setImageDrawable(readIcon);
 				holder.nameView.setTypeface(Typeface.DEFAULT);
 			}
 			else 
 			{
-				holder.iconVM.setImageDrawable(unreadIcon);
 				holder.nameView.setTypeface(Typeface.DEFAULT_BOLD);
 			}
 	
@@ -198,7 +193,7 @@ public class VoiceMailListAdapter extends BaseAdapter
 			{
 				holder.categoryView.setVisibility(View.VISIBLE);
 			}
-			
+
 			markAsSeen(currentVoiceMailDataDBObject); 
 		}
 		
