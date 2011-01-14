@@ -47,7 +47,7 @@
 				<TextView android:layout_height="wrap_content"
 					android:layout_width="wrap_content" android:singleLine="false"
 					android:text="Transcription" android:id="@+id/TranscriptionTextView"
-					android:paddingBottom="5dip" android:paddingRight="5dip"></TextView>
+					android:paddingBottom="9dip" android:paddingRight="5dip"></TextView>
 
 			</LinearLayout>
 
