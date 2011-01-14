@@ -4,33 +4,35 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<TextView android:layout_height="wrap_content"
-		android:textColor="#ffffff" android:text="11.11.2011"
-		android:layout_width="fill_parent" android:id="@+id/CategoryTextView"
+	<TextView android:id="@+id/sipgateVoiceMailListBitCategoryTextView"
+		android:layout_height="wrap_content" android:textColor="#ffffff"
+		android:text="01.01.2010" android:layout_width="fill_parent"
 		android:background="#808080" android:paddingLeft="5dip"
 		android:textStyle="bold"></TextView>
 
 	<TableLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:stretchColumns="1" android:shrinkColumns="1">
+		android:layout_height="wrap_content" android:stretchColumns="1"
+		android:shrinkColumns="1">
 		<TableRow android:layout_width="fill_parent"
 			android:layout_height="wrap_content">
-				
-			<ImageView android:id="@+id/IconView"
-				android:src="@drawable/icon_voicemail"
+
+			<ImageView android:id="@+id/sipgateVoiceMailListBitIconView"
+				android:src="@drawable/sipgate_voice_mail_list_icon_voicemail"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"
-				android:maxWidth="21dp" android:maxHeight="21dp"
-				android:layout_gravity="top" android:paddingLeft="10dp" android:paddingTop="13dp"/>
+				android:paddingTop="13dp" android:paddingLeft="10dp"
+				android:layout_gravity="top" />
 
 			<LinearLayout android:orientation="vertical"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:gravity="center_vertical" android:minHeight="56dp" android:paddingLeft="10dp">
+				android:gravity="top" android:minHeight="56dp"
+				android:paddingLeft="10dp" android:paddingTop="5dp">
 
 				<LinearLayout android:layout_width="fill_parent"
 					android:layout_height="wrap_content">
-					<TextView android:layout_height="wrap_content"
-						android:textColor="#ffffff" android:text="Vorname Nachname"
-						android:textStyle="bold" android:layout_width="wrap_content"
-						android:id="@+id/EventTitle" android:textSize="16dp"
+					<TextView android:id="@+id/EventTitle"
+						android:layout_height="wrap_content" android:textColor="#ffffff"
+						android:text="Vorname Nachname" android:textStyle="bold"
+						android:layout_width="wrap_content" android:textSize="16dp"
 						android:ellipsize="marquee" android:singleLine="true"
 						android:width="200dp" android:maxLines="1" android:height="20px"
 						android:lines="1"></TextView>
@@ -44,9 +46,8 @@
 
 				<TextView android:layout_height="wrap_content"
 					android:layout_width="wrap_content" android:singleLine="false"
-					android:text="Transcription"
-					android:id="@+id/TranscriptionTextView" android:paddingBottom="5dip"
-					android:paddingRight="5dip"></TextView>
+					android:text="Transcription" android:id="@+id/TranscriptionTextView"
+					android:paddingBottom="5dip" android:paddingRight="5dip"></TextView>
 
 			</LinearLayout>
 

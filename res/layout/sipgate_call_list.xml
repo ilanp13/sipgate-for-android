@@ -17,8 +17,7 @@
 	</LinearLayout>
 	<ListView android:id="@+id/CalllistListView"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:divider="#808080" android:dividerHeight="1px"
-		android:fastScrollEnabled="true">
+		android:dividerHeight="1px"	android:fastScrollEnabled="true">
 	</ListView>
 	<TextView android:id="@+id/EmptyCallListTextView"
 		android:text="@string/sipgate_empty_calllist" android:layout_width="fill_parent"

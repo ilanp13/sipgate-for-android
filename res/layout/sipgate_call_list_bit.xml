@@ -11,19 +11,20 @@
 		android:textStyle="bold"></TextView>
 
 	<TableLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:stretchColumns="1">
+		android:layout_height="wrap_content" android:stretchColumns="1"
+		android:shrinkColumns="1">
 		<TableRow android:layout_width="fill_parent"
 			android:layout_height="wrap_content">
 
 			<ImageView android:id="@+id/sipgateCallListBitCallTypeImage"
 				android:src="@drawable/sipgate_call_list_icon_incoming"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"
-				android:maxWidth="21dp" android:maxHeight="21dp"
 				android:layout_gravity="center_vertical" android:paddingLeft="10dp" />
 
 			<LinearLayout android:orientation="vertical"
-				android:layout_width="fill_parent" android:layout_height="fill_parent"
-				android:paddingLeft="10dp" android:gravity="center_vertical">
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:gravity="top" android:minHeight="56dp"
+				android:paddingLeft="10dp" android:paddingTop="5dp">
 
 				<TextView android:id="@+id/sipgateCallListBitCallerNameTextView"
 					android:layout_height="wrap_content" android:textColor="#ffffff"
@@ -54,14 +55,11 @@
 			<LinearLayout android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:gravity="right">
 				<ImageView android:id="@+id/sipgateCallListBitCallImage"
-					android:src="@drawable/button_call" android:layout_height="wrap_content"
-					android:layout_width="wrap_content" android:maxWidth="54dp"
-					android:maxHeight="54dp" />
+					android:src="@drawable/sipgate_call_list_icon_call" android:layout_height="wrap_content"
+					android:layout_width="wrap_content" android:paddingRight="10dp"
+					android:paddingLeft="10dp" android:paddingTop="10dp" />
 
 			</LinearLayout>
 		</TableRow>
 	</TableLayout>
-	<View android:id="@+id/sipgateCallListBitSeparator"
-		android:layout_width="fill_parent" android:layout_height="1dp"
-		android:background="#FF808080" />
 </LinearLayout>

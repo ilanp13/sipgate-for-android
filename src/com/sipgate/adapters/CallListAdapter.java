@@ -44,7 +44,6 @@ public class CallListAdapter extends BaseAdapter
 	
 	private CallDataDBObject currentCallDataDBObject = null;
 	private CallDataDBObject lastCallDataDBObject = null;
-	private CallDataDBObject nextCallDataDBObject = null;
 	
 	private String remoteName = null;
 	private String remoteNumberPretty = null;
@@ -52,7 +51,6 @@ public class CallListAdapter extends BaseAdapter
 	
 	private Calendar currentDayCalendar = null;
 	private Calendar lastDayCalendar = null;
-	private Calendar nextDayCalendar = null;
 	
 	private SimpleDateFormat timeFormatter = null;
 	private SimpleDateFormat dateFormatter = null;
@@ -89,7 +87,6 @@ public class CallListAdapter extends BaseAdapter
 		
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();
-		nextDayCalendar = Calendar.getInstance();
 		
 		nameCache = new HashMap<String, String>();
 	}
@@ -142,7 +139,6 @@ public class CallListAdapter extends BaseAdapter
 			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.sipgateCallListBitCallTypeImage);
 			holder.callButtonView = (ImageView) convertView.findViewById(R.id.sipgateCallListBitCallImage);
 			holder.categoryTextView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCategoryTextView);
-			holder.separator = (View) convertView.findViewById(R.id.sipgateCallListBitSeparator);
 			convertView.setTag(holder);
 		} 
 		else 
@@ -264,24 +260,6 @@ public class CallListAdapter extends BaseAdapter
 			{
 				holder.categoryTextView.setVisibility(View.VISIBLE);
 			}
-			
-			if (position < getCount() - 1)
-			{
-				nextCallDataDBObject = (CallDataDBObject)getItem(position + 1);
-				
-				nextDayCalendar.setTimeInMillis(nextCallDataDBObject.getTime());
-				
-				if (nextDayCalendar.get(Calendar.DAY_OF_YEAR) != currentDayCalendar.get(Calendar.DAY_OF_YEAR) ||
-					nextDayCalendar.get(Calendar.YEAR) != currentDayCalendar.get(Calendar.YEAR))
-				{
-					holder.separator.setVisibility(View.GONE);
-				}
-				else
-				{
-					holder.separator.setVisibility(View.VISIBLE);
-				}
-			}
-			
 			
 			markAsRead(currentCallDataDBObject); 
 		}

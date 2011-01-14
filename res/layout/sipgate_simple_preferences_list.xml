@@ -4,6 +4,6 @@
 	android:layout_width="fill_parent" android:orientation="vertical">
 	<ListView android:id="@+id/sipgateSettingsListView"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:divider="#808080" android:dividerHeight="1px" android:fastScrollEnabled="true">
+		android:dividerHeight="1px" android:fastScrollEnabled="true">
 	</ListView>
 </LinearLayout>
