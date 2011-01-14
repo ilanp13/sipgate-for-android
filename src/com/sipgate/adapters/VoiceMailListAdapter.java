@@ -115,9 +115,9 @@ public class VoiceMailListAdapter extends BaseAdapter
 			holder = new VoiceMailViewHolder();
 			holder.nameView = (TextView) convertView.findViewById(R.id.EventTitle);
 			holder.timeView = (TextView) convertView.findViewById(R.id.DateTextView);
-			holder.categoryView = (TextView) convertView.findViewById(R.id.CategoryTextView);
+			holder.categoryView = (TextView) convertView.findViewById(R.id.sipgateVoiceMailListBitCategoryTextView);
 			holder.transcriptionView = (TextView) convertView.findViewById(R.id.TranscriptionTextView);
-			holder.iconVM = (ImageView) convertView.findViewById(R.id.IconView);
+			holder.iconVM = (ImageView) convertView.findViewById(R.id.sipgateVoiceMailListBitIconView);
 			convertView.setTag(holder);
 		} 
 		else 

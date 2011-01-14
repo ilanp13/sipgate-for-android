@@ -26,7 +26,7 @@
 						android:layout_width="wrap_content" android:layout_height="wrap_content" />
 				</LinearLayout>
 				<ImageView android:id="@+id/ContactCallButton"
-					android:src="@drawable/button_call" android:layout_height="wrap_content"
+					android:src="@drawable/sipgate_call_list_icon_call" android:layout_height="wrap_content"
 					android:layout_width="wrap_content" android:maxWidth="54dp"
 					android:maxHeight="54dp" android:paddingRight="5dp"
 					android:layout_gravity="center_vertical" />
