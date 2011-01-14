@@ -11,19 +11,16 @@
 
 	<LinearLayout android:id="@+id/ContactsRow"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:orientation="vertical">
+		android:orientation="vertical" android:minHeight="56dp">
 		<LinearLayout android:id="@+id/ContactsImageName"
 			android:orientation="horizontal" android:layout_height="wrap_content"
-			android:layout_width="fill_parent" android:paddingTop="15dp" android:paddingBottom="15dp" >
+			android:layout_width="fill_parent" android:layout_gravity="top" android:paddingTop="13dp" >
 			
 			<TextView android:id="@+id/contactName" android:text="Vorname Nachname"
 				android:textColor="#FFFFFF" android:layout_width="wrap_content"
 				android:paddingLeft="5dp" android:layout_gravity="center_vertical"
 				android:layout_height="wrap_content" android:textSize="20dp" />
 		</LinearLayout>
-		<View android:id="@+id/ContactsSeparator"
-			android:layout_width="fill_parent" android:layout_height="1dp"
-			android:background="#FF808080" />
 	</LinearLayout>
 
 </LinearLayout>
