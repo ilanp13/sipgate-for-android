@@ -33,16 +33,16 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_1"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
 	            
 	        <ImageButton android:id="@+id/two"
-	            android:layout_width="108dp"
+	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_2"
-	            android:background="@drawable/btn_dial_inner"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -51,7 +51,7 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_3"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -61,16 +61,16 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_4"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
 	        
 	        <ImageButton android:id="@+id/five"
-	            android:layout_width="108dp"
+	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_5"
-	            android:background="@drawable/btn_dial_inner"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -79,7 +79,7 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_6"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -89,16 +89,16 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_7"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
 	    
 	        <ImageButton android:id="@+id/eight"
-	            android:layout_width="108dp"
+	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_8"
-	            android:background="@drawable/btn_dial_inner"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -107,7 +107,7 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_9"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -117,16 +117,16 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_asterisk"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
 	    
 	        <ImageButton android:id="@+id/zero"
-	            android:layout_width="108dp"
+	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_0"
-	            android:background="@drawable/btn_dial_inner"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -135,7 +135,7 @@
 	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_ziffer_hash"
-	            android:background="@drawable/btn_dial_outer"
+	            android:background="@drawable/btn_dial_onesize"
 	            android:scaleType="fitXY"
 	            android:hapticFeedbackEnabled="true"
 	        />
@@ -156,7 +156,7 @@
 	            android:hapticFeedbackEnabled="true"
 	        />
 	        <ImageButton android:id="@+id/call_button"
-	            android:layout_width="108dp"
+	            android:layout_width="106dp"
 	            android:layout_height="74dp"
 	            android:src="@drawable/taste_dial"
 	            android:background="@drawable/btn_dial_callbutton"
