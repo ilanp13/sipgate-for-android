@@ -44,7 +44,6 @@ public class CallListAdapter extends BaseAdapter
 	
 	private CallDataDBObject currentCallDataDBObject = null;
 	private CallDataDBObject lastCallDataDBObject = null;
-	private CallDataDBObject nextCallDataDBObject = null;
 	
 	private String remoteName = null;
 	private String remoteNumberPretty = null;
@@ -52,7 +51,6 @@ public class CallListAdapter extends BaseAdapter
 	
 	private Calendar currentDayCalendar = null;
 	private Calendar lastDayCalendar = null;
-	private Calendar nextDayCalendar = null;
 	
 	private SimpleDateFormat timeFormatter = null;
 	private SimpleDateFormat dateFormatter = null;
@@ -77,19 +75,18 @@ public class CallListAdapter extends BaseAdapter
 		
 		callDataDBObjects = sipgateDBAdapter.getAllCallData();
 				
-		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
-		noNumberString = activity.getResources().getString(R.string.sipgate_no_number);		
+		unknownCallerString = activity.getResources().getString(R.string.sipgateUnknownCaller);
+		noNumberString = activity.getResources().getString(R.string.sipgateNoNumber);		
 		
-		incomingIcon = activity.getResources().getDrawable(R.drawable.icon_incoming);
-		missedIcon = activity.getResources().getDrawable(R.drawable.icon_missed);
-		outgoingIcon = activity.getResources().getDrawable(R.drawable.icon_outgoing);
+		incomingIcon = activity.getResources().getDrawable(R.drawable.sipgate_call_list_icon_incoming);
+		missedIcon = activity.getResources().getDrawable(R.drawable.sipgate_call_list_icon_missed);
+		outgoingIcon = activity.getResources().getDrawable(R.drawable.sipgate_call_list_icon_outgoing);
 		
-		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
-		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
+		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForDay));
+		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForTime));
 		
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();
-		nextDayCalendar = Calendar.getInstance();
 		
 		nameCache = new HashMap<String, String>();
 	}
@@ -136,13 +133,12 @@ public class CallListAdapter extends BaseAdapter
 		{
 			convertView = mInflater.inflate(R.layout.sipgate_call_list_bit, null);
 			holder = new CallViewHolder();
-			holder.callerNameView = (TextView) convertView.findViewById(R.id.CallerNameTextView);
-			holder.callerNumberView = (TextView) convertView.findViewById(R.id.CallerNumberTextView);
-			holder.callTimeView = (TextView) convertView.findViewById(R.id.DateTimeTextView);
-			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.CallTypeImage);
-			holder.callButtonView = (ImageView) convertView.findViewById(R.id.CallImageButton);
-			holder.categoryTextView = (TextView) convertView.findViewById(R.id.CategoryTextView);
-			holder.separator = (View) convertView.findViewById(R.id.CallSeparator);
+			holder.callerNameView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCallerNameTextView);
+			holder.callerNumberView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCallerNumberTextView);
+			holder.callTimeView = (TextView) convertView.findViewById(R.id.sipgateCallListBitDateTimeTextView);
+			holder.callTypeIconView = (ImageView) convertView.findViewById(R.id.sipgateCallListBitCallTypeImage);
+			holder.callButtonView = (ImageView) convertView.findViewById(R.id.sipgateCallListBitCallImage);
+			holder.categoryTextView = (TextView) convertView.findViewById(R.id.sipgateCallListBitCategoryTextView);
 			convertView.setTag(holder);
 		} 
 		else 
@@ -264,24 +260,6 @@ public class CallListAdapter extends BaseAdapter
 			{
 				holder.categoryTextView.setVisibility(View.VISIBLE);
 			}
-			
-			if (position < getCount() - 1)
-			{
-				nextCallDataDBObject = (CallDataDBObject)getItem(position + 1);
-				
-				nextDayCalendar.setTimeInMillis(nextCallDataDBObject.getTime());
-				
-				if (nextDayCalendar.get(Calendar.DAY_OF_YEAR) != currentDayCalendar.get(Calendar.DAY_OF_YEAR) ||
-					nextDayCalendar.get(Calendar.YEAR) != currentDayCalendar.get(Calendar.YEAR))
-				{
-					holder.separator.setVisibility(View.GONE);
-				}
-				else
-				{
-					holder.separator.setVisibility(View.VISIBLE);
-				}
-			}
-			
 			
 			markAsRead(currentCallDataDBObject); 
 		}

@@ -8,19 +8,19 @@
 		android:background="#333333" android:padding="2dip">
 		<ImageView android:id="@+id/sipgateCallListRefreshImage"
 			android:layout_width="wrap_content" android:layout_gravity="center"
-			android:layout_marginRight="5px"
-			android:layout_height="wrap_content" android:background="@drawable/refresh_spinner"></ImageView>
-		<TextView android:text="@string/sipgate_refresh" android:id="@+id/CallListNumberTextView"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:gravity="center" android:textColor="#FFFFFF"
-			android:textSize="12dip"></TextView>
+			android:layout_marginRight="5px" android:layout_height="wrap_content"
+			android:background="@drawable/refresh_spinner"></ImageView>
+		<TextView android:id="@+id/CallListNumberTextView"
+			android:text="@string/sipgate_refresh" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center"
+			android:textColor="#FFFFFF" android:textSize="12dip"></TextView>
 	</LinearLayout>
 	<ListView android:id="@+id/CalllistListView"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:divider="#808080" android:dividerHeight="1px" android:fastScrollEnabled="true">
+		android:dividerHeight="1px"	android:fastScrollEnabled="true">
 	</ListView>
-	<TextView android:text="@string/sipgate_empty_calllist"
-		android:id="@+id/EmptyCallListTextView" android:layout_width="fill_parent"
+	<TextView android:id="@+id/EmptyCallListTextView"
+		android:text="@string/sipgate_empty_calllist" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:gravity="center"
 		android:textColor="#FFFFFF"></TextView>
 </LinearLayout>

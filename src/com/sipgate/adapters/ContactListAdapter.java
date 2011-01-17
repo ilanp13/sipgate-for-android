@@ -43,7 +43,6 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 	
 	private String currentFirstLetter = null;
 	private String lastFirstLetter = null;
-	private String nextFirstLetter = null;
 		
 	private HashMap <String, Integer> index = null;
 	private Object[] sections = null;
@@ -105,7 +104,6 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 			holder = new ContactViewHolder();
 			holder.contactName = (TextView) convertView.findViewById(R.id.contactName);
 			holder.category = (TextView) convertView.findViewById(R.id.ContactsLetterTextView);
-			holder.separator = (View) convertView.findViewById(R.id.ContactsSeparator);
 			convertView.setTag(holder);
 
 		} else 
@@ -194,16 +192,6 @@ public class ContactListAdapter extends BaseAdapter implements SectionIndexer
 					nextDisplayName += nextContactDataDBObject.getLastName();
 				}
 				
-				nextFirstLetter = nextDisplayName.substring(0, 1).toUpperCase();
-				
-				if (!nextFirstLetter.equalsIgnoreCase(currentFirstLetter)) 
-				{
-					holder.separator.setVisibility(View.GONE);
-				}
-				else 
-				{
-					holder.separator.setVisibility(View.VISIBLE);
-				}
 			}
 		}
 		

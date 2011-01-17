@@ -19,8 +19,8 @@
 	<string name="simple_settings_3g">VoIP Over 3G</string>
 	<string name="simple_settings_stun">Use STUN Server</string>
 	<string name="simple_settings_advanced">Advanced Settings</string>
-	<string name="dateTimeFormatForDay">EEE, MM/dd/yy</string>
-   	<string name="dateTimeFormatForTime">h:mm a</string>
+	<string name="sipgateDateTimeFormatForDay">EEE, MM/dd/yy</string>
+   	<string name="sipgateDateTimeFormatForTime">h:mm a</string>
    	<string name="refresh">Refresh</string>
    	<string name="menu_contacts">Contacts</string>
    	<string name="menu_dial_pad">Dial Pad</string>
@@ -79,8 +79,8 @@
 	<string name="sipgate_empty_calllist">Your call list is empty.</string>
 	<string name="sipgate_a_new_call">You have a new call</string>
 	<string name="sipgate_new_calls">You have %d new calls</string>
-	<string name="sipgate_unknown_caller">Unknown</string>
-	<string name="sipgate_no_number">anonymous</string>
+	<string name="sipgateUnknownCaller">Unknown</string>
+	<string name="sipgateNoNumber">anonymous</string>
 	<string name="sipgate_loading">Loading. Please wait...</string>
 	<string name="sipgate_download_failed">Failed to download voice mail.</string>
 	<string name="sipgate_contacts_in_list">sipgate contacts</string>

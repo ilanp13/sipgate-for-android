@@ -33,7 +33,6 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -284,7 +283,6 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		this.txtCallee.setText("");
 		this.txtCallee.scrollTo(0, 0);
 		this.numberToDial = "";
-		uncrackButtons();
 	}
 
 	@Override
@@ -351,11 +349,7 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 				addDigit("4");
 				break;
 			case R.id.five:
-				if(this.txtCallee.getText().toString().equals("22884646#*")) {
-					crackButtons();  // KonamiCode FTW
-				} else {
-					addDigit("5");
-				}
+				addDigit("5");
 				break;
 			case R.id.six:
 				addDigit("6");
@@ -399,7 +393,6 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 				break;
 			case R.id.five:
 				digit = "5";
-				uncrackButtons();
 				break;
 			case R.id.six:
 				digit = "6";
@@ -480,56 +473,5 @@ public class Sipgate extends Activity implements OnClickListener, OnLongClickLis
 		
 			textWidth = txtCallee.getPaint().measureText((String) txtCallee.getText());
 		}
-	}
-	
-	private void crackButtons() {
-		MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.crackedglass);
-	    mp.start();
-		Vibrator vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-		
-		vib.cancel();
-		vib.vibrate(1000);
-		
-		vib.cancel();
-		vib.vibrate(1000);
-		ImageButton dialOne = (ImageButton) findViewById(R.id.one);
-		ImageButton dialTwo = (ImageButton) findViewById(R.id.two);
-		ImageButton dialThree = (ImageButton) findViewById(R.id.three);
-		ImageButton dialFour = (ImageButton) findViewById(R.id.four);
-		ImageButton dialFive = (ImageButton) findViewById(R.id.five);
-		ImageButton dialSix = (ImageButton) findViewById(R.id.six);
-		ImageButton dialSeven = (ImageButton) findViewById(R.id.seven);
-		ImageButton dialEight = (ImageButton) findViewById(R.id.eight);
-		ImageButton dialNine = (ImageButton) findViewById(R.id.nine);
-		dialOne.setImageDrawable(getResources().getDrawable(R.drawable.crack1));
-		dialTwo.setImageDrawable(getResources().getDrawable(R.drawable.crack2));
-		dialThree.setImageDrawable(getResources().getDrawable(R.drawable.crack3));
-		dialFour.setImageDrawable(getResources().getDrawable(R.drawable.crack4));
-		dialFive.setImageDrawable(getResources().getDrawable(R.drawable.crack5));
-		dialSix.setImageDrawable(getResources().getDrawable(R.drawable.crack6));
-		dialSeven.setImageDrawable(getResources().getDrawable(R.drawable.crack7));
-		dialEight.setImageDrawable(getResources().getDrawable(R.drawable.crack8));
-		dialNine.setImageDrawable(getResources().getDrawable(R.drawable.crack9));
-	}
-	private void uncrackButtons() {
-		ImageButton dialOne = (ImageButton) findViewById(R.id.one);
-		ImageButton dialTwo = (ImageButton) findViewById(R.id.two);
-		ImageButton dialThree = (ImageButton) findViewById(R.id.three);
-		ImageButton dialFour = (ImageButton) findViewById(R.id.four);
-		ImageButton dialFive = (ImageButton) findViewById(R.id.five);
-		ImageButton dialSix = (ImageButton) findViewById(R.id.six);
-		ImageButton dialSeven = (ImageButton) findViewById(R.id.seven);
-		ImageButton dialEight = (ImageButton) findViewById(R.id.eight);
-		ImageButton dialNine = (ImageButton) findViewById(R.id.nine);
-		dialOne.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_1));
-		dialTwo.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_2));
-		dialThree.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_3));
-		dialFour.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_4));
-		dialFive.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_5));
-		dialSix.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_6));
-		dialSeven.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_7));
-		dialEight.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_8));
-		dialNine.setImageDrawable(getResources().getDrawable(R.drawable.taste_ziffer_9));
-	}
-	
+	}	
 }
