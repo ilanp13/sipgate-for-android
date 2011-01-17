@@ -105,6 +105,26 @@
 						android:layout_height="wrap_content" android:layout_marginTop="10dip" android:layout_marginBottom="10dip" />
 				</TableRow>
 			</TableLayout>
+			
+			<!-- Spacer Line -->
+			<View android:layout_height="2px" android:layout_width="fill_parent"
+				android:background="#888888" />
+						
+			<!-- Use Stun -->
+			<TableLayout android:id="@+id/sipgateSettingsSTUNRow"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:stretchColumns="1">
+
+				<TableRow android:layout_height="wrap_content"
+					android:layout_width="fill_parent">
+					<TextView android:layout_column="1"
+						android:text="@string/simple_settings_stun" android:padding="3dip"
+						android:textSize="20dip" android:textColor="#FFFFFF" android:layout_marginTop="10dip" android:layout_marginBottom="10dip" />
+					<CheckBox android:id="@+id/sipgateSettingsSTUN"
+						android:layout_column="2" android:layout_width="wrap_content"
+						android:layout_height="wrap_content" android:layout_marginTop="10dip" android:layout_marginBottom="10dip" />
+				</TableRow>
+			</TableLayout>
 
 			<!-- Spacer Line -->
 			<View android:layout_height="2px" android:layout_width="fill_parent"

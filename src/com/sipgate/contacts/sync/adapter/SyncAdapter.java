@@ -44,13 +44,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 	    
  		ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
 		
- 		Builder builder = ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
-															.withSelection(RawContacts.ACCOUNT_NAME + "=?", 
-																	       new String[]{String.valueOf(account.name)});
-				
-		operations.add(builder.build());
-		operations.addAll(getInsertOperations(contactDataDBObjects, account));
- 		
+ 		addDeleteOperations(operations, account);
+ 		addInsertOperations(operations, contactDataDBObjects, account);
+ 	 	
 		try
 		{
 			getContext().getContentResolver().applyBatch(ContactsContract.AUTHORITY, operations);
@@ -65,10 +61,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 		}
 	}
 	
-	public ArrayList<ContentProviderOperation> getInsertOperations(Vector <ContactDataDBObject> contactDataDBObjects, Account account)
+	public void addDeleteOperations(ArrayList<ContentProviderOperation> operations, Account account)
 	{
-		ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
+		Builder builder = ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
+													.withSelection(RawContacts.ACCOUNT_NAME + "=?", 
+															       new String[]{String.valueOf(account.name)});	
 		
+		operations.add(builder.build());
+	}
+	
+	public void addInsertOperations(ArrayList<ContentProviderOperation> operations, Vector <ContactDataDBObject> contactDataDBObjects, Account account)
+	{
 		Builder builder = null;
 		
 		ContactDataDBObject contactDataDBObject = null;
@@ -107,7 +110,5 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 				operations.add(builder.build());
 			}
 		}
-		
-		return operations;
 	}
 }

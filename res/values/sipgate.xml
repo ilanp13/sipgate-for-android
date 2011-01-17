@@ -17,6 +17,7 @@
 	<string name="simple_settings_balance">Balance</string>
 	<string name="simple_settings_wlan">VoIP Over Wireless</string>
 	<string name="simple_settings_3g">VoIP Over 3G</string>
+	<string name="simple_settings_stun">Use STUN Server</string>
 	<string name="simple_settings_advanced">Advanced Settings</string>
 	<string name="sipgateDateTimeFormatForDay">EEE, MM/dd/yy</string>
    	<string name="sipgateDateTimeFormatForTime">h:mm a</string>
