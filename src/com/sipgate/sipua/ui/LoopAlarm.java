@@ -28,7 +28,9 @@ import android.util.Log;
 public class LoopAlarm extends BroadcastReceiver {
 
     @Override
-	public void onReceive(Context context, Intent intent) {
+	public void onReceive(Context context, Intent intent) 
+    {
+    	Log.i("LoopAlarm", "onReceive");
     	if (!Sipdroid.release) Log.i("SipUA:","alarm");
     	Receiver.engine(context).keepAlive();
     }

@@ -35,8 +35,8 @@ import com.sipgate.util.SipgateApplication;
  * This class represents the contact list activity and implements all
  * it's functions.
  * 
- * @author graef
  * @author Karsten Knuth
+ * @author graef
  * @version 1.2
  */
 public class ContactListActivity extends Activity implements OnItemClickListener
@@ -125,7 +125,8 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		refreshState = application.getRefreshState();
 		application.setRefreshState(SipgateApplication.RefreshState.NONE);
 		
-		switch (refreshState) {
+		switch (refreshState)
+		{
 			case NEW_EVENTS: 
 				refreshView.setVisibility(View.GONE);
 				
@@ -178,7 +179,8 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 			emptyList.setVisibility(View.GONE);
 		}	
 		
-		if(!isAnimationRunning) {
+		if(!isAnimationRunning) 
+		{
 			animationThread.start();
 			isAnimationRunning = true;
 		}
@@ -274,44 +276,44 @@ public class ContactListActivity extends Activity implements OnItemClickListener
 		Intent intent = new Intent(this, SipgateBackgroundService.class);
 		context.startService(intent);
 
-		//if (serviceConnection == null) {
-			Log.d(TAG, "service connection is null -> create new");
-			
-			serviceConnection = new ServiceConnection() 
+		Log.d(TAG, "service connection is null -> create new");
+		
+		serviceConnection = new ServiceConnection() 
+		{
+			public void onServiceDisconnected(ComponentName name) 
 			{
-				public void onServiceDisconnected(ComponentName name) 
-				{
-					Log.d(TAG, "service " + name + " disconnected -> clear binding");
-					serviceBinding = null;
-				}
+				Log.d(TAG, "service " + name + " disconnected -> clear binding");
+				serviceBinding = null;
+			}
 
-				public void onServiceConnected(ComponentName name, IBinder binder) 
+			public void onServiceConnected(ComponentName name, IBinder binder) 
+			{
+				Log.v(TAG, "service " + name + " connected -> bind");
+				
+				try 
 				{
-					Log.v(TAG, "service " + name + " connected -> bind");
+					serviceBinding = (EventService) binder;
 					
-					try {
-						serviceBinding = (EventService) binder;
-						
-						try {
-							Log.d(TAG, "service binding -> registerOnContactsIntent");
-							serviceBinding.registerOnContactsIntents(TAG, getContactsIntent(), newContactsIntent(), noContactsIntent(), errorIntent());
-						} 
-						catch (RemoteException e) {
-							e.printStackTrace();
-						}
+					try
+					{
+						Log.d(TAG, "service binding -> registerOnContactsIntent");
+						serviceBinding.registerOnContactsIntents(TAG, getContactsIntent(), newContactsIntent(), noContactsIntent(), errorIntent());
 					} 
-					catch (ClassCastException e) {
+					catch (RemoteException e) 
+					{
 						e.printStackTrace();
 					}
+				} 
+				catch (ClassCastException e) 
+				{
+					e.printStackTrace();
 				}
-			};
-			
-			boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-			Log.v(TAG, "bind service -> " + bindret);
-		//} 
-		//else {
-		//	Log.d(TAG, "service connection is not null -> already running");
-		//}
+			}
+		};
+		
+		boolean bindret = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+		Log.v(TAG, "bind service -> " + bindret);
+
 	}
 	
 	/**

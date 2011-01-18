@@ -1,7 +1,6 @@
 package com.sipgate.db;
 
 import android.database.sqlite.SQLiteStatement;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import com.sipgate.db.base.BaseDBObject;
 

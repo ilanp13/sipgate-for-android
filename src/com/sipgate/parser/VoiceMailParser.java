@@ -1,7 +1,9 @@
 package com.sipgate.parser;
 
 import java.text.ParseException;
+
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Vector;
 
 import org.xml.sax.Attributes;
@@ -11,10 +13,20 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
 
 import com.sipgate.db.VoiceMailDataDBObject;
+import com.sipgate.util.PhoneNumberFormatter;
 
+/**
+ * This is a SaxParser DefaulHandler implementation for VoiceMailDataDBObjects
+ * A Document is handled by this Class and it trys to parse the content into VoiceMailDataDBObjects
+ * <br/>
+ * <b> Remeber to reuse the object instead of creating a new one for memory saving </b>
+ * 
+ * @author graef
+ *
+ */
 public class VoiceMailParser extends DefaultHandler
 {
-	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss");
+	private static final SimpleDateFormat dateformatterPretty = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	private Vector <VoiceMailDataDBObject> voiceMailDataDBObjects = null;
 	private VoiceMailDataDBObject voiceMailDataDBObject = null;
@@ -23,12 +35,22 @@ public class VoiceMailParser extends DefaultHandler
 	private String parent = null;
 	private String location = null;
 	
+	private String numberPretty = null;
+	private String numberE164 = null;
+	
+	private static final PhoneNumberFormatter formatter = new PhoneNumberFormatter();
+	private static final Locale locale = Locale.getDefault();
+	
 	public VoiceMailParser()
 	{
 		voiceMailDataDBObjects = new Vector<VoiceMailDataDBObject>();
 		currentValue = new StringBuffer();
 	}
 	
+	/**
+	 * This method you should call to (re)initialise youre instance of CallParser to reuse instead of creating 
+	 * a new instance of CallParser for memory saving
+	 */
 	public void init()
 	{
 		voiceMailDataDBObjects.clear();
@@ -93,24 +115,20 @@ public class VoiceMailParser extends DefaultHandler
 		}
 		else if ("numberE164".equalsIgnoreCase(localName))
 		{
+			formatter.initWithFreestyle(currentValue.toString().replace("+", ""), locale.getCountry());
+			
+			numberPretty = formatter.formattedNumber();
+			numberE164 = formatter.e164NumberWithPrefix("+");
+								
 			if ("targets".equalsIgnoreCase(parent))
 			{
-				voiceMailDataDBObject.setLocalNumberE164(currentValue.toString());
+				voiceMailDataDBObject.setLocalNumberE164(numberE164);
+				voiceMailDataDBObject.setLocalNumberPretty(numberPretty);
 			}
 			else if ("sources".equalsIgnoreCase(parent))
 			{
-				voiceMailDataDBObject.setRemoteNumberE164(currentValue.toString());
-			}
-		}
-		else if ("numberPretty".equalsIgnoreCase(localName))
-		{
-			if ("targets".equalsIgnoreCase(parent))
-			{				
-				voiceMailDataDBObject.setLocalNumberPretty(currentValue.toString());
-			}
-			else if ("sources".equalsIgnoreCase(parent))
-			{
-				voiceMailDataDBObject.setRemoteNumberPretty(currentValue.toString());
+				voiceMailDataDBObject.setRemoteNumberE164(numberE164);
+				voiceMailDataDBObject.setRemoteNumberPretty(numberPretty);
 			}
 		}
 		else if ("contactFN".equalsIgnoreCase(localName))
@@ -168,6 +186,10 @@ public class VoiceMailParser extends DefaultHandler
 		return callTime;
 	}
 
+	/**
+	 * This method returns a Vector of parsed VoiceMailDataDBObjects
+	 * @return a Vector of all VoiceMailDataDBObjects parsed by this handler since the last call of init()
+	 */
 	public Vector<VoiceMailDataDBObject> getVoiceMailDataDBObjects()
 	{
 		return voiceMailDataDBObjects;

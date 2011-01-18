@@ -25,7 +25,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 {
 	private final static String TAG = "VoiceMailListAdapter";
 
-	private Activity activity = null;
 	private SipgateDBAdapter sipgateDBAdapter = null;
 	
 	private LayoutInflater mInflater = null;
@@ -57,7 +56,6 @@ public class VoiceMailListAdapter extends BaseAdapter
 	
 	public VoiceMailListAdapter(Activity activity, SipgateDBAdapter sipgateDBAdapter) 
 	{
-		this.activity = activity;
 		this.sipgateDBAdapter = sipgateDBAdapter;
 		
 		mInflater = activity.getLayoutInflater();

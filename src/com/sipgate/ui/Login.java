@@ -25,6 +25,7 @@ import com.sipgate.service.SipgateBackgroundService;
 import com.sipgate.sipua.ui.Receiver;
 import com.sipgate.sipua.ui.RegisterService;
 import com.sipgate.util.ApiServiceProvider;
+import com.sipgate.util.ApiServiceProviderImpl;
 import com.sipgate.util.SettingsClient;
 
 @SuppressWarnings("unused")

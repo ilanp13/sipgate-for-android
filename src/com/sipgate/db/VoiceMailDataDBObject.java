@@ -1,4 +1,4 @@
-	package com.sipgate.db;
+package com.sipgate.db;
 
 import java.util.Date;
 

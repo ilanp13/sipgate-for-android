@@ -29,7 +29,8 @@ public class OneShotAlarm extends BroadcastReceiver {
 
     @Override
 	public void onReceive(Context context, Intent intent) {
-    	if (!Sipdroid.release) Log.i("SipUA:","alarm");
+    	Log.i("OneShotAlarm", "onReceive");
+    	if (!Sipdroid.release) Log.i("OneShotAlarm:","alarm");
     	Receiver.engine(context).expire();
     }
 }
