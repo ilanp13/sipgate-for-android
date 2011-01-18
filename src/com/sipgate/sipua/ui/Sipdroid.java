@@ -324,14 +324,14 @@ public class Sipdroid extends Activity {
 			m_AlertDlg = new AlertDialog.Builder(this)
 				.setMessage(R.string.empty)
 				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
+				.setIcon(R.drawable.sipgate_icon_small)
 				.setCancelable(true)
 				.show();
 		else if (!Receiver.engine(this).call(target))
 			m_AlertDlg = new AlertDialog.Builder(this)
 				.setMessage(R.string.notfast)
 				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
+				.setIcon(R.drawable.sipgate_icon_small)
 				.setCancelable(true)
 				.show();
 	}
@@ -350,7 +350,7 @@ public class Sipdroid extends Activity {
 			m_AlertDlg = new AlertDialog.Builder(this)
 			.setMessage(/*getString(R.string.about_sipdroid4android_prefix).replace("\\n","\n")+*/getString(R.string.about).replace("\\n","\n").replace("${VERSION}", getVersion(this)))
 			.setTitle(getString(R.string.menu_about))
-			.setIcon(R.drawable.icon22)
+			.setIcon(R.drawable.sipgate_icon_small)
 			.setCancelable(true)
 			.show();
 			break;
