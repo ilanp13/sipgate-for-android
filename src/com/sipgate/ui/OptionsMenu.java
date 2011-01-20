@@ -194,7 +194,7 @@ public class OptionsMenu {
 		m_AlertDlg = new AlertDialog.Builder(activity)
 		.setMessage(context.getString(R.string.about).replace("\\n","\n").replace("${VERSION}", getVersion(context)))
 		.setTitle(context.getString(R.string.menu_about))
-		.setIcon(R.drawable.icon22)
+		.setIcon(R.drawable.sipgate_icon_small)
 		.setCancelable(true)
 		.show();
 	}
