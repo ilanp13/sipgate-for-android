@@ -18,6 +18,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.util.Log;
 
 import com.sipgate.db.ContactDataDBObject;
 import com.sipgate.db.ContactNumberDBObject;
@@ -41,49 +42,32 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 		
 		Vector <ContactDataDBObject> contactDataDBObjects = sipgateDBAdapter.getAllContactData(true);
  		sipgateDBAdapter.close();
-	    
- 		ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
-		
- 		addDeleteOperations(operations, account);
- 		addInsertOperations(operations, contactDataDBObjects, account);
- 	 	
-		try
-		{
-			getContext().getContentResolver().applyBatch(ContactsContract.AUTHORITY, operations);
-		}
-		catch (RemoteException e)
-		{
-			e.printStackTrace();
-		}
-		catch (OperationApplicationException e)
-		{
-			e.printStackTrace();
-		}
+	    	
+ 		addDeleteOperations(account);
+ 		addInsertOperations(contactDataDBObjects, account);
+ 	}
+	
+	public void addDeleteOperations(Account account)
+	{
+		getContext().getContentResolver().delete(RawContacts.CONTENT_URI, 
+												 RawContacts.ACCOUNT_NAME + "=?", 
+												 new String[]{String.valueOf(account.name)});
 	}
 	
-	public void addDeleteOperations(ArrayList<ContentProviderOperation> operations, Account account)
+	public void addInsertOperations(Vector <ContactDataDBObject> contactDataDBObjects, Account account)
 	{
-		Builder builder = ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
-													.withSelection(RawContacts.ACCOUNT_NAME + "=?", 
-															       new String[]{String.valueOf(account.name)});	
+		ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
 		
-		operations.add(builder.build());
-	}
-	
-	public void addInsertOperations(ArrayList<ContentProviderOperation> operations, Vector <ContactDataDBObject> contactDataDBObjects, Account account)
-	{
 		Builder builder = null;
 		
 		ContactDataDBObject contactDataDBObject = null;
 		ContactNumberDBObject contactNumberDBObject = null;
 		
-		int backRef = 0;
-		
 		for (int i=0; i < contactDataDBObjects.size(); i++)
 		{
-			backRef = operations.size();
-			
 			contactDataDBObject = contactDataDBObjects.get(i);
+			
+			operations.clear();
 			
 			builder = ContentProviderOperation.newInsert(RawContacts.CONTENT_URI);
 			builder.withValue(RawContacts.ACCOUNT_NAME, account.name);
@@ -91,7 +75,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 			operations.add(builder.build());
 			
 			builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
-			builder.withValueBackReference(Data.RAW_CONTACT_ID, backRef);
+			builder.withValueBackReference(Data.RAW_CONTACT_ID, 0);
 			builder.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
 			builder.withValue(StructuredName.DISPLAY_NAME, contactDataDBObject.getDisplayName());
 			builder.withValue(StructuredName.FAMILY_NAME, contactDataDBObject.getLastName());
@@ -103,11 +87,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter
 				contactNumberDBObject = contactDataDBObject.getContactNumberDBObjects().get(j);
 				
 				builder = ContentProviderOperation.newInsert(Data.CONTENT_URI);
-				builder.withValueBackReference(Phone.RAW_CONTACT_ID, backRef);
+				builder.withValueBackReference(Phone.RAW_CONTACT_ID, 0);
 				builder.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE);
 				builder.withValue(Phone.TYPE, contactNumberDBObject.getTypeAsCommonDataKindsPhoneInt());
 				builder.withValue(Phone.NUMBER, contactNumberDBObject.getNumberE164());
 				operations.add(builder.build());
+			}
+			
+			try
+			{
+				getContext().getContentResolver().applyBatch(ContactsContract.AUTHORITY, operations);
+			}
+			catch (RemoteException e)
+			{
+				Log.e("SyncAdapter", "addInsertOperations", e);
+			}
+			catch (OperationApplicationException e)
+			{
+				Log.e("SyncAdapter", "addInsertOperations", e);
 			}
 		}
 	}
