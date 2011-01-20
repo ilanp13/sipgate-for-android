@@ -202,5 +202,5 @@
 	
 	<uses-sdk android:minSdkVersion="3" />
 
-	<supports-screens android:normalScreens="true" android:anyDensity="true" android:resizeable="false" android:largeScreens="true" android:xlargeScreens="true" android:smallScreens="true"/>
+	<supports-screens android:normalScreens="true" android:largeScreens="true" android:smallScreens="true" android:xlargeScreens="true" android:anyDensity="true" android:resizeable="true"/>
 </manifest> 
