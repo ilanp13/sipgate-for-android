@@ -5,8 +5,8 @@
 	<string name="sipgate_no_credentials">Please provide username and password ...</string>
 	<string name="sipgate_wait">Please wait. Connecting to Server...</string>
 	<string name="sipgate_load_extension">Please wait. Loading extensions...</string>
-	<string name="username">username</string>
-	<string name="password">password</string>
+	<string name="username">Webuser</string>
+	<string name="password">Password</string>
 	<string name="ok">ok</string>
 	<string name="select_extension">Please choose extension:</string>
 	<string name="call_list_title">Call List</string>
