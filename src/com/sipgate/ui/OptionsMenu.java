@@ -77,24 +77,24 @@ public class OptionsMenu {
 		// settings
 		if(!caller.equals("Login")){
 			m = menu.add(0, CONFIGURE_MENU_ITEM, 0, R.string.menu_settings);
-			m.setIcon(R.drawable.menu_icon_settings_48);
+			m.setIcon(R.drawable.sipgate_menu_icon_settings);
 		}
 		// refresh for voicemail tab only
 		if(caller.equals("VoiceMailList")) {
 			m = menu.add(0, REFRESH_VOICEMAIL_LIST, 0, R.string.menu_refresh);
-			m.setIcon(R.drawable.ic_menu_refresh);
+			m.setIcon(R.drawable.sipgate_ic_menu_refresh);
 		}
 		
 		// refresh for calllist tab only
 		if(caller.equals("CallList")) {
 			m = menu.add(0, REFRESH_CALL_LIST, 0, R.string.menu_refresh);
-			m.setIcon(R.drawable.ic_menu_refresh);
+			m.setIcon(R.drawable.sipgate_ic_menu_refresh);
 		}
 		
 		// refresh for contacts tab only
 		if(caller.equals("ContactList")) {
 			m = menu.add(0, REFRESH_CONTACT_LIST, 0, R.string.menu_refresh);
-			m.setIcon(R.drawable.ic_menu_refresh);
+			m.setIcon(R.drawable.sipgate_ic_menu_refresh);
 		}	
 	}
 	
@@ -194,7 +194,7 @@ public class OptionsMenu {
 		m_AlertDlg = new AlertDialog.Builder(activity)
 		.setMessage(context.getString(R.string.about).replace("\\n","\n").replace("${VERSION}", getVersion(context)))
 		.setTitle(context.getString(R.string.menu_about))
-		.setIcon(R.drawable.icon22)
+		.setIcon(R.drawable.sipgate_icon_small)
 		.setCancelable(true)
 		.show();
 	}

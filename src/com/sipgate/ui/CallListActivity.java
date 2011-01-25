@@ -473,7 +473,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 		
 				.setMessage(R.string.empty)
 				.setTitle(R.string.app_name)
-				.setIcon(R.drawable.icon22)
+				.setIcon(R.drawable.sipgate_icon_small)
 				.setCancelable(true)
 				.show();
 		}
@@ -482,7 +482,7 @@ public class CallListActivity extends Activity implements OnItemClickListener
 			m_AlertDlg = new AlertDialog.Builder(this)
 			.setMessage(R.string.notfast)
 			.setTitle(R.string.app_name)
-			.setIcon(R.drawable.icon22)
+			.setIcon(R.drawable.sipgate_icon_small)
 			.setCancelable(false)
 	        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() 
 	        {

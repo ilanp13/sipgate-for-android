@@ -18,13 +18,14 @@
 		ADDITIONAL_TERMS.txt
 		/////////////////////////////////////////////////////////////////////
 	-->
-<manifest package="com.sipgate" xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="179" android:versionName="1.7 beta 9">
+<manifest package="com.sipgate" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.7 beta 93" android:versionCode="1793">
 	<application android:icon="@drawable/android_app_icon" android:label="@string/app_name"
 		android:name=".util.SipgateApplication" android:debuggable="true">
 		
 		<activity android:name="com.sipgate.ui.StartSipgate" android:label="@string/app_name"
-			android:launchMode="singleInstance" android:configChanges="orientation|keyboardHidden"
-			android:finishOnTaskLaunch="true" android:noHistory="true">
+			android:finishOnTaskLaunch="true" android:noHistory="true"
+			android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+			android:screenOrientation="portrait">
 			 <intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
@@ -86,17 +87,17 @@
         </activity>
         
         <activity android:name="com.sipgate.ui.SimpleSettingsListActivity" android:label="@string/app_name"
-			android:configChanges="orientation|keyboardHidden" android:screenOrientation="portrait"
+			android:configChanges="keyboardHidden" android:screenOrientation="portrait"
 			android:excludeFromRecents="true" android:taskAffinity="">
         </activity>
         
         <activity android:name="com.sipgate.ui.SettingsActivity" android:label="@string/app_name"
-			android:configChanges="orientation|keyboardHidden"
+			android:configChanges="keyboardHidden"
 			android:excludeFromRecents="true" android:taskAffinity="">
         </activity>
         
         <activity android:name="com.sipgate.ui.SettingsRefreshActivity" android:label="@string/app_name"
-			android:configChanges="orientation|keyboardHidden" android:screenOrientation="portrait"
+			android:configChanges="keyboardHidden" android:screenOrientation="portrait"
 			android:excludeFromRecents="true" android:taskAffinity="">
         </activity>
         
@@ -202,5 +203,5 @@
 	
 	<uses-sdk android:minSdkVersion="3" />
 
-	<supports-screens android:largeScreens="false" android:normalScreens="true" android:smallScreens="false" android:anyDensity="true" android:resizeable="false" />
+	<supports-screens android:normalScreens="true" android:largeScreens="true" android:smallScreens="true" android:xlargeScreens="true" android:anyDensity="true" android:resizeable="true"/>
 </manifest> 

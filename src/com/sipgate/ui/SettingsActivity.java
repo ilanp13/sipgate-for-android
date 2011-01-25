@@ -239,7 +239,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	
 	void reload() {
 		setPreferenceScreen(null);
-		addPreferencesFromResource(R.xml.preferences);		
+		addPreferencesFromResource(R.xml.sipgate_preferences);		
 	}
 
 	private void setDefaultValues() {
@@ -534,16 +534,10 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     }
 
 	public void updateSummaries() {
-    	getPreferenceScreen().findPreference(PREF_PORT).setSummary(settings.getString(PREF_PORT, DEFAULT_PORT));
-    	getPreferenceScreen().findPreference(PREF_PROTOCOL).setSummary(settings.getString(PREF_PROTOCOL,
-    	settings.getString(PREF_SERVER, DEFAULT_SERVER).equals(DEFAULT_SERVER) ? "tcp" : "udp").toUpperCase());
-    	getPreferenceScreen().findPreference(PREF_SEARCH).setSummary(settings.getString(PREF_SEARCH, DEFAULT_SEARCH)); 
-    	getPreferenceScreen().findPreference(PREF_EXCLUDEPAT).setSummary(settings.getString(PREF_EXCLUDEPAT, DEFAULT_EXCLUDEPAT)); 
     	fill(PREF_EARGAIN,  "" + DEFAULT_EARGAIN,  R.array.eargain_values, R.array.eargain_display_values);
     	fill(PREF_MICGAIN,  "" + DEFAULT_MICGAIN,  R.array.eargain_values, R.array.eargain_display_values);
     	fill(PREF_HEARGAIN, "" + DEFAULT_HEARGAIN, R.array.eargain_values, R.array.eargain_display_values);
     	fill(PREF_HMICGAIN, "" + DEFAULT_HMICGAIN, R.array.eargain_values, R.array.eargain_display_values);
-    	fill(PREF_VQUALITY,      DEFAULT_VQUALITY, R.array.vquality_values,R.array.vquality_display_values);
     }
 
 	public void onClick(DialogInterface arg0, int arg1) {

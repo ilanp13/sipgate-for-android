@@ -116,15 +116,6 @@ public class CallScreen extends Activity implements DialogInterface.OnClickListe
 			Receiver.engine(this).speaker(RtpStreamReceiver.speakermode == AudioManager.MODE_NORMAL?
 					AudioManager.MODE_IN_CALL:AudioManager.MODE_NORMAL);
 			break;
-					
-		case VIDEO_MENU_ITEM:
-			if (Receiver.call_state == UserAgent.UA_STATE_HOLD) Receiver.engine(this).togglehold();
-			try {
-				intent = new Intent(this, com.sipgate.sipua.ui.VideoCamera.class);
-				startActivity(intent);
-			} catch (ActivityNotFoundException e) {
-			}
-			break;
 		}
 
 		return result;

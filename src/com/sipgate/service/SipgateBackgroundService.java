@@ -1280,7 +1280,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private void createNewCallNotification(int unreadCounter) 
 	{
 		if (notifyClient != null) {
-			notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, buildCallNotificationString(unreadCounter));
+			notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.sipgate_call_list_icon_notification, buildCallNotificationString(unreadCounter));
 		}
 	}
 	
@@ -1294,7 +1294,7 @@ public class SipgateBackgroundService extends Service implements EventService
 	private void createNewVoiceMailNotification(int unreadCounter) 
 	{
 		if (notifyClient != null) {
-			notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.statusbar_voicemai_48, buildVoicemailNotificationString(unreadCounter));
+			notifyClient.setNotification(NotificationClient.NotificationType.VOICEMAIL, R.drawable.sipgate_voice_mail_list_icon_notification, buildVoicemailNotificationString(unreadCounter));
 		}
 	}
 	

@@ -4,48 +4,49 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<TextView android:layout_height="wrap_content"
-		android:textColor="#ffffff" android:text="01.01.2010"
-		android:layout_width="fill_parent" android:id="@+id/CategoryTextView"
+	<TextView android:id="@+id/sipgateCallListBitCategoryTextView"
+		android:layout_height="wrap_content" android:textColor="#ffffff"
+		android:text="01.01.2010" android:layout_width="fill_parent"
 		android:background="#808080" android:paddingLeft="5dip"
 		android:textStyle="bold"></TextView>
 
 	<TableLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:stretchColumns="1">
+		android:layout_height="wrap_content" android:stretchColumns="1"
+		android:shrinkColumns="1">
 		<TableRow android:layout_width="fill_parent"
 			android:layout_height="wrap_content">
 
-			<ImageView android:id="@+id/CallTypeImage" android:src="@drawable/ic_incall_ongoing"
+			<ImageView android:id="@+id/sipgateCallListBitCallTypeImage"
+				android:src="@drawable/sipgate_call_list_icon_incoming"
 				android:layout_height="wrap_content" android:layout_width="wrap_content"
-				android:maxWidth="21dp" android:maxHeight="21dp"
-				android:layout_gravity="center_vertical" />
+				android:layout_gravity="center_vertical" android:paddingLeft="10dp" />
 
 			<LinearLayout android:orientation="vertical"
-				android:layout_width="fill_parent" android:layout_height="fill_parent"
-				android:paddingLeft="10dp"
-				android:gravity="center_vertical">
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:gravity="top" android:minHeight="56dp"
+				android:paddingLeft="10dp" android:paddingTop="5dp">
 
-				<TextView android:layout_height="wrap_content"
-					android:textColor="#ffffff" android:text="Vorname Nachname"
-					android:textStyle="bold" android:layout_width="wrap_content"
-					android:id="@+id/CallerNameTextView" android:textSize="16dp"
+				<TextView android:id="@+id/sipgateCallListBitCallerNameTextView"
+					android:layout_height="wrap_content" android:textColor="#ffffff"
+					android:text="Vorname Nachname" android:textStyle="bold"
+					android:layout_width="wrap_content" android:textSize="16dp"
 					android:ellipsize="marquee" android:singleLine="true"
 					android:width="200dp" android:maxLines="1" android:height="20px"
 					android:lines="1"></TextView>
 
 				<LinearLayout android:layout_width="fill_parent"
-					android:layout_height="wrap_content" >
+					android:layout_height="wrap_content">
 
-					<TextView android:layout_height="wrap_content"
-						android:text="Rufnummer" android:layout_width="wrap_content"
-						android:id="@+id/CallerNumberTextView"></TextView>
+					<TextView android:id="@+id/sipgateCallListBitCallerNumberTextView"
+						android:layout_height="wrap_content" android:text="Rufnummer"
+						android:layout_width="wrap_content"></TextView>
 
 					<LinearLayout android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:gravity="right" android:layout_gravity="right">
-						<TextView android:layout_height="wrap_content"
-							android:text="00:00 Uhr" android:layout_width="wrap_content"
-							android:id="@+id/DateTimeTextView" android:layout_gravity="right"></TextView>
+						android:layout_height="wrap_content" android:gravity="right"
+						android:layout_gravity="right">
+						<TextView android:id="@+id/sipgateCallListBitDateTimeTextView"
+							android:layout_height="wrap_content" android:text="00:00 Uhr"
+							android:layout_width="wrap_content" android:layout_gravity="right"></TextView>
 					</LinearLayout>
 				</LinearLayout>
 
@@ -53,13 +54,12 @@
 
 			<LinearLayout android:layout_width="wrap_content"
 				android:layout_height="wrap_content" android:gravity="right">
-				<ImageView android:id="@+id/CallImageButton" android:src="@drawable/button_call"
-					android:layout_height="wrap_content" android:layout_width="wrap_content"
-					android:maxWidth="54dp" android:maxHeight="54dp" />
+				<ImageView android:id="@+id/sipgateCallListBitCallImage"
+					android:src="@drawable/sipgate_call_list_icon_call" android:layout_height="wrap_content"
+					android:layout_width="wrap_content" android:paddingRight="10dp"
+					android:paddingLeft="10dp" android:paddingTop="10dp" />
 
 			</LinearLayout>
 		</TableRow>
 	</TableLayout>
-	<View android:id="@+id/CallSeparator" android:layout_width="fill_parent"
-		android:layout_height="1dp" android:background="#FF808080" />
 </LinearLayout>

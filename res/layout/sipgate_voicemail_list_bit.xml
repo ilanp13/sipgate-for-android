@@ -4,40 +4,57 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<TextView android:layout_height="wrap_content"
-		android:textColor="#ffffff" android:text="category"
-		android:layout_width="fill_parent" android:id="@+id/CategoryTextView"
-		android:background="#808080"></TextView>
+	<TextView android:id="@+id/sipgateVoiceMailListBitCategoryTextView"
+		android:layout_height="wrap_content" android:textColor="#ffffff"
+		android:text="01.01.2010" android:layout_width="fill_parent"
+		android:background="#808080" android:paddingLeft="5dip"
+		android:textStyle="bold"></TextView>
 
-	<LinearLayout android:id="@+id/LinearLayout01"
-		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:paddingLeft="6px" android:paddingRight="6px">
+	<TableLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:stretchColumns="1"
+		android:shrinkColumns="1">
+		<TableRow android:layout_width="fill_parent"
+			android:layout_height="wrap_content">
 
-		<ImageView android:id="@+id/IconView" android:src="@drawable/voicemail_unread"
-			android:layout_height="32dp" android:layout_width="32dp"
-			android:scaleType="fitXY" android:layout_marginRight="6dp"
-			android:layout_marginTop="2dp" />
+			<ImageView android:id="@+id/sipgateVoiceMailListBitIconView"
+				android:src="@drawable/sipgate_voice_mail_list_icon_voicemail"
+				android:layout_height="wrap_content" android:layout_width="wrap_content"
+				android:paddingTop="13dp" android:paddingLeft="10dp"
+				android:layout_gravity="top" />
 
-		<LinearLayout android:id="@+id/LinearLayout03"
-			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:orientation="vertical">
+			<LinearLayout android:orientation="vertical"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:gravity="top" android:minHeight="56dp"
+				android:paddingLeft="10dp" android:paddingTop="5dp">
 
-			<LinearLayout android:id="@+id/LinearLayout02"
-				android:layout_height="wrap_content" android:gravity="left"
-				android:layout_width="fill_parent">
-				<TextView android:text="element" android:id="@+id/EventTitle"
-					android:layout_width="wrap_content" android:layout_height="wrap_content"
-					android:ellipsize="end" android:textColor="#ffffff" 
-					android:singleLine="true" android:inputType="none" android:gravity="left"
-					android:width="200dp" android:layout_gravity="left"></TextView>
-				<TextView android:layout_width="wrap_content" android:width="70dp"
-					android:layout_height="wrap_content" android:id="@+id/DateTextView"
-					android:text="0:00"  android:gravity="right" android:layout_gravity="right"></TextView>
+				<LinearLayout android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+					<TextView android:id="@+id/EventTitle"
+						android:layout_height="wrap_content" android:textColor="#ffffff"
+						android:text="Vorname Nachname" android:textStyle="bold"
+						android:layout_width="wrap_content" android:textSize="16dp"
+						android:ellipsize="marquee" android:singleLine="true"
+						android:width="200dp" android:maxLines="1" android:height="20px"
+						android:lines="1"></TextView>
+
+					<LinearLayout android:layout_width="fill_parent"
+						android:layout_height="wrap_content" android:gravity="right"
+						android:layout_gravity="right">
+						<TextView android:layout_width="wrap_content"
+							android:width="70dp" android:layout_height="wrap_content"
+							android:id="@+id/DateTextView" android:text="0:00"
+							android:gravity="right" android:layout_gravity="right"
+							android:paddingRight="10dip"></TextView>
+					</LinearLayout>
+				</LinearLayout>
+
+				<TextView android:layout_height="wrap_content"
+					android:layout_width="wrap_content" android:singleLine="false"
+					android:text="Transcription" android:id="@+id/TranscriptionTextView"
+					android:paddingBottom="9dip" android:paddingRight="5dip"></TextView>
+
 			</LinearLayout>
 
-			<TextView android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:id="@+id/TranscriptionTextView"
-				android:text="transcription"></TextView>
-		</LinearLayout>		
-	</LinearLayout>
+		</TableRow>
+	</TableLayout>
 </LinearLayout>
