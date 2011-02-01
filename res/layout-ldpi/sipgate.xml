@@ -9,20 +9,28 @@
 <!--
 			<com.sipgate.sipua.ui.InstantAutoCompleteTextView
  -->
-	<TextView
-		android:id="@+id/txt_callee"
-		android:layout_width="320dp"
-		android:layout_height="56dp"
-		android:text=""
-		android:background="@drawable/input_bg"
-		android:drawableLeft="@drawable/sipgate32_with_margin"
-		android:textColor="#000000"
-		android:textSize="40dp"
-		android:maxLength="128"
-		android:maxLines="1"
-		android:scrollHorizontally="true"
-		android:gravity="center_vertical"/>
-	
+ 
+ 	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical"
+	    android:stretchColumns="0">
+		<TableRow android:orientation="vertical">
+			<TextView
+				android:id="@+id/txt_callee"
+				android:layout_height="56dp"
+				android:text=""
+				android:background="@drawable/input_bg"
+				android:drawableLeft="@drawable/input_sipgate_icon"
+				android:textColor="#000000"
+				android:textSize="40dp"
+				android:maxLength="128"
+				android:maxLines="1"
+				android:scrollHorizontally="true"
+				android:gravity="center_vertical"/>
+		</TableRow>
+	</TableLayout>
+ 	
 	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

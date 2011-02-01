@@ -5,7 +5,7 @@
 	<string name="sipgate_no_credentials">Bitte Benutzername und Passwort eingeben ...</string>
 	<string name="sipgate_wait">Bitte warten. Verbinde zum Server...</string>
 	<string name="sipgate_load_extension">Bitte warten. Lade Liste der Telefone...</string>
-	<string name="username">Benutzername</string>
+	<string name="username">Web-Benutzername</string>
 	<string name="password">Passwort</string>
 	<string name="ok">Ok</string>
 	<string name="select_extension">Bitte wählen Sie ein Telefon:</string>
@@ -17,9 +17,10 @@
 	<string name="simple_settings_balance">Guthaben</string>
 	<string name="simple_settings_wlan">VoIP via WLAN</string>
 	<string name="simple_settings_3g">VoIP via 3G</string>
+	<string name="simple_settings_stun">STUN Server verwenden</string>
 	<string name="simple_settings_advanced">Experten-Einstellungen</string>
-	<string name="dateTimeFormatForDay">dd.MM.yyyy</string>
-   	<string name="dateTimeFormatForTime">HH:mm</string>
+	<string name="sipgateDateTimeFormatForDay">dd.MM.yyyy</string>
+   	<string name="sipgateDateTimeFormatForTime">HH:mm</string>
    	<string name="refresh">aktualisieren</string>
    	<string name="menu_contacts">Kontakte</string>
    	<string name="menu_dial_pad">Ziffernblock</string>
@@ -27,7 +28,7 @@
    	<string name="menu_exit">Beenden</string>
    	<string name="menu_settings">Einstellungen</string>
    	<string name="menu_refresh">Aktualisieren</string>
-   	<string name="menu_about">Über</string>
+   	<string name="menu_about">Info</string>
    	<string name="sipgate_a_new_voicemail">Eine neue Voicemailnachricht</string>
    	<string name="sipgate_new_voicemails">%d neue Voicemailnachrichten</string>
    	<string name="alert_3g_cost">Bitte beachten Sie, dass Datentransfer über das 3G-Netz mit Kosten verbunden sein kann.</string>
@@ -72,8 +73,8 @@
 	<string name="sipgate_network_problem">Es ist ein Netzwerkproblem aufgetreten. Bitte prüfen Sie, ob Ihr Gerät mit dem Internet verbunden ist und versuchen Sie es noch einmal.</string>
 	<string name="sipgate_unable_to_provision">Fehler beim Provisionieren</string>
    	<string name="sipgate_me">Ich</string>
-   	<string name="sipgate_unknown_caller">Unbekannt</string>
-   	<string name="sipgate_no_number">anonym</string>
+   	<string name="sipgateUnknownCaller">Unbekannt</string>
+   	<string name="sipgateNoNumber">anonym</string>
    	<string name="sipgate_empty_calllist">Keine Einträge in Ihrer Anrufliste.</string>
    	<string name="sipgate_new_calls">%d neue Anrufe</string>
    	<string name="sipgate_a_new_call">Ein neuer Anruf</string>

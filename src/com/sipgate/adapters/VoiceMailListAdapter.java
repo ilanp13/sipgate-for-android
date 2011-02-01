@@ -62,14 +62,11 @@ public class VoiceMailListAdapter extends BaseAdapter
 		
 		voiceMailDataDBObjects = sipgateDBAdapter.getAllVoiceMailData();
 				
-		unknownCallerString = activity.getResources().getString(R.string.sipgate_unknown_caller);
+		unknownCallerString = activity.getResources().getString(R.string.sipgateUnknownCaller);
 		secondsText =  activity.getResources().getString(R.string.sipgate_seconds);
 
-		readIcon = activity.getResources().getDrawable(R.drawable.voicemail_read);
-		unreadIcon = activity.getResources().getDrawable(R.drawable.voicemail_unread);
-		
-		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForDay));
-		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.dateTimeFormatForTime));
+		dateFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForDay));
+		timeFormatter = new SimpleDateFormat(activity.getResources().getString(R.string.sipgateDateTimeFormatForTime));
 		
 		currentDayCalendar = Calendar.getInstance();
 		lastDayCalendar = Calendar.getInstance();
@@ -119,9 +116,9 @@ public class VoiceMailListAdapter extends BaseAdapter
 			holder = new VoiceMailViewHolder();
 			holder.nameView = (TextView) convertView.findViewById(R.id.EventTitle);
 			holder.timeView = (TextView) convertView.findViewById(R.id.DateTextView);
-			holder.categoryView = (TextView) convertView.findViewById(R.id.CategoryTextView);
+			holder.categoryView = (TextView) convertView.findViewById(R.id.sipgateVoiceMailListBitCategoryTextView);
 			holder.transcriptionView = (TextView) convertView.findViewById(R.id.TranscriptionTextView);
-			holder.iconVM = (ImageView) convertView.findViewById(R.id.IconView);
+			holder.iconVM = (ImageView) convertView.findViewById(R.id.sipgateVoiceMailListBitIconView);
 			convertView.setTag(holder);
 		} 
 		else 
@@ -137,12 +134,10 @@ public class VoiceMailListAdapter extends BaseAdapter
 					
 			if(isRead) 
 			{
-				holder.iconVM.setImageDrawable(readIcon);
 				holder.nameView.setTypeface(Typeface.DEFAULT);
 			}
 			else 
 			{
-				holder.iconVM.setImageDrawable(unreadIcon);
 				holder.nameView.setTypeface(Typeface.DEFAULT_BOLD);
 			}
 	
@@ -199,7 +194,7 @@ public class VoiceMailListAdapter extends BaseAdapter
 			{
 				holder.categoryView.setVisibility(View.VISIBLE);
 			}
-			
+
 			markAsSeen(currentVoiceMailDataDBObject); 
 		}
 		

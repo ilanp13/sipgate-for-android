@@ -60,6 +60,7 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 
 	private String overWireless = null;
 	private String over3G = null;
+	private String useStun = null;
 
 	private String refresh = null;
 	private String experts = null;
@@ -88,7 +89,9 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		overWireless = activity.getResources().getString(
 				R.string.simple_settings_wlan);
 		over3G = activity.getResources().getString(R.string.simple_settings_3g);
-
+		
+		useStun = activity.getResources().getString(R.string.simple_settings_stun);
+		
 		refresh = activity.getResources().getString(
 				R.string.simple_settings_refresh_timers);
 		experts = activity.getResources().getString(
@@ -191,9 +194,10 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			return 0;
 		case 3:
 		case 4:
-			return 1;
 		case 5:
+			return 1;
 		case 6:
+		case 7:
 			return 2;
 		default:
 			return 0;
@@ -209,9 +213,10 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			return getInfoView(position, convertView, parent);
 		case 3:
 		case 4:
-			return getCheckboxView(position, convertView, parent);
 		case 5:
+			return getCheckboxView(position, convertView, parent);
 		case 6:
+		case 7:
 			return getStandardView(position, convertView, parent);
 		default:
 			return null;
@@ -396,6 +401,10 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 			checkboxHolder.checkedTextView.setText(over3G);
 			checkboxHolder.checkedTextView.setChecked(settings.getUse3G());
 			break;
+		case 5:
+			checkboxHolder.checkedTextView.setText(useStun);
+			checkboxHolder.checkedTextView.setChecked(settings.getUseStunServer());
+			break;
 		default:
 			break;
 		}
@@ -420,10 +429,10 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 		}
 		
 		switch (position) {
-		case 5:
+		case 6:
 			textHolder.textView.setText(refresh);
 			break;
-		case 6:
+		case 7:
 			textHolder.textView.setText(experts);
 			break;
 		default:
@@ -445,7 +454,6 @@ public class SimpleSettingsAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return 7;
+		return 8;
 	}
-
 }

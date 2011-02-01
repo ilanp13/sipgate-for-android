@@ -436,7 +436,6 @@ public class InCallScreen extends CallScreen implements View.OnClickListener {
 			menu.findItem(HOLD_MENU_ITEM).setVisible(true);
 			menu.findItem(MUTE_MENU_ITEM).setVisible(true);
 			menu.findItem(SPEAKER_MENU_ITEM).setVisible(Receiver.headset <= 0);
-			menu.findItem(VIDEO_MENU_ITEM).setVisible(VideoCamera.videoValid() && Receiver.call_state == UserAgent.UA_STATE_INCALL && Receiver.engine(this).getRemoteVideo() != 0);
 			menu.findItem(TRANSFER_MENU_ITEM).setVisible(true);
 		} else {
 			menu.findItem(HOLD_MENU_ITEM).setVisible(false);

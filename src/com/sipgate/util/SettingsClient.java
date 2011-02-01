@@ -303,6 +303,16 @@ public class SettingsClient {
 	}
 	
 	/**
+	 * Return whether STUN server is used
+	 * 
+	 * @since 1.0
+	 * @return whether STUN server is used 
+	 */
+	public boolean getUseStunServer(){
+		return this.preferences.getBoolean(Settings.PREF_STUN, false);
+	}
+	
+	/**
 	 * Changes the STUN server
 	 * 
 	 * @since 1.0

@@ -139,10 +139,20 @@ public class SimpleSettingsListActivity extends Activity implements OnItemClickL
 			Receiver.engine(this).StartEngine();
 			break;
 		case 5:
+			if (settingsClient.getUseStunServer()) {
+				settingsClient.setUseStunServer(false);
+			} else {
+				settingsClient.setUseStunServer(true);
+			}
+			settingsListAdapter.notifyDataSetChanged();
+			Receiver.engine(this).halt();
+			Receiver.engine(this).StartEngine();
+			break;
+		case 6:
 			intent = new Intent(this, SettingsRefreshActivity.class);
 			startActivity(intent);
 			break;
-		case 6:
+		case 7:
 			intent = new Intent(this, SettingsActivity.class);
 			startActivity(intent);
 			break;

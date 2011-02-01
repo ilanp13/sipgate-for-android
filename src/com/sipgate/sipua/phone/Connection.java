@@ -248,11 +248,11 @@ public class Connection
 	        
 	        if(callsCount == 1)
 	        {
-	            notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, String.format((String) context.getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(callsCount)));
+	            notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.sipgate_call_list_icon_notification, String.format((String) context.getResources().getText(R.string.sipgate_a_new_call), Integer.valueOf(callsCount)));
 	        }
 			else 
 			{
-			    notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.statusbar_icon_calllist, String.format((String) context.getResources().getText(R.string.sipgate_new_calls), Integer.valueOf(callsCount)));
+			    notifyClient.setNotification(NotificationClient.NotificationType.CALL, R.drawable.sipgate_call_list_icon_notification, String.format((String) context.getResources().getText(R.string.sipgate_new_calls), Integer.valueOf(callsCount)));
 		    }
 	    }
     	
