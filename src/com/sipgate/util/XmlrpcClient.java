@@ -294,7 +294,7 @@ public class XmlrpcClient implements ApiClientInterface {
 			String localNumberE164 = null;
 			
 			String remoteNumberPretty = null;
-			String rempoteNumberE164 = null;
+			String remoteNumberE164 = null;
 			
 			String callID = null;
 			
@@ -344,12 +344,19 @@ public class XmlrpcClient implements ApiClientInterface {
 				
 				numberLocal = (String) historySet.get("LocalUri");
 				numberRemote = (String) historySet.get("RemoteUri");
-
-				localNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberLocal, locale.getCountry());
+				
+				numberLocal = formatter.formattedPhoneNumberFromStringWithCountry(numberLocal, locale.getCountry());
+				numberRemote = formatter.formattedPhoneNumberFromStringWithCountry(numberRemote, locale.getCountry());
+				
+				formatter.initWithE164(numberLocal, locale.getCountry());
+				
+				localNumberPretty = formatter.formattedNumber();
 				localNumberE164 = formatter.e164NumberWithPrefix("+");
-
-				remoteNumberPretty = formatter.formattedPhoneNumberFromStringWithCountry(numberRemote, locale.getCountry());
-				rempoteNumberE164 = formatter.e164NumberWithPrefix("+");
+				
+				formatter.initWithE164(numberRemote, locale.getCountry());
+								
+				remoteNumberPretty = formatter.formattedNumber();
+				remoteNumberE164 = formatter.e164NumberWithPrefix("+");
 								
 				if(direction.equals("accepted")){
 					callDataDBObject.setMissed(false);
@@ -364,7 +371,7 @@ public class XmlrpcClient implements ApiClientInterface {
 					callDataDBObject.setDirection(CallDataDBObject.OUTGOING);
 				}
 				
-				callDataDBObject.setRemoteNumberE164(rempoteNumberE164);
+				callDataDBObject.setRemoteNumberE164(remoteNumberE164);
 				callDataDBObject.setRemoteNumberPretty(remoteNumberPretty);
 				callDataDBObject.setRemoteName("");
 				callDataDBObject.setLocalNumberE164(localNumberE164);
